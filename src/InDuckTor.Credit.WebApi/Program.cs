@@ -24,18 +24,18 @@ builder.Services.AddInDuckTorSecurity();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddHangfire(cfg => cfg
-    .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
-    .UseSimpleAssemblyNameTypeSerializer()
-    .UseRecommendedSerializerSettings()
-    .UsePostgreSqlStorage(configure =>
-    {
-        // configure.UseNpgsqlConnection();
-    })
-);
+// builder.Services.AddHangfire(cfg => cfg
+//     .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+//     .UseSimpleAssemblyNameTypeSerializer()
+//     .UseRecommendedSerializerSettings()
+//     .UsePostgreSqlStorage(configure =>
+//     {
+//         // configure.UseNpgsqlConnection();
+//     })
+// );
 
 // Add the processing server as IHostedService
-builder.Services.AddHangfireServer();
+// builder.Services.AddHangfireServer();
 
 builder.Services.AddSwaggerGen(cfg =>
 {
