@@ -52,15 +52,11 @@ public static class LoanEndpoints
     }
 
     private static Ok<LoanInfoResponse> GetLoanInfoForClient([FromRoute] long loanId)
-
     {
         throw new NotImplementedException();
     }
 
-    private static Ok<CreateLoanApplicationBody> GetAllClientLoans(
-        [FromRoute] long clientId,
-        [FromBody] CreateLoanApplicationBody body)
-
+    private static Ok<LoanInfoShortResponse> GetAllClientLoans([FromRoute] long clientId)
     {
         throw new NotImplementedException();
     }
