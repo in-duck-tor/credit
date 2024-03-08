@@ -23,4 +23,8 @@
     <ProjectReference Include="..\InDuckTor.Credit.Domain\InDuckTor.Credit.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Endpoints\LoanApplication\Models\Response\" />
+  </ItemGroup>
+
 </Project>

@@ -1,12 +1,9 @@
 using InDuckTor.Credit.Domain.Loan.Financing.Application.Model;
 using InDuckTor.Credit.Domain.Loan.Financing.Program;
-using InDuckTor.Credit.Domain.Loan.Service;
-using InDuckTor.Credit.Domain.Loan.Service.Model;
 
 namespace InDuckTor.Credit.Domain.Loan.Financing.Application;
 
 public class ApplicationService(
-    LoanService loanService,
     IApplicationRepository applicationRepository,
     ILoanProgramRepository loanProgramRepository)
 {
@@ -16,10 +13,12 @@ public class ApplicationService(
         var loanProgram = loanProgramRepository.GetLoanProgramById(newApplication.LoanProgramId);
         return new LoanApplication
         {
+            ClientId = newApplication.ClientId,
             LoanProgram = loanProgram,
             BorrowedAmount = newApplication.BorrowedAmount,
             LoanTerm = newApplication.LoanTerm,
-            ApplicationState = ApplicationState.Pending
+            // Сейчас заявки только Approved, т.к. нет системы модерации заявок
+            ApplicationState = ApplicationState.Approved
         };
     }
 
@@ -37,10 +36,10 @@ public class ApplicationService(
         // loanService.CreateLoan(newLoan);
     }
 
-    public void CancelApplication(long applicationId)
+    public void RejectApplication(long applicationId)
     {
         var application = applicationRepository.GetApplicationById(applicationId);
         application.ApprovalDate = null;
-        application.ApplicationState = ApplicationState.Canceled;
+        application.ApplicationState = ApplicationState.Rejected;
     }
 }
