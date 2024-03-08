@@ -21,9 +21,21 @@ public class LoanApplication
     /// <b>Срок взятия кредита</b>. Отсчёт от Рождения Христа
     /// </summary>
     public required DateTime LoanTerm { get; set; }
+
+    public required ApplicationState ApplicationState { get; set; }
     
     /// <summary>
     /// <b>Дата одобрения заявки</b>
     /// </summary>
     public DateTime? ApprovalDate { get; set; }
+}
+
+/// <summary>
+/// <b>Статус заявки</b>
+/// </summary>
+public enum ApplicationState
+{
+    Canceled,
+    Pending,
+    Approved
 }
