@@ -1,6 +1,6 @@
 using InDuckTor.Credit.Domain.Loan;
 
-namespace InDuckTor.Credit.WebApi.Endpoints.LoanProgram.Model.Response;
+namespace InDuckTor.Credit.WebApi.Endpoints.Program.Model.Response;
 
 public record LoanProgramShortResponse(
     decimal InterestRate,

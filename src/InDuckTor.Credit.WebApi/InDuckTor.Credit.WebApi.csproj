@@ -24,8 +24,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Endpoints\LoanApplication\Models\Response\" />
-    <Folder Include="Endpoints\LoanProgram\Model\Request\" />
+    <Folder Include="Endpoints\Application\Models\Response\" />
+    <Folder Include="Endpoints\Program\Model\Request\" />
+    <Folder Include="Endpoints\Loan\Models\Request\" />
+    <Folder Include="Endpoints\Loan\Models\Response\" />
   </ItemGroup>
 
 </Project>

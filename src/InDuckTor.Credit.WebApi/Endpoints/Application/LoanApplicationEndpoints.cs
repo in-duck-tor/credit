@@ -1,24 +1,24 @@
-using InDuckTor.Credit.WebApi.Endpoints.LoanApplication.Models.Request;
+using InDuckTor.Credit.WebApi.Endpoints.Application.Models.Request;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
-namespace InDuckTor.Credit.WebApi.Endpoints.LoanApplication;
+namespace InDuckTor.Credit.WebApi.Endpoints.Application;
 
 public static class LoanApplicationEndpoints
 {
     public static IEndpointRouteBuilder AddLoanApplicationEndpoints(this IEndpointRouteBuilder builder)
     {
-        var groupBuilder = builder.MapGroup("/api/v1")
+        var groupBuilder = builder.MapGroup("/api/v1/application")
             .WithTags("LoanApplication")
             .WithOpenApi();
         
-        groupBuilder.MapPost("/application", CreateApplication)
+        groupBuilder.MapPost("", CreateApplication)
             .WithDescription("Создаёт заявку на получение кредита");
 
-        groupBuilder.MapPost("/application/approve", ApproveApplication)
+        groupBuilder.MapPost("/approve", ApproveApplication)
             .WithDescription("Одобрение заявки на получение кредита");
         
-        groupBuilder.MapPost("/application/reject", RejectApplication)
+        groupBuilder.MapPost("/reject", RejectApplication)
             .WithDescription("Отклонение заявки на получение кредита");
 
         return builder;

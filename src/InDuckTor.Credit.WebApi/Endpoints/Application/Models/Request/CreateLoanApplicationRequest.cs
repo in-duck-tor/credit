@@ -1,4 +1,4 @@
-namespace InDuckTor.Credit.WebApi.Endpoints.LoanApplication.Models.Request;
+namespace InDuckTor.Credit.WebApi.Endpoints.Application.Models.Request;
 
 public record CreateLoanApplicationRequest(
     long ClientId,

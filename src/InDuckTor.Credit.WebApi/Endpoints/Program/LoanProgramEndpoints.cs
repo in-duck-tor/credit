@@ -1,28 +1,26 @@
-using InDuckTor.Credit.WebApi.Endpoints.LoanApplication.Models.Request;
-using InDuckTor.Credit.WebApi.Endpoints.LoanProgram.Model.Response;
+using InDuckTor.Credit.WebApi.Endpoints.Program.Model.Response;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 
-namespace InDuckTor.Credit.WebApi.Endpoints.LoanProgram;
+namespace InDuckTor.Credit.WebApi.Endpoints.Program;
 
 public static class LoanProgramEndpoints
 {
     public static IEndpointRouteBuilder AddLoanProgramEndpoints(this IEndpointRouteBuilder builder)
     {
-        var groupBuilder = builder.MapGroup("/api/v1")
-            .WithTags("LoanApplication")
+        var groupBuilder = builder.MapGroup("/api/v1/program")
+            .WithTags("Program")
             .WithOpenApi();
         
-        groupBuilder.MapGet("/program", GetAllLoanPrograms)
+        groupBuilder.MapGet("", GetAllLoanPrograms)
             .WithDescription("Получение всех программ кредитования");
         
-        groupBuilder.MapPost("/program", CreateLoanProgram)
+        groupBuilder.MapPost("", CreateLoanProgram)
             .WithDescription("Создание программы кредитования");
 
         return builder;
     }
 
-    // В будущем добавить эндпонит на получение доступных только клиенту программ
+    // В будущем добавить эндпонит на получение доступных только клиенту программ кредитования
     private static Ok<List<LoanProgramShortResponse>> GetAllLoanPrograms()
     {
         throw new NotImplementedException();

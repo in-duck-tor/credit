@@ -1,7 +1,7 @@
 using Hangfire;
 using Hangfire.PostgreSql;
-using InDuckTor.Credit.WebApi.Endpoints.LoanApplication;
-using InDuckTor.Credit.WebApi.Endpoints.LoanProgram;
+using InDuckTor.Credit.WebApi.Endpoints.Application;
+using InDuckTor.Credit.WebApi.Endpoints.Program;
 using InDuckTor.Shared.Security;
 using Microsoft.OpenApi.Models;
 
