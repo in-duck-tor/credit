@@ -1,6 +1,4 @@
-using InDuckTor.Credit.Domain.Loan.BillingPeriod;
-
-namespace InDuckTor.Credit.Domain.Loan;
+namespace InDuckTor.Credit.Domain.Loan.BillingPeriod;
 
 /// <summary>
 /// <b>Платёж</b>

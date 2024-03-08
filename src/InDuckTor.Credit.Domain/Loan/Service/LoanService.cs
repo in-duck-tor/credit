@@ -1,10 +1,10 @@
-using InDuckTor.Credit.Domain.Loan.Financing;
+using InDuckTor.Credit.Domain.Loan.Service.Model;
 
-namespace InDuckTor.Credit.Domain.Loan;
+namespace InDuckTor.Credit.Domain.Loan.Service;
 
 public class LoanService
 {
-    public Loan CreateLoan(LoanApplication loanApplication)
+    public Loan CreateLoan(NewLoan newLoan)
     {
         // var loan = newLoan.ToDomain();
         // loan.State = LoanState.Approved;
