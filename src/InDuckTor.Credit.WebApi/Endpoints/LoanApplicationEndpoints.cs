@@ -1,8 +1,9 @@
-using InDuckTor.Credit.WebApi.Endpoints.Application.Models.Request;
+using InDuckTor.Credit.WebApi.Contracts.Bodies;
+using InDuckTor.Credit.WebApi.Contracts.Responses;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
-namespace InDuckTor.Credit.WebApi.Endpoints.Application;
+namespace InDuckTor.Credit.WebApi.Endpoints;
 
 public static class LoanApplicationEndpoints
 {
@@ -24,8 +25,8 @@ public static class LoanApplicationEndpoints
         return builder;
     }
 
-    private static Ok<CreateLoanApplicationRequest> CreateApplication(
-        [FromBody] CreateLoanApplicationRequest request)
+    private static Ok<LoanApplicationResponse> CreateApplication(
+        [FromBody] CreateLoanApplicationBody body)
     {
         throw new NotImplementedException();
     }

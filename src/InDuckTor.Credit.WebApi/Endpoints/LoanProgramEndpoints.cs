@@ -1,7 +1,7 @@
-using InDuckTor.Credit.WebApi.Endpoints.Program.Model.Response;
+using InDuckTor.Credit.WebApi.Contracts.Responses;
 using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace InDuckTor.Credit.WebApi.Endpoints.Program;
+namespace InDuckTor.Credit.WebApi.Endpoints;
 
 public static class LoanProgramEndpoints
 {

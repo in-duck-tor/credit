@@ -1,11 +1,21 @@
+using System.Text.Json.Serialization;
 using Hangfire;
 using Hangfire.PostgreSql;
-using InDuckTor.Credit.WebApi.Endpoints.Application;
-using InDuckTor.Credit.WebApi.Endpoints.Program;
+using InDuckTor.Credit.WebApi.Contracts.Dtos;
+using InDuckTor.Credit.WebApi.Endpoints;
+using InDuckTor.Shared.Configuration;
 using InDuckTor.Shared.Security;
-using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Http.Json;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.Configure<JsonOptions>(cfg =>
+{
+    var enumMemberConverter = new JsonStringEnumMemberConverter(
+        new JsonStringEnumMemberConverterOptions(),
+        typeof(ApplicationStateDto));
+    cfg.SerializerOptions.Converters.Add(enumMemberConverter);
+});
 
 builder.Services.AddInDuckTorSecurity();
 
@@ -14,7 +24,7 @@ builder.Services.AddInDuckTorSecurity();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddHangfire(configuration => configuration
+builder.Services.AddHangfire(cfg => cfg
     .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
     .UseSimpleAssemblyNameTypeSerializer()
     .UseRecommendedSerializerSettings()
@@ -29,25 +39,8 @@ builder.Services.AddHangfireServer();
 
 builder.Services.AddSwaggerGen(cfg =>
 {
-    cfg.AddSecurityDefinition("auth", new OpenApiSecurityScheme
-    {
-        Type = SecuritySchemeType.Http,
-        Scheme = "bearer",
-        BearerFormat = "JWT"
-    });
-
-    cfg.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "auth" }
-            },
-            []
-        }
-    });
-
-    cfg.SwaggerDoc("v1", new OpenApiInfo { Title = "Blabber Service", Version = "v1" });
+    cfg.ConfigureJwtAuth();
+    cfg.ConfigureEnumMemberValues();
 });
 
 var app = builder.Build();
