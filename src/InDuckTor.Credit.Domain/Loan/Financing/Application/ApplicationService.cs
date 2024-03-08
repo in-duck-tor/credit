@@ -19,7 +19,7 @@ public class ApplicationService(
             LoanProgram = loanProgram,
             BorrowedAmount = newApplication.BorrowedAmount,
             LoanTerm = newApplication.LoanTerm,
-            ApplicationState = newApplication.ApplicationState
+            ApplicationState = ApplicationState.Pending
         };
     }
 

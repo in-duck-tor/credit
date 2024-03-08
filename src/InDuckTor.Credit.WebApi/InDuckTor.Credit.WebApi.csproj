@@ -19,4 +19,8 @@
     <None Include="Properties\launchSettings.json" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\InDuckTor.Credit.Domain\InDuckTor.Credit.Domain.csproj" />
+  </ItemGroup>
+
 </Project>
