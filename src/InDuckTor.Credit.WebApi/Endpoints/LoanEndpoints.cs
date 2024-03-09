@@ -21,18 +21,38 @@ public static class LoanEndpoints
         groupBuilder.MapPost("/{loanId:long}/pay/regularly", PayRegularly)
             .WithSummary("Внесение средств для оплаты кредита в регулярном порядке")
             .WithDescription("Если платёж клиента превысит сумму задолженностей и " +
-                             "платежа по текущему расчётному периоду, операция отклонится");
+                             "платежа по текущему расчётному периоду, операция отклонится")
+            .WithOpenApi(o =>
+            {
+                o.Deprecated = true;
+                return o;
+            });
 
         groupBuilder.MapPost("/{loanId:long}/pay/early", PayoffEarly)
             .WithSummary("Внесение средств для досрочной оплаты кредита")
             .WithDescription("Досрочно можно оплачивать только если успешно внесена " +
-                             "оплата за текущий расчётный период. Иначе операция отклонится");
+                             "оплата за текущий расчётный период. Иначе операция отклонится")
+            .WithOpenApi(o =>
+            {
+                o.Deprecated = true;
+                return o;
+            });
 
         groupBuilder.MapGet("/{loanId:long}", GetLoanInfoForClient)
-            .WithSummary("Получение клиентом информации о конкретном кредите");
+            .WithSummary("Получение клиентом информации о конкретном кредите")
+            .WithOpenApi(o =>
+            {
+                o.Deprecated = true;
+                return o;
+            });
 
         groupBuilder.MapGet("/client/{clientId:long}", GetAllClientLoans)
-            .WithSummary("Получение информации обо всех кредитах пользователя");
+            .WithSummary("Получение информации обо всех кредитах пользователя")
+            .WithOpenApi(o =>
+            {
+                o.Deprecated = true;
+                return o;
+            });
 
         return builder;
     }

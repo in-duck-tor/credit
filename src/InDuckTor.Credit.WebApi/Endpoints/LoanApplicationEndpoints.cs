@@ -12,15 +12,31 @@ public static class LoanApplicationEndpoints
         var groupBuilder = builder.MapGroup("/api/v1/application")
             .WithTags("LoanApplication")
             .WithOpenApi();
-        
+
         groupBuilder.MapPost("", CreateApplication)
-            .WithDescription("Создаёт заявку на получение кредита");
+            .WithDescription("Создаёт заявку на получение кредита")
+            .WithOpenApi(o =>
+            {
+                o.Deprecated = true;
+                return o;
+            });
+
 
         groupBuilder.MapPost("/approve", ApproveApplication)
-            .WithDescription("Одобрение заявки на получение кредита");
-        
+            .WithDescription("Одобрение заявки на получение кредита")
+            .WithOpenApi(o =>
+            {
+                o.Deprecated = true;
+                return o;
+            });
+
         groupBuilder.MapPost("/reject", RejectApplication)
-            .WithDescription("Отклонение заявки на получение кредита");
+            .WithDescription("Отклонение заявки на получение кредита")
+            .WithOpenApi(o =>
+            {
+                o.Deprecated = true;
+                return o;
+            });
 
         return builder;
     }
@@ -35,7 +51,7 @@ public static class LoanApplicationEndpoints
     {
         throw new NotImplementedException();
     }
-    
+
     private static Ok RejectApplication([FromQuery] long applicationId)
     {
         throw new NotImplementedException();

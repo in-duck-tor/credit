@@ -12,10 +12,20 @@ public static class LoanProgramEndpoints
             .WithOpenApi();
         
         groupBuilder.MapGet("", GetAllLoanPrograms)
-            .WithDescription("Получение всех программ кредитования");
+            .WithDescription("Получение всех программ кредитования")
+            .WithOpenApi(o =>
+            {
+                o.Deprecated = true;
+                return o;
+            });
         
         groupBuilder.MapPost("", CreateLoanProgram)
-            .WithDescription("Создание программы кредитования");
+            .WithDescription("Создание программы кредитования")
+            .WithOpenApi(o =>
+            {
+                o.Deprecated = true;
+                return o;
+            });
 
         return builder;
     }
