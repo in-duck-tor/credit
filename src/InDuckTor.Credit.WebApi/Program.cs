@@ -53,7 +53,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.AddLoanApplicationEndpoints()
-    .AddLoanProgramEndpoints();
+    .AddLoanProgramEndpoints()
+    .AddLoanEndpoints();
 
 app.UseHttpsRedirection();
 
