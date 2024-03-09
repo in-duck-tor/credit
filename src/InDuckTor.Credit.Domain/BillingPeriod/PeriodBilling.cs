@@ -35,13 +35,60 @@ public class PeriodBilling
     /// <summary>
     /// Имел ли пользователь задолженность по Периоду, к которому относится этот Расчёт
     /// </summary>
-    public bool HadDebt { get; set; } = false;
+    public bool IsDebt { get; set; } = false;
 
     /// <summary>
     /// <para>Сумма, которую осталось заплатить по Расчётному Периоду.</para>
     /// <para>Используется как утилитарное поле. Обозначает либо задолженность, либо,
-    /// если <see cref="HadDebt"/> равен <c>false</c>, оставшуюся плату за Расчётный Период.</para>
+    /// если <see cref="IsDebt"/> равен <c>false</c>, оставшуюся плату за Расчётный Период.</para>
     /// <para>Если плата за Расчётный Период полностью внесена, значение поля будет <c>null</c>.</para>
     /// </summary>
     public BillingItems? RemainingPayoff { get; set; }
+
+    public bool IsPaid => RemainingPayoff == null;
+
+    public decimal GetRemainingInterest()
+    {
+        ArgumentNullException.ThrowIfNull(RemainingPayoff);
+        return RemainingPayoff.Interest;
+    }
+    
+    public decimal GetRemainingLoanBodyPayoff()
+    {
+        ArgumentNullException.ThrowIfNull(RemainingPayoff);
+        return RemainingPayoff.LoanBodyPayoff;
+    }
+    
+    public decimal GetRemainingChargingForServices()
+    {
+        ArgumentNullException.ThrowIfNull(RemainingPayoff);
+        return RemainingPayoff.ChargingForServices;
+    }
+
+    public void ChangeInterest(decimal amount)
+    {
+        ArgumentNullException.ThrowIfNull(RemainingPayoff);
+        RemainingPayoff.ChangeInterest(amount);
+        RemoveRemainingPayoffIfEmpty();
+    }
+
+    public void ChangeLoanBodyPayoff(decimal amount)
+    {
+        ArgumentNullException.ThrowIfNull(RemainingPayoff);
+        RemainingPayoff.ChangeLoanBodyPayoff(amount);
+        RemoveRemainingPayoffIfEmpty();
+    }
+
+    public void ChangeChargingForServices(decimal amount)
+    {
+        ArgumentNullException.ThrowIfNull(RemainingPayoff);
+        RemainingPayoff.ChangeChargingForServices(amount);
+        RemoveRemainingPayoffIfEmpty();
+    }
+
+    private void RemoveRemainingPayoffIfEmpty()
+    {
+        ArgumentNullException.ThrowIfNull(RemainingPayoff);
+        if (RemainingPayoff.GetTotalSum() == 0) RemainingPayoff = null;
+    }
 }

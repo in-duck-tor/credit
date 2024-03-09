@@ -1,4 +1,4 @@
-using InDuckTor.Credit.Domain.LoanManagement.Model;
+using InDuckTor.Credit.Domain.LoanManagement.Models;
 using InDuckTor.Credit.Domain.LoanManagement.PaymentCalculator;
 
 namespace InDuckTor.Credit.Domain.LoanManagement.Interactor;

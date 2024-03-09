@@ -1,5 +1,4 @@
 ﻿using InDuckTor.Credit.Domain.BillingPeriod;
-using InDuckTor.Credit.Domain.LoanManagement.Model;
 
 namespace InDuckTor.Credit.Domain.LoanManagement;
 

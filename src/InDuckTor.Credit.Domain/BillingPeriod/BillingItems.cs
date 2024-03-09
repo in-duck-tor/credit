@@ -1,5 +1,3 @@
-using System.Reflection;
-
 namespace InDuckTor.Credit.Domain.BillingPeriod;
 
 /// <summary>
@@ -13,6 +11,24 @@ public class BillingItems(decimal interest, decimal loanBodyPayoff, decimal char
     public decimal Interest { get; set; } = interest;
     public decimal LoanBodyPayoff { get; set; } = loanBodyPayoff;
     public decimal ChargingForServices { get; set; } = chargingForServices;
+
+    public void ChangeInterest(decimal amount)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(Interest + amount);
+        Interest += amount;
+    }
+    
+    public void ChangeLoanBodyPayoff(decimal amount)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(LoanBodyPayoff + amount);
+        LoanBodyPayoff += amount;
+    }
+    
+    public void ChangeChargingForServices(decimal amount)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(ChargingForServices + amount);
+        ChargingForServices += amount;
+    }
 
     public decimal GetTotalSum() => Interest + LoanBodyPayoff + ChargingForServices;
     

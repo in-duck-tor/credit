@@ -22,19 +22,18 @@ public class Payment
     // todo Добавить расчёт штрафов
     public void DistributeOn(PeriodBilling periodBilling)
     {
-        var periodPayoff = periodBilling.RemainingPayoff;
-        if (periodPayoff == null || periodPayoff.GetTotalSum() == 0) return;
+        if (periodBilling.IsPaid) return;
 
         var distributedPayment = PaymentDistribution.CalculateDistributedPaymentSum();
+        
         var paymentToDistribute = PaymentAmount - distributedPayment;
+        if (paymentToDistribute == 0) return;
+        
         var paymentBillingItems = GetOrCreatePaymentBillingItems(periodBilling.Id);
 
-        paymentToDistribute = InternalDistributePayment(periodPayoff, paymentBillingItems, paymentToDistribute);
+        paymentToDistribute = InternalDistributePayment(periodBilling, paymentBillingItems, paymentToDistribute);
 
-        if (paymentToDistribute == 0)
-        {
-            PaymentDistribution.IsDistributed = true;
-        }
+        if (paymentToDistribute == 0) PaymentDistribution.IsDistributed = true;
     }
 
     private BillingItems GetOrCreatePaymentBillingItems(long periodBillingId)
@@ -58,36 +57,36 @@ public class Payment
     /// Распределяет <see cref="paymentToDistribute"/> по Статьям расчёта,
     /// уменьшая значения в periodPayoff и увеличивая в paymentBillingItems 
     /// </summary>
-    /// <param name="periodPayoff">Статьи расчёта для Расчёта по Периоду</param>
+    /// <param name="periodBilling">Статьи расчёта для Расчёта по Периоду</param>
     /// <param name="paymentBillingItems">Статьи расчёта для Платежа</param>
     /// <param name="paymentToDistribute">Оставшаяся нераспределённая сумма</param>
     /// <returns>Нераспределённая сумма</returns>
-    private decimal InternalDistributePayment(BillingItems periodPayoff,
+    private decimal InternalDistributePayment(PeriodBilling periodBilling,
         BillingItems paymentBillingItems,
         decimal paymentToDistribute)
     {
-        if (periodPayoff.Interest != 0)
+        if (!periodBilling.IsPaid)
         {
-            var min = decimal.Min(paymentToDistribute, periodPayoff.Interest);
-            periodPayoff.Interest -= min;
+            var min = decimal.Min(paymentToDistribute, periodBilling.GetRemainingInterest());
+            periodBilling.ChangeInterest(-min);
             paymentToDistribute -= min;
-            paymentBillingItems.Interest += min;
+            paymentBillingItems.ChangeInterest(min);
         }
 
-        if (paymentToDistribute != 0 && periodPayoff.LoanBodyPayoff != 0)
+        if (paymentToDistribute != 0 && periodBilling.IsPaid)
         {
-            var min = decimal.Min(paymentToDistribute, periodPayoff.LoanBodyPayoff);
-            periodPayoff.LoanBodyPayoff -= min;
+            var min = decimal.Min(paymentToDistribute, periodBilling.GetRemainingLoanBodyPayoff());
+            periodBilling.ChangeLoanBodyPayoff(-min);
             paymentToDistribute -= min;
-            paymentBillingItems.LoanBodyPayoff += min;
+            paymentBillingItems.ChangeLoanBodyPayoff(min);
         }
 
-        if (paymentToDistribute != 0 && periodPayoff.ChargingForServices != 0)
+        if (paymentToDistribute != 0 && periodBilling.IsPaid)
         {
-            var min = decimal.Min(paymentToDistribute, periodPayoff.ChargingForServices);
-            periodPayoff.ChargingForServices -= min;
+            var min = decimal.Min(paymentToDistribute, periodBilling.GetRemainingChargingForServices());
+            periodBilling.ChangeChargingForServices(-min);
             paymentToDistribute -= min;
-            paymentBillingItems.ChargingForServices += min;
+            paymentBillingItems.ChangeChargingForServices(min);
         }
 
         return paymentToDistribute;

@@ -1,4 +1,4 @@
-namespace InDuckTor.Credit.Domain.LoanManagement.Model;
+namespace InDuckTor.Credit.Domain.LoanManagement.Models;
 
 public record NewLoan(
     decimal BorrowedAmount,

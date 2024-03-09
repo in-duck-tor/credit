@@ -1,5 +1,5 @@
 using InDuckTor.Credit.Domain.LoanManagement.Interactor;
-using InDuckTor.Credit.Domain.LoanManagement.Model;
+using InDuckTor.Credit.Domain.LoanManagement.Models;
 
 namespace InDuckTor.Credit.Domain.LoanManagement;
 
