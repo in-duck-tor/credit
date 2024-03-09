@@ -1,4 +1,6 @@
-namespace InDuckTor.Credit.Domain.BillingPeriod.Payment;
+using InDuckTor.Credit.Domain.BillingPeriod;
+
+namespace InDuckTor.Credit.Domain.Payment;
 
 /// <summary>
 /// <b>Платёж</b>
@@ -100,7 +102,7 @@ public class PaymentDistribution
 {
     public long Id { get; set; }
 
-    public bool IsDistributed { get; set; } = false;
+    public bool IsDistributed { get; set; }
 
     /// <summary>
     /// Погашения за Период, относящиеся к данному Платежу

@@ -1,7 +1,8 @@
+using InDuckTor.Credit.Domain.BillingPeriod;
 using InDuckTor.Credit.Domain.BillingPeriod.Exceptions;
-using InDuckTor.Credit.Domain.BillingPeriod.Payment.Models;
+using InDuckTor.Credit.Domain.Payment.Models;
 
-namespace InDuckTor.Credit.Domain.BillingPeriod.Payment;
+namespace InDuckTor.Credit.Domain.Payment;
 
 public class PaymentService(IPaymentRepository paymentRepository, IPeriodBillingRepository periodBillingRepository)
 {
