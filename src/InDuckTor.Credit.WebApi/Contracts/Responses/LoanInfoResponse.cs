@@ -1,4 +1,4 @@
-using InDuckTor.Credit.Domain.Loan;
+using InDuckTor.Credit.Domain.LoanManagement;
 
 namespace InDuckTor.Credit.WebApi.Contracts.Responses;
 

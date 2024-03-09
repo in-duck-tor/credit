@@ -1,8 +1,8 @@
 using InDuckTor.Credit.Domain.LoanManagement;
 
-namespace InDuckTor.Credit.WebApi.Contracts.Responses;
+namespace InDuckTor.Credit.Domain.Financing.Program.Model;
 
-public record LoanProgramShortResponse(
+public record NewProgram(
     decimal InterestRate,
     PaymentType PaymentType,
     PaymentScheduleType PaymentScheduleType);
