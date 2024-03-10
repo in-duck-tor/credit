@@ -17,7 +17,7 @@ public class PeriodService(PaymentService paymentService)
     {
         // todo: добавить проверку времени окончания Расчётного Периода
         var periodBilling = CreatePeriodBilling(loanBilling, closingTime);
-        paymentService.DistributePaymentsForNewPeriod(periodBilling);
+        paymentService.DistributePaymentsForNewPeriod(loanBilling.Loan.Id, periodBilling);
         loanBilling.AddAndRecalculateForNewPeriod(periodBilling);
         return periodBilling;
     }
@@ -34,7 +34,6 @@ public class PeriodService(PaymentService paymentService)
         var periodBilling = new PeriodBilling
         {
             PeriodStartDate = loanBilling.PeriodAccruals.PeriodStartDate,
-            Loan = loanBilling.Loan,
             LoanBilling = loanBilling,
             PeriodEndDate = endDate,
             OneTimePayment = loanBilling.PeriodAccruals.OneTimePayment,

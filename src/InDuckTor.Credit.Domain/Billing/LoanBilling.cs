@@ -95,6 +95,9 @@ public class PeriodAccruals
     /// </summary>
     public DateTime PeriodStartDate { get; set; }
 
+    /// <summary>
+    /// <b>Дата конца периода</b>
+    /// </summary>
     public DateTime PeriodEndDate { get; set; }
 
     /// <summary>

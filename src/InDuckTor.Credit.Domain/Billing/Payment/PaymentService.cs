@@ -14,10 +14,11 @@ public class PaymentService(IPaymentRepository paymentRepository, IPeriodBilling
     /// <summary>
     /// Распределяет Платёж для только что созданного Расчётного Периода. В конце операции все платежи должны распределиться.
     /// </summary>
+    /// <param name="loanId">Id кредита, для которого происходит распределение</param>
     /// <param name="periodBilling">Расчёт за Период, по которому распределются Платежи</param>
-    public void DistributePaymentsForNewPeriod(PeriodBilling periodBilling)
+    public void DistributePaymentsForNewPeriod(long loanId, PeriodBilling periodBilling)
     {
-        var payments = paymentRepository.GetAllNonDistributedPayments(periodBilling.Loan.Id);
+        var payments = paymentRepository.GetAllNonDistributedPayments(loanId);
         DistributePayments(periodBilling.LoanBilling, payments, [periodBilling]);
         if (!periodBilling.IsPaid) periodBilling.IsDebt = true;
     }

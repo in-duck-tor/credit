@@ -26,9 +26,9 @@ public class Payment
         if (periodBilling.IsPaid) return;
 
         var distributedPayment = PaymentDistribution.CalculateDistributedPaymentSum();
-
         var paymentToDistribute = PaymentAmount - distributedPayment;
         if (paymentToDistribute == 0) return;
+
         var paymentBillingItems = GetOrCreatePaymentBillingItems(periodBilling);
 
         foreach (var item in items)
@@ -38,30 +38,17 @@ public class Payment
             var min = decimal.Min(paymentToDistribute, periodBilling.GetRemainingInterest());
             item.ChangeAmount(-min);
             paymentToDistribute -= min;
-            ChangeBillingItemAccordingToPriority(paymentBillingItems, item.Priority, min);
+
+            // todo: ОТРЕФАКТОРИТЬ!
+            if (item.Priority == PaymentPriority.Penalty)
+            {
+                PaymentDistribution.Penalty?.ChangeAmount(min);
+            }
+
+            paymentBillingItems.ChangeBasedOnPriority(item.Priority, min);
         }
 
         if (paymentToDistribute == 0) PaymentDistribution.IsDistributed = true;
-    }
-
-    private static void ChangeBillingItemAccordingToPriority(BillingItems billingItems,
-        PaymentPriority paymentPriority,
-        decimal amount)
-    {
-        switch (paymentPriority)
-        {
-            case PaymentPriority.DebtInterest:
-            case PaymentPriority.RegularInterest:
-                billingItems.ChangeInterest(amount);
-                break;
-            case PaymentPriority.DebtBody:
-            case PaymentPriority.RegularBody:
-                billingItems.ChangeLoanBodyPayoff(amount);
-                break;
-            case PaymentPriority.ChargingForServices:
-                billingItems.ChangeChargingForServices(amount);
-                break;
-        }
     }
 
     private BillingItems GetOrCreatePaymentBillingItems(PeriodBilling periodBilling)
@@ -92,8 +79,6 @@ public class Payment
 /// </summary>
 public class PaymentDistribution
 {
-    public long Id { get; set; }
-
     public bool IsDistributed { get; set; }
 
     /// <summary>
@@ -104,11 +89,11 @@ public class PaymentDistribution
     /// <summary>
     /// Сумма Платежа, распределённая на оплату Штрафа 
     /// </summary>
-    public decimal? Penalty { get; set; }
+    public BillingItem? Penalty { get; set; }
 
     public decimal CalculateDistributedPaymentSum() => BillingsPayoffs
         .Select(payoff => payoff.BillingItems.GetTotalSum())
-        .Aggregate((accumulate, periodDistribution) => accumulate + periodDistribution) + Penalty ?? 0;
+        .Aggregate((accumulate, periodDistribution) => accumulate + periodDistribution) + Penalty?.Amount ?? 0;
 }
 
 /// <summary>

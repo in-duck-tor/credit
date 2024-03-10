@@ -78,3 +78,26 @@ public static class BillingItemExtensions
         return new ChainedPrioritizedItem(prioritized, item);
     }
 }
+
+public static class BillingItemsExtensions
+{
+    public static void ChangeBasedOnPriority(this BillingItems billingItems,
+        PaymentPriority paymentPriority,
+        decimal amount)
+    {
+        switch (paymentPriority)
+        {
+            case PaymentPriority.DebtInterest:
+            case PaymentPriority.RegularInterest:
+                billingItems.ChangeInterest(amount);
+                break;
+            case PaymentPriority.DebtBody:
+            case PaymentPriority.RegularBody:
+                billingItems.ChangeLoanBodyPayoff(amount);
+                break;
+            case PaymentPriority.ChargingForServices:
+                billingItems.ChangeChargingForServices(amount);
+                break;
+        }
+    }
+}

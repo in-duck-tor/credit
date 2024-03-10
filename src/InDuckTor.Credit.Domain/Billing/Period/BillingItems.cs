@@ -1,7 +1,8 @@
 namespace InDuckTor.Credit.Domain.Billing.Period;
 
+// todo: Переименовать сущность или сделать иерархию, чтобы были сущности статей расчёта, которые относятся только к периоду или ко всему кредиту в целом.
 /// <summary>
-/// <b>Статья расчёта</b>
+/// <b>Статьи расчёта</b>
 /// </summary>
 /// <param name="interest">Сумма процентов</param>
 /// <param name="loanBodyPayoff">Остаток Платежа в пользу тела долга</param>
@@ -17,13 +18,13 @@ public class BillingItems(decimal interest, decimal loanBodyPayoff, decimal char
         ArgumentOutOfRangeException.ThrowIfNegative(Interest + amount);
         Interest += amount;
     }
-    
+
     public void ChangeLoanBodyPayoff(decimal amount)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(LoanBodyPayoff + amount);
         LoanBodyPayoff += amount;
     }
-    
+
     public void ChangeChargingForServices(decimal amount)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(ChargingForServices + amount);
@@ -31,7 +32,7 @@ public class BillingItems(decimal interest, decimal loanBodyPayoff, decimal char
     }
 
     public decimal GetTotalSum() => Interest + LoanBodyPayoff + ChargingForServices;
-    
+
     public BillingItems DeepCopy()
     {
         return new BillingItems(Interest, LoanBodyPayoff, ChargingForServices);

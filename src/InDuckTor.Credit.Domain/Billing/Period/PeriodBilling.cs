@@ -11,8 +11,6 @@ public class PeriodBilling
 
     public required LoanBilling LoanBilling { get; init; }
 
-    public required Loan Loan { get; init; }
-
     /// <summary>
     /// <b>Дата начала периода</b>
     /// </summary>
@@ -36,7 +34,7 @@ public class PeriodBilling
     /// <summary>
     /// Имел ли пользователь задолженность по Периоду, к которому относится этот Расчёт
     /// </summary>
-    public bool IsDebt { get; set; } = false;
+    public bool IsDebt { get; set; }
 
     /// <summary>
     /// <para>Сумма, которую осталось заплатить по Расчётному Периоду.</para>
