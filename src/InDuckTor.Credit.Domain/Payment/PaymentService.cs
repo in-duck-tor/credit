@@ -1,5 +1,6 @@
 using InDuckTor.Credit.Domain.BillingPeriod;
 using InDuckTor.Credit.Domain.BillingPeriod.Exceptions;
+using InDuckTor.Credit.Domain.LoanManagement;
 using InDuckTor.Credit.Domain.Payment.Models;
 
 namespace InDuckTor.Credit.Domain.Payment;
@@ -14,11 +15,10 @@ public class PaymentService(IPaymentRepository paymentRepository, IPeriodBilling
     /// <summary>
     /// Распределяет Платёж для только что созданного Расчётного Периода. В конце операции все платежи должны распределиться.
     /// </summary>
-    /// <param name="loanId"></param>
-    /// <param name="periodBilling"></param>
-    public void DistributePaymentsForNewPeriod(long loanId, PeriodBilling periodBilling)
+    /// <param name="periodBilling">Расчёт за Период, по которому распределются Платежи</param>
+    public void DistributePaymentsForNewPeriod(PeriodBilling periodBilling)
     {
-        var payments = paymentRepository.GetAllNonDistributedPayments(loanId);
+        var payments = paymentRepository.GetAllNonDistributedPayments(periodBilling.Loan.Id);
         DistributePayments(payments, [periodBilling]);
     }
 
@@ -43,12 +43,14 @@ public class PaymentService(IPaymentRepository paymentRepository, IPeriodBilling
     }
 
     /// <summary>
-    /// Распределяет Платежи по Расчётам за Период
+    /// Распределяет Платежи по Расчётам за Период, а также изменяет значения по кредиту у: тела долга, задолженностей и штрафов 
     /// </summary>
-    /// <param name="payments"></param>
-    /// <param name="periods"></param>
-    /// <exception cref="InvalidPaymentDistributionException"></exception>
-    private void DistributePayments(List<Payment> payments, List<PeriodBilling> periods)
+    /// <param name="loan">Кредит, по которому происходит распределение</param>
+    /// <param name="payments">Платежи для распределения</param>
+    /// <param name="periods">Расчёты за Период, по которым происходит распределение</param>
+    /// <exception cref="InvalidPaymentDistributionException">Выбрасывается, если после распределения,
+    /// один из платежей не распределён полностью и период, по которому он распределялся, не оплачен</exception>
+    private void DistributePayments(Loan loan, List<Payment> payments, List<PeriodBilling> periods)
     {
         if (payments.Count == 0) return;
         if (periods.Count == 0) return;
@@ -60,7 +62,7 @@ public class PaymentService(IPaymentRepository paymentRepository, IPeriodBilling
 
         while (true)
         {
-            payment.DistributeOn(period);
+            payment.DistributeOn(period, loan.Penalty);
 
             if (!payment.IsDistributed && !period.IsPaid)
                 throw new InvalidPaymentDistributionException(
@@ -77,5 +79,57 @@ public class PaymentService(IPaymentRepository paymentRepository, IPeriodBilling
             if (!periodEnumerator.MoveNext()) return;
             period = periodEnumerator.Current;
         }
+    }
+}
+
+interface IBillingItem
+{
+    decimal Amount { get; }
+    void ChangeAmount(decimal amount);
+}
+
+interface IPrioritizedBillingItem : IBillingItem
+{
+    int Priority { get; }
+}
+
+class BillingItem(decimal amount) : IBillingItem
+{
+    public decimal Amount { get; private set; } = amount;
+
+    public virtual void ChangeAmount(decimal amount)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(Amount + amount);
+        Amount += amount;
+    }
+}
+
+class PaymentBillingItem(int priority, BillingItem billingItem) : IPrioritizedBillingItem
+{
+    private BillingItem BillingItem { get; } = billingItem;
+
+    public decimal Amount => BillingItem.Amount;
+    public int Priority { get; } = priority;
+
+    public void ChangeAmount(decimal amount)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(Amount + amount);
+        BillingItem.ChangeAmount(amount);
+    }
+}
+
+class PeriodPaymentBillingItem(PeriodBilling periodBilling, PaymentBillingItem paymentBillingItem)
+    : IPrioritizedBillingItem
+{
+    public decimal Amount => PaymentBillingItem.Amount;
+    public int Priority => PaymentBillingItem.Priority;
+
+    private PaymentBillingItem PaymentBillingItem { get; } = paymentBillingItem;
+    private PeriodBilling PeriodBilling { get; } = periodBilling;
+
+    public void ChangeAmount(decimal amount)
+    {
+        ArgumentNullException.ThrowIfNull(PeriodBilling.RemainingPayoff);
+        if (PeriodBilling.RemainingPayoff.GetTotalSum() == 0) PeriodBilling.RemainingPayoff = null;
     }
 }

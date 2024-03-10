@@ -62,6 +62,11 @@ public class Loan
     public decimal Penalty { get; set; }
 
     /// <summary>
+    /// Процент Штрафа
+    /// </summary>
+    public const decimal PenaltyRate = 0.1m;
+
+    /// <summary>
     /// <para><b>Начисления за текущий Период</b></para>
     /// <para>Если Кредит в состоянии<see cref="LoanState.Approved"/>, значение поля будет<c>null</c></para>
     /// </summary>
@@ -71,6 +76,12 @@ public class Loan
     /// <b>Расчёт за Период</b>
     /// </summary>
     public List<PeriodBilling> PeriodsBillings { get; set; } = [];
+
+    public void AddPeriodBilling(PeriodBilling periodBilling)
+    {
+        PeriodsBillings.Add(periodBilling);
+        // LoanBody -=
+    }
 }
 
 /// <summary>
@@ -105,7 +116,7 @@ public class PeriodAccruals
 }
 
 /// <summary>
-/// <b>Статус Кредита</b> </para>
+/// <b>Статус Кредита</b>
 /// </summary>
 public enum LoanState
 {
@@ -158,3 +169,9 @@ public enum PaymentScheduleType
     /// </summary>
     Interval
 }
+
+// todo: Подключение расчётного счёта и создание ссудного счёта
+// todo: Досрочное погашение
+// todo: Перевод средств на расчётный счёт
+// todo: Расчёт штрафов
+// todo: 

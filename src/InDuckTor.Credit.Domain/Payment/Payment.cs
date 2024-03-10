@@ -22,7 +22,7 @@ public class Payment
     public bool IsDistributed => PaymentDistribution.IsDistributed;
 
     // todo Добавить расчёт штрафов
-    public void DistributeOn(PeriodBilling periodBilling)
+    public void DistributeOn(PeriodBilling periodBilling, decimal penalty)
     {
         if (periodBilling.IsPaid) return;
 
@@ -32,8 +32,7 @@ public class Payment
         if (paymentToDistribute == 0) return;
         
         var paymentBillingItems = GetOrCreatePaymentBillingItems(periodBilling.Id);
-
-        paymentToDistribute = InternalDistributePayment(periodBilling, paymentBillingItems, paymentToDistribute);
+        paymentToDistribute = InternalDistributePayment(periodBilling, penalty, paymentBillingItems, paymentToDistribute);
 
         if (paymentToDistribute == 0) PaymentDistribution.IsDistributed = true;
     }
@@ -55,18 +54,29 @@ public class Payment
         return paymentBillingItems;
     }
 
+    // todo: добавить PaymentCategory и отдельный класс PayoffPeriodBillingItems, в котором эти категории будут находиться.
+    //  Такой класс будет привязан к PeriodBilling и будет использоваться для расчёта цены. Мы сможем получить
     /// <summary>
     /// Распределяет <see cref="paymentToDistribute"/> по Статьям расчёта,
     /// уменьшая значения в periodPayoff и увеличивая в paymentBillingItems 
     /// </summary>
     /// <param name="periodBilling">Статьи расчёта для Расчёта по Периоду</param>
+    /// <param name="penalty">Размер Штрафа</param>
     /// <param name="paymentBillingItems">Статьи расчёта для Платежа</param>
     /// <param name="paymentToDistribute">Оставшаяся нераспределённая сумма</param>
     /// <returns>Нераспределённая сумма</returns>
     private decimal InternalDistributePayment(PeriodBilling periodBilling,
+        decimal penalty,
         BillingItems paymentBillingItems,
         decimal paymentToDistribute)
     {
+        if (periodBilling.IsDebt)
+        {
+            var min = decimal.Min(paymentToDistribute, penalty);
+            PaymentDistribution.Penalty += min;
+            paymentToDistribute -= min;
+        }
+        
         if (!periodBilling.IsPaid)
         {
             var min = decimal.Min(paymentToDistribute, periodBilling.GetRemainingInterest());
@@ -83,6 +93,13 @@ public class Payment
             paymentBillingItems.ChangeLoanBodyPayoff(min);
         }
 
+        if (periodBilling.IsDebt)
+        {
+            var min = decimal.Min(paymentToDistribute, penalty);
+            PaymentDistribution.Penalty += min;
+            paymentToDistribute -= min;
+        }
+        
         if (paymentToDistribute != 0 && periodBilling.IsPaid)
         {
             var min = decimal.Min(paymentToDistribute, periodBilling.GetRemainingChargingForServices());

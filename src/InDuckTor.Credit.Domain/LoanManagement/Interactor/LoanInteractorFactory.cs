@@ -32,11 +32,7 @@ public class LoanInteractorFactory : ILoanInteractorFactory
 
     public LoanInteractor FromLoan(Loan loan)
     {
-        return new LoanInteractor
-        {
-            Loan = loan,
-            PaymentCalculator = GetPaymentSystem(loan.PaymentType)
-        };
+        return new LoanInteractor(loan, GetPaymentSystem(loan.PaymentType));
     }
 
     private static IPaymentCalculator GetPaymentSystem(PaymentType paymentType)
@@ -45,7 +41,7 @@ public class LoanInteractorFactory : ILoanInteractorFactory
         {
             PaymentType.Annuity => new AnnuityPaymentCalculator(),
             PaymentType.Differentiated => new DifferentiatedPaymentCalculator(),
-            _ => throw new ArgumentOutOfRangeException()
+            _ => throw new ArgumentOutOfRangeException(nameof(paymentType))
         };
     }
 }

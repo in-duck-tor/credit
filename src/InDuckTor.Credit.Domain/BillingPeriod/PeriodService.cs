@@ -13,11 +13,12 @@ public class PeriodService(PaymentService paymentService)
     /// </summary>
     /// <param name="loan">Кредит, для которого закрывается Расчётный Период</param>
     /// <param name="closingTime">Действительное время закрытия Расчётного Периода</param>
-    public void CloseBillingPeriod(Loan loan, DateTime closingTime)
+    public PeriodBilling CloseBillingPeriod(Loan loan, DateTime closingTime)
     {
         // todo: добавить проверку времени окончания Расчётного Периода
         var periodBilling = CreatePeriodBilling(loan, closingTime);
-        paymentService.DistributePaymentsForNewPeriod(loan.Id, periodBilling);
+        paymentService.DistributePaymentsForNewPeriod(periodBilling);
+        return periodBilling;
     }
 
     private PeriodBilling CreatePeriodBilling(Loan loan, DateTime endDate)
