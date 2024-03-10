@@ -1,4 +1,5 @@
-﻿using InDuckTor.Credit.Domain.BillingPeriod;
+﻿using InDuckTor.Credit.Domain.Billing;
+using InDuckTor.Credit.Domain.Billing.Period;
 
 namespace InDuckTor.Credit.Domain.LoanManagement;
 
@@ -20,6 +21,11 @@ public class Loan
     /// <b>Дата одобрения кредита</b>
     /// </summary>
     public required DateTime ApprovalDate { get; set; }
+
+    /// <summary>
+    /// <b>Расчёт кредита</b>
+    /// </summary>
+    public LoanBilling LoanBilling { get; set; }
 
     /// <summary>
     /// <b>Дата начисления кредитных средств</b>
@@ -45,74 +51,6 @@ public class Loan
     /// <b>Тип Платёжного графика</b>
     /// </summary>
     public required PaymentScheduleType PaymentScheduleType { get; set; }
-
-    /// <summary>
-    /// <b>Остаток по Кредиту</b>
-    /// </summary>
-    public required decimal LoanBody { get; set; }
-
-    /// <summary>
-    /// <b>Задолженность по Кредиту</b>
-    /// </summary>
-    public decimal LoanDebt { get; set; }
-
-    /// <summary>
-    /// <b>Штраф по Задолженности</b>
-    /// </summary>
-    public decimal Penalty { get; set; }
-
-    /// <summary>
-    /// Процент Штрафа
-    /// </summary>
-    public const decimal PenaltyRate = 0.1m;
-
-    /// <summary>
-    /// <para><b>Начисления за текущий Период</b></para>
-    /// <para>Если Кредит в состоянии<see cref="LoanState.Approved"/>, значение поля будет<c>null</c></para>
-    /// </summary>
-    public PeriodAccruals? PeriodAccruals { get; set; }
-
-    /// <summary>
-    /// <b>Расчёт за Период</b>
-    /// </summary>
-    public List<PeriodBilling> PeriodsBillings { get; set; } = [];
-
-    public void AddPeriodBilling(PeriodBilling periodBilling)
-    {
-        PeriodsBillings.Add(periodBilling);
-        // LoanBody -=
-    }
-}
-
-/// <summary>
-/// <b>Начисления за Период</b>
-/// </summary>
-public class PeriodAccruals
-{
-    /// <summary>
-    /// <b>Дата начала периода</b>
-    /// </summary>
-    public DateTime PeriodStartDate { get; set; }
-
-    /// <summary>
-    /// <b>Начисление процентов</b>
-    /// </summary>
-    public decimal InterestAccrual { get; set; }
-
-    /// <summary>
-    /// <b>Выплата по Телу Кредита</b>
-    /// </summary>
-    public decimal LoanBodyPayoff { get; set; }
-
-    /// <summary>
-    /// <b>Начисление платы за Услуги</b>
-    /// </summary>
-    public decimal ChargingForServices { get; set; }
-
-    /// <summary>
-    /// <b>Сумма единовременного Платежа</b>
-    /// </summary>
-    public decimal OneTimePayment { get; set; }
 }
 
 /// <summary>

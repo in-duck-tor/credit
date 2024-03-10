@@ -1,7 +1,6 @@
-using System.Runtime.CompilerServices;
 using InDuckTor.Credit.Domain.LoanManagement;
 
-namespace InDuckTor.Credit.Domain.BillingPeriod;
+namespace InDuckTor.Credit.Domain.Billing.Period;
 
 /// <summary>
 /// <b>Расчёт за Период</b>
@@ -10,7 +9,9 @@ public class PeriodBilling
 {
     public long Id { get; set; }
 
-    public required Loan Loan { get; set; }
+    public required LoanBilling LoanBilling { get; init; }
+
+    public required Loan Loan { get; init; }
 
     /// <summary>
     /// <b>Дата начала периода</b>
@@ -52,43 +53,18 @@ public class PeriodBilling
         ArgumentNullException.ThrowIfNull(RemainingPayoff);
         return RemainingPayoff.Interest;
     }
-    
+
     public decimal GetRemainingLoanBodyPayoff()
     {
         ArgumentNullException.ThrowIfNull(RemainingPayoff);
         return RemainingPayoff.LoanBodyPayoff;
     }
-    
+
     public decimal GetRemainingChargingForServices()
     {
         ArgumentNullException.ThrowIfNull(RemainingPayoff);
         return RemainingPayoff.ChargingForServices;
     }
 
-    public void ChangeInterest(decimal amount)
-    {
-        ArgumentNullException.ThrowIfNull(RemainingPayoff);
-        RemainingPayoff.ChangeInterest(amount);
-        RemoveRemainingPayoffIfEmpty();
-    }
-
-    public void ChangeLoanBodyPayoff(decimal amount)
-    {
-        ArgumentNullException.ThrowIfNull(RemainingPayoff);
-        RemainingPayoff.ChangeLoanBodyPayoff(amount);
-        RemoveRemainingPayoffIfEmpty();
-    }
-
-    public void ChangeChargingForServices(decimal amount)
-    {
-        ArgumentNullException.ThrowIfNull(RemainingPayoff);
-        RemainingPayoff.ChangeChargingForServices(amount);
-        RemoveRemainingPayoffIfEmpty();
-    }
-
-    private void RemoveRemainingPayoffIfEmpty()
-    {
-        ArgumentNullException.ThrowIfNull(RemainingPayoff);
-        if (RemainingPayoff.GetTotalSum() == 0) RemainingPayoff = null;
-    }
+    public decimal GetPaidLoanBody() => BillingItems.LoanBodyPayoff - GetRemainingLoanBodyPayoff();
 }

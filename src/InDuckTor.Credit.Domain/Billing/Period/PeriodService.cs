@@ -1,7 +1,7 @@
+using InDuckTor.Credit.Domain.Billing.Payment;
 using InDuckTor.Credit.Domain.LoanManagement;
-using InDuckTor.Credit.Domain.Payment;
 
-namespace InDuckTor.Credit.Domain.BillingPeriod;
+namespace InDuckTor.Credit.Domain.Billing.Period;
 
 public class PeriodService(PaymentService paymentService)
 {
@@ -11,33 +11,35 @@ public class PeriodService(PaymentService paymentService)
     /// Брать текущее время некорректо, т.к. действительное временя может отличаться от времени вызова этого метода.
     /// </para>
     /// </summary>
-    /// <param name="loan">Кредит, для которого закрывается Расчётный Период</param>
+    /// <param name="loanBilling">Кредит, для которого закрывается Расчётный Период</param>
     /// <param name="closingTime">Действительное время закрытия Расчётного Периода</param>
-    public PeriodBilling CloseBillingPeriod(Loan loan, DateTime closingTime)
+    public PeriodBilling CloseBillingPeriod(LoanBilling loanBilling, DateTime closingTime)
     {
         // todo: добавить проверку времени окончания Расчётного Периода
-        var periodBilling = CreatePeriodBilling(loan, closingTime);
+        var periodBilling = CreatePeriodBilling(loanBilling, closingTime);
         paymentService.DistributePaymentsForNewPeriod(periodBilling);
+        loanBilling.AddAndRecalculateForNewPeriod(periodBilling);
         return periodBilling;
     }
 
-    private PeriodBilling CreatePeriodBilling(Loan loan, DateTime endDate)
+    private PeriodBilling CreatePeriodBilling(LoanBilling loanBilling, DateTime endDate)
     {
-        ArgumentNullException.ThrowIfNull(loan.PeriodAccruals);
+        ArgumentNullException.ThrowIfNull(loanBilling.PeriodAccruals);
 
         var billingItems = new BillingItems(
-            loan.PeriodAccruals.InterestAccrual,
-            loan.PeriodAccruals.LoanBodyPayoff,
-            loan.PeriodAccruals.ChargingForServices);
+            loanBilling.PeriodAccruals.InterestAccrual,
+            loanBilling.PeriodAccruals.LoanBodyPayoff,
+            loanBilling.PeriodAccruals.ChargingForServices);
 
         var periodBilling = new PeriodBilling
         {
-            PeriodStartDate = loan.PeriodAccruals.PeriodStartDate,
-            Loan = loan,
+            PeriodStartDate = loanBilling.PeriodAccruals.PeriodStartDate,
+            Loan = loanBilling.Loan,
+            LoanBilling = loanBilling,
             PeriodEndDate = endDate,
-            OneTimePayment = loan.PeriodAccruals.OneTimePayment,
+            OneTimePayment = loanBilling.PeriodAccruals.OneTimePayment,
             BillingItems = billingItems,
-            RemainingPayoff = billingItems.DeepCopy()
+            RemainingPayoff = billingItems.DeepCopy(),
         };
 
         return periodBilling;

@@ -14,6 +14,6 @@ public class LoanInteractor(Loan loan, IPaymentCalculator paymentCalculator)
 
     public void ChargePenalty()
     {
-        Loan.Penalty += Loan.LoanDebt * Loan.PenaltyRate;
+        Loan.LoanBilling.ChargePenalty();
     }
 }

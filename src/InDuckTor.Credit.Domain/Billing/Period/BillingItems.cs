@@ -1,4 +1,4 @@
-namespace InDuckTor.Credit.Domain.BillingPeriod;
+namespace InDuckTor.Credit.Domain.Billing.Period;
 
 /// <summary>
 /// <b>Статья расчёта</b>
@@ -8,20 +8,9 @@ namespace InDuckTor.Credit.Domain.BillingPeriod;
 /// <param name="chargingForServices">Сумма стоимости дополнительных Услуг</param>
 public class BillingItems(decimal interest, decimal loanBodyPayoff, decimal chargingForServices)
 {
-    public decimal Interest { get; set; } = interest;
-    public decimal LoanBodyPayoff { get; set; } = loanBodyPayoff;
-    public decimal ChargingForServices { get; set; } = chargingForServices;
-
-    class PaymentCategory(decimal amount)
-    {
-        public decimal Amount { get; private set; } = amount;
-        
-        public void ChangeAmount(decimal amount)
-        {
-            ArgumentOutOfRangeException.ThrowIfNegative(Amount + amount);
-            Amount += amount;
-        }
-    }
+    public BillingItem Interest { get; private set; } = interest;
+    public BillingItem LoanBodyPayoff { get; private set; } = loanBodyPayoff;
+    public BillingItem ChargingForServices { get; private set; } = chargingForServices;
 
     public void ChangeInterest(decimal amount)
     {

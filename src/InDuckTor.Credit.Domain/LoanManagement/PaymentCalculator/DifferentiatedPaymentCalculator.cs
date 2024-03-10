@@ -6,10 +6,10 @@ class DifferentiatedPaymentCalculator : IPaymentCalculator
 
     public void AccrueInterestOnCurrentPeriod(Loan loan)
     {
-        ArgumentNullException.ThrowIfNull(loan.PeriodAccruals);
+        ArgumentNullException.ThrowIfNull(loan.LoanBilling.PeriodAccruals);
+        
+        var interest = _interestCalculator.InterestAccrual(loan.LoanBilling.LoanBody, loan.InterestRate);
 
-        var interest = _interestCalculator.InterestAccrual(loan.LoanBody, loan.InterestRate);
-
-        loan.PeriodAccruals.InterestAccrual += interest;
+        loan.LoanBilling.PeriodAccruals.InterestAccrual += interest;
     }
 }

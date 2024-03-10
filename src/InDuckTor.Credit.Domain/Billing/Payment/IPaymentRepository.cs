@@ -1,4 +1,4 @@
-namespace InDuckTor.Credit.Domain.Payment;
+namespace InDuckTor.Credit.Domain.Billing.Payment;
 
 public interface IPaymentRepository
 {

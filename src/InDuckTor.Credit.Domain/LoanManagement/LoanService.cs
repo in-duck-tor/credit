@@ -1,4 +1,5 @@
-using InDuckTor.Credit.Domain.BillingPeriod;
+using InDuckTor.Credit.Domain.Billing;
+using InDuckTor.Credit.Domain.Billing.Period;
 using InDuckTor.Credit.Domain.LoanManagement.Interactor;
 using InDuckTor.Credit.Domain.LoanManagement.Models;
 
@@ -27,14 +28,13 @@ public class LoanService(
     public void CloseBillingPeriod(long loanId)
     {
         var loan = loanRepository.GetById(loanId);
-        var periodBilling = periodService.CloseBillingPeriod(loan, DateTime.Now);
-        loan.PeriodsBillings.Add(periodBilling);
+        var periodBilling = periodService.CloseBillingPeriod(loan.LoanBilling, DateTime.Now);
     }
 
     public void Tick(Loan loan)
     {
         var interactor = loanInteractorFactory.FromLoan(loan);
-        
+
         interactor.AccrueInterestOnCurrentPeriod();
         interactor.ChargePenalty();
     }
