@@ -1,4 +1,4 @@
-using InDuckTor.Credit.WebApi.Contracts.Dtos;
+using InDuckTor.Credit.Domain.Financing.Application;
 
 namespace InDuckTor.Credit.WebApi.Contracts.Responses;
 
@@ -7,4 +7,4 @@ public class LoanApplicationResponse(
     LoanProgramShortResponse LoanProgram,
     decimal BorrowedAmount,
     DateTime LoanTerm,
-    ApplicationStateDto ApplicationState);
+    ApplicationState ApplicationState);

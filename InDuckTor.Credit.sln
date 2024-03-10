@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InDuckTor.Credit.WebApi", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InDuckTor.Credit.Domain", "src\InDuckTor.Credit.Domain\InDuckTor.Credit.Domain.csproj", "{57260306-73C5-405B-AED8-D068BA8F1C73}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InDuckTor.Credit.Feature", "InDuckTor.Credit.Feature\InDuckTor.Credit.Feature.csproj", "{ADE3AB7C-59C3-4C4F-8B6D-D26A07D48D59}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{57260306-73C5-405B-AED8-D068BA8F1C73}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{57260306-73C5-405B-AED8-D068BA8F1C73}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{57260306-73C5-405B-AED8-D068BA8F1C73}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ADE3AB7C-59C3-4C4F-8B6D-D26A07D48D59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ADE3AB7C-59C3-4C4F-8B6D-D26A07D48D59}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ADE3AB7C-59C3-4C4F-8B6D-D26A07D48D59}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ADE3AB7C-59C3-4C4F-8B6D-D26A07D48D59}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

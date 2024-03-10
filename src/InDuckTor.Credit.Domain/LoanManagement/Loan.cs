@@ -1,4 +1,5 @@
-﻿using InDuckTor.Credit.Domain.Billing;
+﻿using System.Runtime.Serialization;
+using InDuckTor.Credit.Domain.Billing;
 using InDuckTor.Credit.Domain.Billing.Period;
 
 namespace InDuckTor.Credit.Domain.LoanManagement;
@@ -61,17 +62,17 @@ public enum LoanState
     /// <summary>
     /// Кредит одобрен, но деньги не переведены на счёт заёмщика
     /// </summary>
-    Approved,
+    [EnumMember(Value = "approved")] Approved,
 
     /// <summary>
     /// Кредит одобрен и деньги переведены на счёт заёмщика
     /// </summary>
-    Active,
+    [EnumMember(Value = "active")] Active,
 
     /// <summary>
     /// Кредит погашен
     /// </summary>
-    Closed
+    [EnumMember(Value = "closed")] Closed
 }
 
 /// <summary>
@@ -82,12 +83,12 @@ public enum PaymentType
     /// <summary>
     /// <b>Аннуитетный Платёж</b>
     /// </summary>
-    Annuity,
+    [EnumMember(Value = "annuity")] Annuity,
 
     /// <summary>
     /// <b>Дифференцированный Платёж</b>
     /// </summary>
-    Differentiated
+    [EnumMember(Value = "differentiated")] Differentiated
 }
 
 /// <summary>
@@ -100,12 +101,12 @@ public enum PaymentScheduleType
     /// <example>Если клиент взял кредит 10 числа какого-то месяца,
     /// то каждый новый Расчётный Период будет начинаться 10 числа следующего месяца</example>
     /// </summary>
-    Calendar,
+    [EnumMember(Value = "calendar")] Calendar,
 
     /// <summary>
     /// <b>Интервальный график</b>. Расчётный период не привязан к конкретной дате и длится всегда фиксированное время
     /// </summary>
-    Interval
+    [EnumMember(Value = "interval")] Interval
 }
 
 // todo: Подключение расчётного счёта и создание ссудного счёта

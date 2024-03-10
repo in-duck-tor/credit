@@ -1,3 +1,4 @@
+using System.Runtime.Serialization;
 using InDuckTor.Credit.Domain.Financing.Program;
 
 namespace InDuckTor.Credit.Domain.Financing.Application;
@@ -22,7 +23,7 @@ public class LoanApplication
     /// <summary>
     /// <b>Срок взятия кредита</b>. Отсчёт от Рождения Христа
     /// </summary>
-    public required DateTime LoanTerm { get; set; }
+    public required TimeSpan LoanTerm { get; set; }
 
     public required ApplicationState ApplicationState { get; set; }
 
@@ -37,7 +38,7 @@ public class LoanApplication
 /// </summary>
 public enum ApplicationState
 {
-    Rejected,
-    Pending,
-    Approved
+    [EnumMember(Value = "rejected")] Rejected,
+    [EnumMember(Value = "pending")] Pending,
+    [EnumMember(Value = "approved")] Approved
 }

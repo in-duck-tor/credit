@@ -1,7 +1,6 @@
 using System.Text.Json.Serialization;
-using Hangfire;
-using Hangfire.PostgreSql;
-using InDuckTor.Credit.WebApi.Contracts.Dtos;
+using InDuckTor.Credit.Domain.Financing.Application;
+using InDuckTor.Credit.WebApi.Configuration;
 using InDuckTor.Credit.WebApi.Endpoints;
 using InDuckTor.Shared.Configuration;
 using InDuckTor.Shared.Security;
@@ -9,11 +8,13 @@ using Microsoft.AspNetCore.Http.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
+builder.Services.AddProblemDetails().ConfigureJsonConverters();
 builder.Services.Configure<JsonOptions>(cfg =>
 {
     var enumMemberConverter = new JsonStringEnumMemberConverter(
         new JsonStringEnumMemberConverterOptions(),
-        typeof(ApplicationStateDto));
+        typeof(ApplicationState));
     cfg.SerializerOptions.Converters.Add(enumMemberConverter);
 });
 
