@@ -1,29 +1,72 @@
 using InDuckTor.Credit.Domain.Financing.Application;
 using InDuckTor.Credit.Domain.Financing.Application.Model;
+using InDuckTor.Credit.Domain.LoanManagement;
+using InDuckTor.Credit.Feature.Feature.Common;
+using InDuckTor.Credit.Feature.Feature.Loan;
+using InDuckTor.Credit.Feature.Feature.Program.Model;
+using InDuckTor.Credit.Infrastructure.Config.Database;
 using InDuckTor.Shared.Strategies;
 
 namespace InDuckTor.Credit.Feature.Feature.Application;
 
-public record ApplicationInfo(long ClientId, long LoanProgramId, decimal BorrowedAmount, TimeSpan LoanTerm);
+/// <param name="ClientId">Id Клиента</param>
+/// <param name="LoanProgramId">Id Программы Кредитования</param>
+/// <param name="BorrowedAmount">Сумма займа</param>
+/// <param name="LoanTerm">Время, на которое берётся Кредит в секундах</param>
+public record ApplicationInfo(
+    long ClientId,
+    long LoanProgramId,
+    decimal BorrowedAmount,
+    long LoanTerm,
+    string ClientAccountNumber);
 
-// "clientId": 0,
-// "loanProgramId": 0,
-// "borrowedAmount": 0,
-// "loanTerm": "2024-03-10T13:28:13.602Z"
-
-public interface ISubmitApplication : ICommand<ApplicationInfo, long>;
-
-public class SubmitApplication(ApplicationService applicationService) : ISubmitApplication
+public record LoanApplicationResponse(
+    long Id,
+    long ClientId,
+    LoanProgramResponse LoanProgram,
+    decimal BorrowedAmount,
+    TimeSpan LoanTerm,
+    ApplicationState ApplicationState,
+    // todo: разделить на несколько запросов
+    LoanInfoResponse Loan)
 {
-    public Task<long> Execute(ApplicationInfo input, CancellationToken ct)
+    public static LoanApplicationResponse
+        FromApplication(LoanApplication application, Domain.LoanManagement.Loan loan) => new(
+        application.Id,
+        application.ClientId,
+        LoanProgramResponse.FromLoanProgram(application.LoanProgram),
+        application.BorrowedAmount,
+        application.LoanTerm,
+        application.ApplicationState,
+        LoanInfoResponse.FromLoan(loan)
+    );
+}
+
+public interface ISubmitApplication : ICommand<ApplicationInfo, LoanApplicationResponse>;
+
+[Intercept(typeof(SaveChangesInterceptor<ApplicationInfo, LoanApplicationResponse>))]
+public class SubmitApplication(
+    LoanDbContext context,
+    IApplicationService applicationService,
+    IExecutor<ICreateLoan, LoanApplication, Domain.LoanManagement.Loan> createLoan) : ISubmitApplication
+{
+    public async Task<LoanApplicationResponse> Execute(ApplicationInfo info, CancellationToken ct)
     {
         var newApplication = new NewApplication
         {
-            ClientId = input.ClientId,
-            LoanProgramId = input.LoanProgramId,
-            BorrowedAmount = input.BorrowedAmount,
-            LoanTerm = input.LoanTerm
+            ClientId = info.ClientId,
+            LoanProgramId = info.LoanProgramId,
+            BorrowedAmount = info.BorrowedAmount,
+            LoanTerm = TimeSpan.FromSeconds(info.LoanTerm),
+            ClientAccountNumber = info.ClientAccountNumber,
         };
-        return Task.FromResult(applicationService.CreateApplication(newApplication).Id);
+
+        var application = await applicationService.CreateApplication(newApplication);
+        context.LoanApplications.Add(application);
+
+        // todo: Создаётся сразу, т.к. у нас нет модерации. В будущем надо создавать либо через джобу, либо сразу после одобрения
+        var loan = await createLoan.Execute(application, ct);
+
+        return LoanApplicationResponse.FromApplication(application, loan);
     }
 }

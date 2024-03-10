@@ -12,7 +12,7 @@ public class LoanApplicationConfiguration : IEntityTypeConfiguration<LoanApplica
 
         builder
             .HasOne(la => la.LoanProgram)
-            .WithMany()
-            .HasForeignKey(la => la.LoanProgram);
+            .WithMany();
+        // .HasForeignKey(la => la.LoanProgramId);
     }
 }

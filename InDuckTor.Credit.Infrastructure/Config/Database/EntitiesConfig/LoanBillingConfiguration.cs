@@ -13,7 +13,8 @@ public class LoanBillingConfiguration : IEntityTypeConfiguration<LoanBilling>
         builder.ComplexProperty(lb => lb.LoanBody, bi => bi.IsRequired());
         builder.ComplexProperty(lb => lb.LoanDebt, bi => bi.IsRequired());
         builder.ComplexProperty(lb => lb.Penalty, bi => bi.IsRequired());
-        builder.ComplexProperty(lb => lb.PeriodAccruals);
+
+        builder.OwnsOne(lb => lb.PeriodAccruals);
 
         builder
             .HasMany(lb => lb.PeriodsBillings)

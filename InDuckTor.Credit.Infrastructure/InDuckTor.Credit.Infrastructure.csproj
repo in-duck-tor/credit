@@ -14,5 +14,9 @@
     <ItemGroup>
       <ProjectReference Include="..\src\InDuckTor.Credit.Domain\InDuckTor.Credit.Domain.csproj" />
     </ItemGroup>
+    
+    <ItemGroup>
+      <Folder Include="Migrations\" />
+    </ItemGroup>
 
 </Project>

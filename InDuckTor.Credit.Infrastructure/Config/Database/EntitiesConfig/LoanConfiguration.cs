@@ -14,7 +14,7 @@ public class LoanConfiguration : IEntityTypeConfiguration<Loan>
         builder
             .HasOne(l => l.LoanBilling)
             .WithOne(lb => lb.Loan)
-            .HasForeignKey<LoanBilling>(lb => lb.Loan)
+            .HasForeignKey<LoanBilling>(l => l.Id)
             .IsRequired();
     }
 }

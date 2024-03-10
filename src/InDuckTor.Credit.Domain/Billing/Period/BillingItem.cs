@@ -6,7 +6,7 @@ public interface IBillingItem
     void ChangeAmount(decimal amount);
 }
 
-public class BillingItem(decimal amount) : IBillingItem
+public struct BillingItem(decimal amount) : IBillingItem
 {
     public BillingItem() : this(0)
     {
@@ -14,12 +14,12 @@ public class BillingItem(decimal amount) : IBillingItem
 
     public decimal Amount { get; private set; } = amount;
 
-    public virtual void ChangeAmount(decimal amount)
+    public void ChangeAmount(decimal amount)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(Amount + amount);
         Amount += amount;
     }
 
-    public static implicit operator BillingItem(decimal d) => new BillingItem(d);
+    public static implicit operator BillingItem(decimal d) => new(d);
     public static implicit operator decimal(BillingItem b) => b.Amount;
 }

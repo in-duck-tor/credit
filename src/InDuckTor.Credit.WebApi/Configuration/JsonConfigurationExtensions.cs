@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using InDuckTor.Credit.Domain.Financing.Application;
 using InDuckTor.Credit.Domain.LoanManagement;
+using InDuckTor.Credit.Domain.LoanManagement.Accounts;
 using Microsoft.AspNetCore.Http.Json;
 
 namespace InDuckTor.Credit.WebApi.Configuration;
@@ -13,7 +14,13 @@ public static class JsonConfigurationExtensions
     {
         var enumMemberConverter = new JsonStringEnumMemberConverter(
             new JsonStringEnumMemberConverterOptions(),
-            typeof(ApplicationState), typeof(LoanState), typeof(PaymentType), typeof(PaymentScheduleType));
+            typeof(ApplicationState),
+            typeof(LoanState),
+            typeof(PaymentType),
+            typeof(PaymentScheduleType),
+            typeof(AccountType),
+            typeof(TransactionType),
+            typeof(TransactionStatus));
 
         options.SerializerOptions.Converters.Add(enumMemberConverter);
     }

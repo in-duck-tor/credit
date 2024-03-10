@@ -1,5 +1,3 @@
-using InDuckTor.Credit.Domain.LoanManagement;
-
 namespace InDuckTor.Credit.Domain.Billing.Period;
 
 /// <summary>
@@ -45,6 +43,9 @@ public class PeriodBilling
     public BillingItems? RemainingPayoff { get; set; }
 
     public bool IsPaid => RemainingPayoff == null;
+
+    public decimal TotalRemainingPayment =>
+        GetRemainingInterest() + GetRemainingLoanBodyPayoff() + GetRemainingChargingForServices();
 
     public decimal GetRemainingInterest()
     {

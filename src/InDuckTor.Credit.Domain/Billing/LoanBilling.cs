@@ -37,12 +37,14 @@ public class LoanBilling
     /// </summary>
     public PeriodAccruals? PeriodAccruals { get; set; }
 
+    public bool IsRepaid => LoanBody + LoanDebt + Penalty == 0;
+
     public void ChargePenalty()
     {
         Penalty += LoanDebt * PenaltyRate;
     }
 
-    public void AddAndRecalculateForNewPeriod(PeriodBilling periodBilling)
+    public void AddNewPeriodAndRecalculate(PeriodBilling periodBilling)
     {
         PeriodsBillings.Add(periodBilling);
 
@@ -57,7 +59,7 @@ public class LoanBilling
     public List<IPrioritizedBillingItem> GetBillingItemsForPeriod(PeriodBilling periodBilling)
     {
         if (periodBilling.LoanBilling.Id != Id)
-            throw EntitiesIsNotRelatedException.WithNames(nameof(LoanBilling), nameof(PeriodBilling));
+            throw Errors.EntitiesIsNotRelatedException.WithNames(nameof(LoanBilling), nameof(PeriodBilling));
 
         List<IPrioritizedBillingItem> items = [];
 
@@ -82,6 +84,21 @@ public class LoanBilling
         items.Add(periodBilling.GetServicesItem(PaymentPriority.ChargingForServices));
 
         return items;
+    }
+
+    public void StartNewPeriod()
+    {
+        var now = DateTime.UtcNow;
+        if (PeriodAccruals != null && PeriodAccruals.PeriodEndDate > now) return;
+
+        var startDate = new DateTime(now.Year, now.Month, now.Day, now.Hour, 0, 0, now.Kind);
+        var endDate = now + Loan.PeriodInterval;
+    }
+
+    public DateTime CurrentPeriodStartDate()
+    {
+        ArgumentNullException.ThrowIfNull(PeriodAccruals);
+        return PeriodAccruals.PeriodStartDate;
     }
 }
 

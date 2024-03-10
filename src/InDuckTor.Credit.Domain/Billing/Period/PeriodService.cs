@@ -1,9 +1,8 @@
 using InDuckTor.Credit.Domain.Billing.Payment;
-using InDuckTor.Credit.Domain.LoanManagement;
 
 namespace InDuckTor.Credit.Domain.Billing.Period;
 
-public class PeriodService(PaymentService paymentService)
+public class PeriodService(IPaymentService paymentService)
 {
     /// <summary>
     /// <para>Создаёт Расчётный Период.</para>
@@ -13,16 +12,16 @@ public class PeriodService(PaymentService paymentService)
     /// </summary>
     /// <param name="loanBilling">Кредит, для которого закрывается Расчётный Период</param>
     /// <param name="closingTime">Действительное время закрытия Расчётного Периода</param>
-    public PeriodBilling CloseBillingPeriod(LoanBilling loanBilling, DateTime closingTime)
+    internal async Task<PeriodBilling> CloseBillingPeriod(LoanBilling loanBilling, DateTime closingTime)
     {
         // todo: добавить проверку времени окончания Расчётного Периода
         var periodBilling = CreatePeriodBilling(loanBilling, closingTime);
-        paymentService.DistributePaymentsForNewPeriod(loanBilling.Loan.Id, periodBilling);
-        loanBilling.AddAndRecalculateForNewPeriod(periodBilling);
+        await paymentService.DistributePaymentsForNewPeriod(loanBilling.Loan.Id, periodBilling);
+        loanBilling.AddNewPeriodAndRecalculate(periodBilling);
         return periodBilling;
     }
 
-    private PeriodBilling CreatePeriodBilling(LoanBilling loanBilling, DateTime endDate)
+    private static PeriodBilling CreatePeriodBilling(LoanBilling loanBilling, DateTime endDate)
     {
         ArgumentNullException.ThrowIfNull(loanBilling.PeriodAccruals);
 

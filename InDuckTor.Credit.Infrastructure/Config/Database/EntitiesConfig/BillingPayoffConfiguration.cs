@@ -10,7 +10,7 @@ public class BillingPayoffConfiguration : IEntityTypeConfiguration<BillingPayoff
     {
         builder.ToTable(nameof(BillingPayoff)).HasKey(l => l.Id);
 
-        builder.HasOne(bp => bp.PeriodBilling).WithMany().HasForeignKey(bp => bp.PeriodBilling);
-        builder.ComplexProperty(bp => bp.BillingItems, b => b.IsRequired());
+        builder.HasOne(bp => bp.PeriodBilling).WithMany();
+        builder.OwnsOne(bp => bp.BillingItems);
     }
 }

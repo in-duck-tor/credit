@@ -7,12 +7,18 @@ public interface IPrioritizedBillingItem : IBillingItem
     PaymentPriority Priority { get; }
 }
 
-public class PrioritizedBillingItem(PaymentPriority priority, BillingItem billingItem) : IPrioritizedBillingItem
+public class PrioritizedBillingItem : IPrioritizedBillingItem
 {
-    private BillingItem BillingItem { get; } = billingItem;
+    public PrioritizedBillingItem(PaymentPriority priority, BillingItem billingItem)
+    {
+        BillingItem = billingItem;
+        Priority = priority;
+    }
+
+    private BillingItem BillingItem { get; }
 
     public decimal Amount => BillingItem.Amount;
-    public PaymentPriority Priority { get; } = priority;
+    public PaymentPriority Priority { get; }
 
     public void ChangeAmount(decimal amount)
     {
@@ -21,8 +27,7 @@ public class PrioritizedBillingItem(PaymentPriority priority, BillingItem billin
     }
 }
 
-public class PeriodPaymentBillingItem(PeriodBilling periodBilling, PrioritizedBillingItem prioritizedBillingItem)
-    : IPrioritizedBillingItem
+public class PeriodPaymentBillingItem : IPrioritizedBillingItem
 {
     public PeriodPaymentBillingItem(PeriodBilling periodBilling, PaymentPriority priority, BillingItem billingItem) :
         this(
@@ -30,8 +35,14 @@ public class PeriodPaymentBillingItem(PeriodBilling periodBilling, PrioritizedBi
     {
     }
 
-    private PrioritizedBillingItem PrioritizedBillingItem { get; } = prioritizedBillingItem;
-    private PeriodBilling PeriodBilling { get; } = periodBilling;
+    public PeriodPaymentBillingItem(PeriodBilling periodBilling, PrioritizedBillingItem prioritizedBillingItem)
+    {
+        PrioritizedBillingItem = prioritizedBillingItem;
+        PeriodBilling = periodBilling;
+    }
+
+    private PrioritizedBillingItem PrioritizedBillingItem { get; }
+    private PeriodBilling PeriodBilling { get; }
 
     public decimal Amount => PrioritizedBillingItem.Amount;
     public PaymentPriority Priority => PrioritizedBillingItem.Priority;
@@ -44,11 +55,16 @@ public class PeriodPaymentBillingItem(PeriodBilling periodBilling, PrioritizedBi
     }
 }
 
-public class ChainedPrioritizedItem(IPrioritizedBillingItem prioritizedBillingItem, IBillingItem chainedItem)
-    : IPrioritizedBillingItem
+public class ChainedPrioritizedItem : IPrioritizedBillingItem
 {
-    private IPrioritizedBillingItem PrioritizedBillingItem { get; } = prioritizedBillingItem;
-    private IBillingItem ChainedItem { get; } = chainedItem;
+    public ChainedPrioritizedItem(IPrioritizedBillingItem prioritizedBillingItem, IBillingItem chainedItem)
+    {
+        PrioritizedBillingItem = prioritizedBillingItem;
+        ChainedItem = chainedItem;
+    }
+
+    private IPrioritizedBillingItem PrioritizedBillingItem { get; }
+    private IBillingItem ChainedItem { get; }
 
     public decimal Amount => PrioritizedBillingItem.Amount;
     public PaymentPriority Priority => PrioritizedBillingItem.Priority;

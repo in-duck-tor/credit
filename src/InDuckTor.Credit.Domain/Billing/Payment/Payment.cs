@@ -9,24 +9,28 @@ public class Payment
 {
     public long Id { get; set; }
 
+    public required long LoanId { get; init; }
+    public required long ClientId { get; init; }
+
     /// <summary>
     /// <b>Сумма Платежа</b>
     /// </summary>
-    public required decimal PaymentAmount { get; set; }
+    public required decimal PaymentAmount { get; init; }
 
     /// <summary>
     /// Распределение Платежа формируется в конце Расчётного Периода
     /// </summary>
-    public PaymentDistribution PaymentDistribution { get; set; } = new();
+    public PaymentDistribution PaymentDistribution { get; init; } = new();
 
     public bool IsDistributed => PaymentDistribution.IsDistributed;
+
+    public decimal PaymentToDistribute => PaymentAmount - PaymentDistribution.CalculateDistributedPaymentSum();
 
     public void DistributeOn(PeriodBilling periodBilling, List<IPrioritizedBillingItem> items)
     {
         if (periodBilling.IsPaid) return;
 
-        var distributedPayment = PaymentDistribution.CalculateDistributedPaymentSum();
-        var paymentToDistribute = PaymentAmount - distributedPayment;
+        var paymentToDistribute = PaymentToDistribute;
         if (paymentToDistribute == 0) return;
 
         var paymentBillingItems = GetOrCreatePaymentBillingItems(periodBilling);
@@ -79,6 +83,8 @@ public class Payment
 /// </summary>
 public class PaymentDistribution
 {
+    public long Id { get; set; }
+
     public bool IsDistributed { get; set; }
 
     /// <summary>

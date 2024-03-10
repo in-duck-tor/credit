@@ -1,5 +1,7 @@
+using InDuckTor.Credit.Feature.Feature.Application;
 using InDuckTor.Credit.WebApi.Contracts.Bodies;
 using InDuckTor.Credit.WebApi.Contracts.Responses;
+using InDuckTor.Shared.Strategies;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,12 +16,7 @@ public static class LoanApplicationEndpoints
             .WithOpenApi();
 
         groupBuilder.MapPost("", CreateApplication)
-            .WithDescription("Создаёт заявку на получение кредита")
-            .WithOpenApi(o =>
-            {
-                o.Deprecated = true;
-                return o;
-            });
+            .WithDescription("Создаёт заявку на получение кредита");
 
 
         groupBuilder.MapPost("/approve", ApproveApplication)
@@ -41,10 +38,13 @@ public static class LoanApplicationEndpoints
         return builder;
     }
 
-    private static Ok<LoanApplicationResponse> CreateApplication(
-        [FromBody] CreateLoanApplicationBody body)
+    private static async Task<Ok<LoanApplicationResponse>> CreateApplication(
+        [FromBody] ApplicationInfo body,
+        [FromServices] IExecutor<ISubmitApplication, ApplicationInfo, LoanApplicationResponse> submitApplication,
+        CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var result = await submitApplication.Execute(body, cancellationToken);
+        return TypedResults.Ok(result);
     }
 
     private static Ok ApproveApplication([FromQuery] long applicationId)

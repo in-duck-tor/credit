@@ -1,6 +1,6 @@
 namespace InDuckTor.Credit.Domain.LoanManagement.PaymentCalculator;
 
-class AnnuityPaymentCalculator : IPaymentCalculator
+public class AnnuityPaymentCalculator : IPaymentCalculator
 {
     private readonly InterestCalculator _interestCalculator = new();
 

@@ -1,21 +1,19 @@
-using InDuckTor.Credit.Domain.LoanManagement;
+using InDuckTor.Credit.Domain.Exceptions;
 using InDuckTor.Credit.Feature.Feature.Common;
+using InDuckTor.Credit.Feature.Feature.Program.Model;
+using InDuckTor.Credit.Infrastructure.Config.Database;
 using InDuckTor.Shared.Strategies;
+using Microsoft.EntityFrameworkCore;
 
 namespace InDuckTor.Credit.Feature.Feature.Program;
 
-public record LoanProgramShortResponse(
-    decimal InterestRate,
-    PaymentType PaymentType,
-    PaymentScheduleType PaymentScheduleType);
+public interface IGetAllLoanPrograms : IQuery<Unit, List<LoanProgramResponse>>;
 
-public interface IGetAllLoanPrograms : IQuery<Unit, LoanProgramShortResponse>;
-
-public class GetAllLoanPrograms : IGetAllLoanPrograms
+public class GetAllLoanPrograms(LoanDbContext context) : IGetAllLoanPrograms
 {
-    public Task<LoanProgramShortResponse> Execute(Unit input, CancellationToken ct)
+    public async Task<List<LoanProgramResponse>> Execute(Unit input, CancellationToken ct)
     {
-        // todo:
-        throw new NotImplementedException();
+        var loanPrograms = await context.LoanPrograms.ToListAsync(cancellationToken: ct);
+        return loanPrograms.Select(LoanProgramResponse.FromLoanProgram).ToList();
     }
 }

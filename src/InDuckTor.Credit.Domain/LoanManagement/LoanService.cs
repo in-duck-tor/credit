@@ -1,41 +1,58 @@
-using InDuckTor.Credit.Domain.Billing;
 using InDuckTor.Credit.Domain.Billing.Period;
+using InDuckTor.Credit.Domain.LoanManagement.Accounts;
 using InDuckTor.Credit.Domain.LoanManagement.Interactor;
 using InDuckTor.Credit.Domain.LoanManagement.Models;
 
 namespace InDuckTor.Credit.Domain.LoanManagement;
 
+public interface ILoanService
+{
+    public Task<Loan> CreateLoan(NewLoan newLoan);
+    public Task Tick(Loan loan);
+}
+
 public class LoanService(
     ILoanInteractorFactory loanInteractorFactory,
-    ILoanRepository loanRepository,
-    PeriodService periodService)
+    PeriodService periodService,
+    IAccountsRepository accountsRepository) : ILoanService
 {
-    public Loan CreateLoan(NewLoan newLoan)
+    public async Task<Loan> CreateLoan(NewLoan newLoan)
     {
-        // newLoan.LoanTerm;
+        var loan = Loan.CreateNewLoan(newLoan);
 
-        var loanInteractor = loanInteractorFactory.FromNewLoan(newLoan);
+        // Создание ссудного счёта для Кредита
+        var newAccount = CreateNewLoanAccount(loan);
 
-        // 1. Присвоить поля из LoanInfo в соответствующие им поля из Loan
-        // 2. Определить планируемое количетсво платежей
-        // 3. Привязать кредит к расчётному счёту
-        // 4. Создать ссудный счёт
+        var accountNumber = await accountsRepository.CreateAccount(newAccount);
+        // todo: Также здесь должен происходить перевод денег на счёт заёмщика, но я хз, как это сделать
+        loan.AttachLoanAccount(accountNumber);
 
-
-        return default!;
+        return loan;
     }
 
-    public void CloseBillingPeriod(long loanId)
-    {
-        var loan = loanRepository.GetById(loanId);
-        var periodBilling = periodService.CloseBillingPeriod(loan.LoanBilling, DateTime.Now);
-    }
-
-    public void Tick(Loan loan)
+    public async Task Tick(Loan loan)
     {
         var interactor = loanInteractorFactory.FromLoan(loan);
 
         interactor.AccrueInterestOnCurrentPeriod();
         interactor.ChargePenalty();
+
+        if (interactor.Loan.IsCurrentPeriodEnded())
+        {
+            await CloseBillingPeriod(interactor);
+        }
+    }
+
+    private static NewAccount CreateNewLoanAccount(Loan loan)
+    {
+        var extendedLoanTerm = loan.PeriodDuration() * (loan.PlannedPaymentsNumber + 2);
+        var plannedExpiration = DateTime.UtcNow.Add(extendedLoanTerm);
+        return new NewAccount(loan.ClientId, AccountType.Loan, "RUB", plannedExpiration);
+    }
+
+    private async Task CloseBillingPeriod(LoanInteractor interactor)
+    {
+        var periodBilling = await periodService.CloseBillingPeriod(interactor.Loan.LoanBilling, DateTime.UtcNow);
+        if (interactor.IsRepaid) interactor.CloseLoan();
     }
 }

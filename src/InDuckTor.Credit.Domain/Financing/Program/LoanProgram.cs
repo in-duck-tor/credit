@@ -26,8 +26,20 @@ public class LoanProgram
     /// <summary>
     /// <b>Процентная Ставка</b> по программе кредитования
     /// </summary>
-    public decimal InterestRate { get; set; }
+    public required decimal InterestRate { get; set; }
 
-    public PaymentType PaymentType { get; set; }
-    public PaymentScheduleType PaymentScheduleType { get; set; }
+    public required PaymentType PaymentType { get; set; }
+
+    // Календарный пока не работает(
+    public required PaymentScheduleType PaymentScheduleType { get; set; }
+
+    // /// <summary>
+    // /// <b>Календарный день начала и конца Расчётного Периода</b>
+    // /// </summary>
+    // public int? PeriodDay { get; set; }
+
+    /// <summary>
+    /// <b>Длительность Расчётного Периода</b>. 
+    /// </summary>
+    public TimeSpan? PeriodInterval { get; set; }
 }

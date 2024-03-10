@@ -2,6 +2,6 @@ namespace InDuckTor.Credit.Domain.Financing.Application;
 
 public interface IApplicationRepository
 {
-    LoanApplication GetApplicationById(long id);
+    Task<LoanApplication?> GetApplicationById(long id);
     
 }

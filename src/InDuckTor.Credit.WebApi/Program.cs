@@ -1,48 +1,39 @@
-using System.Text.Json.Serialization;
-using InDuckTor.Credit.Domain.Financing.Application;
+using System.Reflection;
+using Hangfire;
+using Hangfire.PostgreSql;
+using InDuckTor.Credit.Feature.Feature.Application;
+using InDuckTor.Credit.Feature.Feature.Loan;
+using InDuckTor.Credit.Infrastructure.Config.Database;
 using InDuckTor.Credit.WebApi.Configuration;
 using InDuckTor.Credit.WebApi.Endpoints;
 using InDuckTor.Shared.Configuration;
 using InDuckTor.Shared.Security;
-using Microsoft.AspNetCore.Http.Json;
+using InDuckTor.Shared.Strategies;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var services = builder.Services;
 
-builder.Services.AddProblemDetails().ConfigureJsonConverters();
-builder.Services.Configure<JsonOptions>(cfg =>
-{
-    var enumMemberConverter = new JsonStringEnumMemberConverter(
-        new JsonStringEnumMemberConverterOptions(),
-        typeof(ApplicationState));
-    cfg.SerializerOptions.Converters.Add(enumMemberConverter);
-});
+services.AddStrategiesFrom(Assembly.GetAssembly(typeof(ISubmitApplication))!)
+    .ConfigureDomain(builder.Configuration);
 
-builder.Services.AddInDuckTorSecurity();
+services.AddProblemDetails().ConfigureJsonConverters();
+
+services.AddLoanDbContext(builder.Configuration);
+services.AddInDuckTorSecurity();
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-// builder.Services.AddHangfire(cfg => cfg
-//     .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
-//     .UseSimpleAssemblyNameTypeSerializer()
-//     .UseRecommendedSerializerSettings()
-//     .UsePostgreSqlStorage(configure =>
-//     {
-//         // configure.UseNpgsqlConnection();
-//     })
-// );
-
-// Add the processing server as IHostedService
-// builder.Services.AddHangfireServer();
-
-builder.Services.AddSwaggerGen(cfg =>
+services.AddEndpointsApiExplorer();
+services.AddSwaggerGen(cfg =>
 {
     cfg.ConfigureJwtAuth();
     cfg.ConfigureEnumMemberValues();
 });
+
+services.ConfigureHangfire(builder.Configuration);
+
+services.ConfigureRefit(builder.Configuration);
 
 var app = builder.Build();
 
@@ -53,10 +44,15 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseHangfireDashboard();
+
 app.AddLoanApplicationEndpoints()
     .AddLoanProgramEndpoints()
-    .AddLoanEndpoints();
+    .AddLoanEndpoints()
+    .MapHangfireDashboard();
 
 app.UseHttpsRedirection();
+
+app.RunBackgroundJobs();
 
 app.Run();

@@ -1,4 +1,6 @@
+using InDuckTor.Credit.Infrastructure.Config.Database;
 using InDuckTor.Shared.Strategies;
+using Microsoft.EntityFrameworkCore;
 
 namespace InDuckTor.Credit.Feature.Feature.Loan;
 
@@ -8,17 +10,27 @@ public record LoanInfoShortResponse(
     int PlannedPaymentsNumber,
     decimal LoanBody,
     decimal LoanDebt,
-    decimal Penalty);
-
-public interface IGetAllClientLoans : IQuery<long, LoanInfoShortResponse>;
-
-public class GetAllClientLoans : IGetAllClientLoans
+    decimal Penalty)
 {
-    /// <param name="input">Id клиента, для которого выполняется запрос</param>
-    /// <param name="ct"></param>
-    public Task<LoanInfoShortResponse> Execute(long input, CancellationToken ct)
+    public static LoanInfoShortResponse FromLoan(Domain.LoanManagement.Loan loan) => new(
+        loan.BorrowedAmount,
+        loan.InterestRate,
+        loan.PlannedPaymentsNumber,
+        loan.LoanBilling.LoanBody,
+        loan.LoanBilling.LoanDebt,
+        loan.LoanBilling.Penalty
+    );
+}
+
+public interface IGetAllClientLoans : IQuery<long, List<LoanInfoShortResponse>>;
+
+public class GetAllClientLoans(LoanDbContext context) : IGetAllClientLoans
+{
+    public async Task<List<LoanInfoShortResponse>> Execute(long clientId, CancellationToken ct)
     {
-        // todo
-        throw new NotImplementedException();
+        return await context.Loans
+            .Where(loan => loan.ClientId == clientId)
+            .Select(loan => LoanInfoShortResponse.FromLoan(loan))
+            .ToListAsync(cancellationToken: ct);
     }
 }

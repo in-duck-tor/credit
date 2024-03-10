@@ -9,6 +9,11 @@ namespace InDuckTor.Credit.Domain.Billing.Period;
 /// <param name="chargingForServices">Сумма стоимости дополнительных Услуг</param>
 public class BillingItems(decimal interest, decimal loanBodyPayoff, decimal chargingForServices)
 {
+    private BillingItems() : this(0, 0, 0)
+    {
+        // EF Core((((
+    }
+    
     public BillingItem Interest { get; private set; } = interest;
     public BillingItem LoanBodyPayoff { get; private set; } = loanBodyPayoff;
     public BillingItem ChargingForServices { get; private set; } = chargingForServices;

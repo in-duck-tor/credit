@@ -2,5 +2,5 @@ namespace InDuckTor.Credit.Domain.Billing.Period;
 
 public interface IPeriodBillingRepository
 {
-    List<PeriodBilling> GetAllUnpaidPeriodBillings(long loanId);
+    Task<List<PeriodBilling>> GetAllUnpaidPeriodBillings(long loanId);
 }

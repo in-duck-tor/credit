@@ -13,17 +13,17 @@ public readonly struct Unit : IEquatable<Unit>, IComparable<Unit>
 
     public bool Equals(Unit other) => true;
 
-    public static bool operator ==(Unit lhs, Unit rhs) => true;
+    public static bool operator ==(Unit a, Unit b) => true;
 
-    public static bool operator !=(Unit lhs, Unit rhs) => false;
+    public static bool operator !=(Unit a, Unit b) => false;
 
-    public static bool operator >(Unit lhs, Unit rhs) => false;
+    public static bool operator >(Unit a, Unit b) => false;
 
-    public static bool operator >=(Unit lhs, Unit rhs) => true;
+    public static bool operator >=(Unit a, Unit b) => true;
 
-    public static bool operator <(Unit lhs, Unit rhs) => false;
+    public static bool operator <(Unit a, Unit b) => false;
 
-    public static bool operator <=(Unit lhs, Unit rhs) => true;
+    public static bool operator <=(Unit a, Unit b) => true;
 
     public int CompareTo(Unit other) => 0;
 

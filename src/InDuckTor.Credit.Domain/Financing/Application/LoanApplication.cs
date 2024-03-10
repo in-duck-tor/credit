@@ -16,14 +16,23 @@ public class LoanApplication
     /// <b>Программа Кредитования</b>. Программа не меняется после того, как пользователь отправил заявку.
     /// Можно только отменить текущую заявку и отправить новую
     /// </summary>
+    // public long LoanProgramId { get; set; }
     public required LoanProgram LoanProgram { get; init; }
 
+    /// <summary>
+    /// <b>Сумма Займа</b>
+    /// </summary>
     public required decimal BorrowedAmount { get; set; }
 
     /// <summary>
-    /// <b>Срок взятия кредита</b>. Отсчёт от Рождения Христа
+    /// <b>Срок взятия кредита</b>
     /// </summary>
     public required TimeSpan LoanTerm { get; set; }
+
+    /// <summary>
+    /// <b>Счёт Клиента</b>
+    /// </summary>
+    public required string ClientAccountNumber { get; set; }
 
     public required ApplicationState ApplicationState { get; set; }
 
@@ -40,5 +49,6 @@ public enum ApplicationState
 {
     [EnumMember(Value = "rejected")] Rejected,
     [EnumMember(Value = "pending")] Pending,
-    [EnumMember(Value = "approved")] Approved
+    [EnumMember(Value = "approved")] Approved,
+    [EnumMember(Value = "processed")] Processed
 }
