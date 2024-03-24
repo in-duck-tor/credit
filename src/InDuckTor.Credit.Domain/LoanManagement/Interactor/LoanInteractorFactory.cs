@@ -11,16 +11,16 @@ public class LoanInteractorFactory : ILoanInteractorFactory
 {
     public LoanInteractor FromLoan(Loan loan)
     {
-        return new LoanInteractor(loan, GetPaymentSystem(loan.PaymentType));
+        return new LoanInteractor(loan, GetPaymentSystem(loan));
     }
 
-    private static IPaymentCalculator GetPaymentSystem(PaymentType paymentType)
+    private static IPaymentCalculator GetPaymentSystem(Loan loan)
     {
-        return paymentType switch
+        return loan.PaymentType switch
         {
-            PaymentType.Annuity => new AnnuityPaymentCalculator(),
-            PaymentType.Differentiated => new DifferentiatedPaymentCalculator(),
-            _ => throw new ArgumentOutOfRangeException(nameof(paymentType))
+            PaymentType.Annuity => new AnnuityPaymentCalculator(loan),
+            PaymentType.Differentiated => new DifferentiatedPaymentCalculator(loan),
+            _ => throw new ArgumentOutOfRangeException(nameof(loan.PaymentType))
         };
     }
 }

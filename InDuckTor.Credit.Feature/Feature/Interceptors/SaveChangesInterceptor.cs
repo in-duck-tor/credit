@@ -1,7 +1,7 @@
 using InDuckTor.Credit.Infrastructure.Config.Database;
 using InDuckTor.Shared.Strategies;
 
-namespace InDuckTor.Credit.Feature.Feature.Common;
+namespace InDuckTor.Credit.Feature.Feature.Interceptors;
 
 public class SaveChangesInterceptor<T1, T2>(LoanDbContext context) : IStrategyInterceptor<T1, T2>
 {

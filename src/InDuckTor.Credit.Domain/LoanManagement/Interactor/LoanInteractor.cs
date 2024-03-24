@@ -12,7 +12,7 @@ public class LoanInteractor(Loan loan, IPaymentCalculator paymentCalculator)
 
     public void AccrueInterestOnCurrentPeriod()
     {
-        PaymentCalculator.AccrueInterestOnCurrentPeriod(Loan);
+        PaymentCalculator.AccrueInterestOnCurrentPeriod();
     }
 
     public void ChargePenalty()

@@ -1,11 +1,10 @@
 using InDuckTor.Credit.Domain.Billing.Payment;
 using InDuckTor.Credit.Domain.Billing.Payment.Models;
-using InDuckTor.Credit.Domain.Exceptions;
-using InDuckTor.Credit.Feature.Feature.Common;
+using InDuckTor.Credit.Feature.Feature.Interceptors;
 using InDuckTor.Credit.Feature.Feature.Loan.Payment.Models;
 using InDuckTor.Credit.Infrastructure.Config.Database;
+using InDuckTor.Shared.Models;
 using InDuckTor.Shared.Strategies;
-using Microsoft.EntityFrameworkCore;
 
 namespace InDuckTor.Credit.Feature.Feature.Loan.Payment;
 
@@ -16,13 +15,8 @@ public class SubmitRegularPayment(LoanDbContext context, IPaymentService payment
 {
     public async Task<Unit> Execute(PaymentSubmission input, CancellationToken ct)
     {
-        var isExists = await context.Loans.AnyAsync(
-            loan => loan.Id == input.LoanId && loan.ClientId == input.ClientId, ct
-        );
-
-        if (!isExists) throw new Errors.Loan.NotFound("Loan with specified client id and loan id is not found");
-
-        var payment = paymentService.CreatePayment(new NewPayment(input.LoanId, input.ClientId, input.Payment));
+        var newPayment = new NewPayment(input.LoanId, input.ClientId, input.Payment);
+        var payment = await paymentService.CreatePayment(newPayment, ct);
         context.Payments.Add(payment);
 
         await paymentService.DistributePayment(payment);

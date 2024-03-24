@@ -24,6 +24,9 @@ public static class Errors
             }
         }
 
+        public class CannotProvideLoan(string message = "Cannot provide a loan to a client")
+            : BusinessLogicException(message);
+
         public class InvalidLoanStateChange(string message) : BusinessLogicException(message);
     }
 

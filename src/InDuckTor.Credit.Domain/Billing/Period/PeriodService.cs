@@ -14,7 +14,6 @@ public class PeriodService(IPaymentService paymentService)
     /// <param name="closingTime">Действительное время закрытия Расчётного Периода</param>
     internal async Task<PeriodBilling> CloseBillingPeriod(LoanBilling loanBilling, DateTime closingTime)
     {
-        // todo: добавить проверку времени окончания Расчётного Периода
         var periodBilling = CreatePeriodBilling(loanBilling, closingTime);
         await paymentService.DistributePaymentsForNewPeriod(loanBilling.Loan.Id, periodBilling);
         loanBilling.AddNewPeriodAndRecalculate(periodBilling);

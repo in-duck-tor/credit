@@ -8,6 +8,6 @@ public class PeriodBillingRepository(LoanDbContext context) : IPeriodBillingRepo
 {
     public async Task<List<PeriodBilling>> GetAllUnpaidPeriodBillings(long loanId)
     {
-        return await context.PeriodsBillings.Where(pb => pb.IsPaid == false).ToListAsync();
+        return await context.PeriodsBillings.Where(pb => pb.RemainingPayoff != null).ToListAsync();
     }
 }

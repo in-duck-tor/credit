@@ -1,7 +1,6 @@
-using InDuckTor.Credit.Domain.Exceptions;
-using InDuckTor.Credit.Feature.Feature.Common;
 using InDuckTor.Credit.Feature.Feature.Program.Model;
 using InDuckTor.Credit.Infrastructure.Config.Database;
+using InDuckTor.Shared.Models;
 using InDuckTor.Shared.Strategies;
 using Microsoft.EntityFrameworkCore;
 

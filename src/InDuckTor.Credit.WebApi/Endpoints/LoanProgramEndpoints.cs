@@ -1,7 +1,6 @@
-using InDuckTor.Credit.Feature.Feature.Common;
 using InDuckTor.Credit.Feature.Feature.Program;
 using InDuckTor.Credit.Feature.Feature.Program.Model;
-using InDuckTor.Credit.WebApi.Contracts.Responses;
+using InDuckTor.Shared.Models;
 using InDuckTor.Shared.Strategies;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -26,23 +25,21 @@ public static class LoanProgramEndpoints
     }
 
     // В будущем добавить эндпонит на получение доступных только клиенту программ кредитования
-    private static async Task<Ok<List<LoanProgramResponse>>> GetAllLoanPrograms(
+    private static async Task<IResult> GetAllLoanPrograms(
         [FromServices] IExecutor<IGetAllLoanPrograms, Unit, List<LoanProgramResponse>> getAllLoanPrograms,
         CancellationToken cancellationToken
     )
     {
-        var result = await getAllLoanPrograms.Execute(default, cancellationToken);
-        return TypedResults.Ok(result);
+        return TypedResults.Ok(await getAllLoanPrograms.Execute(default, cancellationToken));
     }
 
     // Здесь должна быть проверка прав вызывающего
-    private static async Task<Ok<LoanProgramResponse>> CreateLoanProgram(
+    private static async Task<IResult> CreateLoanProgram(
         [FromBody] LoanProgramInfo body,
         [FromServices] IExecutor<ICreateLoanProgram, LoanProgramInfo, LoanProgramResponse> createLoanProgram,
         CancellationToken cancellationToken
     )
     {
-        var result = await createLoanProgram.Execute(body, cancellationToken);
-        return TypedResults.Ok(result);
+        return TypedResults.Ok(await createLoanProgram.Execute(body, cancellationToken));
     }
 }

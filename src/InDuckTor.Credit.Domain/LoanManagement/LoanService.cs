@@ -1,4 +1,5 @@
 using InDuckTor.Credit.Domain.Billing.Period;
+using InDuckTor.Credit.Domain.Exceptions;
 using InDuckTor.Credit.Domain.LoanManagement.Accounts;
 using InDuckTor.Credit.Domain.LoanManagement.Interactor;
 using InDuckTor.Credit.Domain.LoanManagement.Models;
@@ -8,7 +9,9 @@ namespace InDuckTor.Credit.Domain.LoanManagement;
 public interface ILoanService
 {
     public Task<Loan> CreateLoan(NewLoan newLoan);
+
     public Task Tick(Loan loan);
+    // public Task PayRegularly(long loanId, );
 }
 
 public class LoanService(
@@ -18,14 +21,29 @@ public class LoanService(
 {
     public async Task<Loan> CreateLoan(NewLoan newLoan)
     {
+        // Резервация запрошенных клиентом денег для дальнейшего перевода на расчётный счёт
+        var newTransaction = new NewTransaction(
+            newLoan.BorrowedAmount,
+            new TransactionAccountInfo(newLoan.ClientAccountNumber, BankCodes.InDuckTorCode),
+            // todo: заменить на главную кассу кредитной организации
+            null
+        );
+        var transactionInfo = await accountsRepository.InitiateTransaction(newTransaction);
+
+        if (transactionInfo.Status == TransactionStatus.Canceled) throw new Errors.Loan.CannotProvideLoan();
+
         var loan = Loan.CreateNewLoan(newLoan);
 
         // Создание ссудного счёта для Кредита
         var newAccount = CreateNewLoanAccount(loan);
-
-        var accountNumber = await accountsRepository.CreateAccount(newAccount);
-        // todo: Также здесь должен происходить перевод денег на счёт заёмщика, но я хз, как это сделать
+        var accountNumber = await accountsRepository.CreateLoanAccount(newAccount);
         loan.AttachLoanAccount(accountNumber);
+
+        // Перевод долговой суммы на расчётный счёт
+        await accountsRepository.CommitTransaction(transactionInfo.Id);
+
+        loan.State = LoanState.Active;
+        loan.LoanBilling.StartNewPeriod();
 
         return loan;
     }
@@ -52,7 +70,7 @@ public class LoanService(
 
     private async Task CloseBillingPeriod(LoanInteractor interactor)
     {
-        var periodBilling = await periodService.CloseBillingPeriod(interactor.Loan.LoanBilling, DateTime.UtcNow);
+        await periodService.CloseBillingPeriod(interactor.Loan.LoanBilling, DateTime.UtcNow);
         if (interactor.IsRepaid) interactor.CloseLoan();
     }
 }

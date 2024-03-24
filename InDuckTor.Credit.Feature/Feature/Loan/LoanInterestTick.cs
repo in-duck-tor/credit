@@ -1,6 +1,7 @@
 using InDuckTor.Credit.Domain.LoanManagement;
-using InDuckTor.Credit.Feature.Feature.Common;
+using InDuckTor.Credit.Feature.Feature.Interceptors;
 using InDuckTor.Credit.Infrastructure.Config.Database;
+using InDuckTor.Shared.Models;
 using InDuckTor.Shared.Strategies;
 using Microsoft.EntityFrameworkCore;
 

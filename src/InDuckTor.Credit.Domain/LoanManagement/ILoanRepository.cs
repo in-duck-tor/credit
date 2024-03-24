@@ -2,5 +2,5 @@ namespace InDuckTor.Credit.Domain.LoanManagement;
 
 public interface ILoanRepository
 {
-    Task<Loan?> GetById(long loanId);
+    Task<bool> IsExists(long loanId, long clientId, CancellationToken cancellationToken);
 }

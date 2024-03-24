@@ -10,7 +10,10 @@
   <ItemGroup>
     <PackageReference Include="Hangfire.AspNetCore" Version="1.8.11" />
     <PackageReference Include="Hangfire.PostgreSql" Version="1.20.8" />
-    <PackageReference Include="InDuckTor.Shared" Version="1.1.4" />
+    <PackageReference Include="InDuckTor.Shared" Version="2.1.4" />
+    <PackageReference Include="inducktor.shared.configuration.swagger" Version="2.0.0" />
+    <PackageReference Include="inducktor.shared.security.http" Version="2.0.0" />
+    <PackageReference Include="InDuckTor.Shared.Security.Jwt" Version="2.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.3">
       <PrivateAssets>all</PrivateAssets>
@@ -28,10 +31,6 @@
     <ProjectReference Include="..\..\InDuckTor.Credit.Feature\InDuckTor.Credit.Feature.csproj" />
     <ProjectReference Include="..\..\InDuckTor.Credit.Infrastructure\InDuckTor.Credit.Infrastructure.csproj" />
     <ProjectReference Include="..\InDuckTor.Credit.Domain\InDuckTor.Credit.Domain.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Contracts\Dtos\" />
   </ItemGroup>
 
 </Project>

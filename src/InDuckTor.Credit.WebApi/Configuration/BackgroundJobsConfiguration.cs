@@ -1,27 +1,28 @@
 using Hangfire;
 using Hangfire.PostgreSql;
 using InDuckTor.Credit.Feature.Feature.Loan;
+using InDuckTor.Shared.Models;
+using InDuckTor.Shared.Strategies;
 
 namespace InDuckTor.Credit.WebApi.Configuration;
 
 public static class BackgroundJobsConfiguration
 {
-    public static void RunBackgroundJobs(this WebApplication app)
+    public static void UseHangfire(this WebApplication app)
     {
-        var loanInterestTick = app.Services.GetRequiredService<ILoanInterestTick>();
-        AddLoanTickJob(loanInterestTick);
+        GlobalConfiguration.Configuration.UseActivator(new HangfireActivator(app.Services));
+
+        app.UseHangfireDashboard();
+        app.MapHangfireDashboard();
+
+        AddLoanTickJob();
     }
 
-    private static void PopolnitSchetKlienta()
-    {
-        
-    }
-    
-    private static void AddLoanTickJob(ILoanInterestTick loanInterestTick)
+    private static void AddLoanTickJob()
     {
         RecurringJob.AddOrUpdate(
             "loanTick",
-            () => loanInterestTick.Execute(default, default),
+            (IExecutor<ILoanInterestTick, Unit, Unit> loanInterestTick) => loanInterestTick.Execute(default, default),
             Cron.Minutely);
     }
 
@@ -41,5 +42,20 @@ public static class BackgroundJobsConfiguration
         serviceCollection.AddHangfireServer();
 
         return serviceCollection;
+    }
+}
+
+public class HangfireActivator : JobActivator
+{
+    private readonly IServiceProvider _serviceProvider;
+
+    public HangfireActivator(IServiceProvider serviceProvider)
+    {
+        _serviceProvider = serviceProvider;
+    }
+
+    public override object? ActivateJob(Type type)
+    {
+        return _serviceProvider.GetService(type);
     }
 }

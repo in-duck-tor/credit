@@ -1,6 +1,4 @@
 using InDuckTor.Credit.Feature.Feature.Application;
-using InDuckTor.Credit.WebApi.Contracts.Bodies;
-using InDuckTor.Credit.WebApi.Contracts.Responses;
 using InDuckTor.Shared.Strategies;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -17,7 +15,6 @@ public static class LoanApplicationEndpoints
 
         groupBuilder.MapPost("", CreateApplication)
             .WithDescription("Создаёт заявку на получение кредита");
-
 
         groupBuilder.MapPost("/approve", ApproveApplication)
             .WithDescription("Одобрение заявки на получение кредита")

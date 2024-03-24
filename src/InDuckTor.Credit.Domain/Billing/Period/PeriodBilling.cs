@@ -1,3 +1,5 @@
+using System.Linq.Expressions;
+
 namespace InDuckTor.Credit.Domain.Billing.Period;
 
 /// <summary>

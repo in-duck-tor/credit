@@ -90,9 +90,30 @@ public class LoanBilling
     {
         var now = DateTime.UtcNow;
         if (PeriodAccruals != null && PeriodAccruals.PeriodEndDate > now) return;
+        // todo: переделать на generic получение
+        ArgumentNullException.ThrowIfNull(Loan.PeriodInterval);
 
         var startDate = new DateTime(now.Year, now.Month, now.Day, now.Hour, 0, 0, now.Kind);
-        var endDate = now + Loan.PeriodInterval;
+        var endDate = now + Loan.PeriodInterval.Value;
+
+        if (Loan.PaymentType == PaymentType.Annuity)
+        {
+            PeriodAccruals = new PeriodAccruals
+            {
+                PeriodStartDate = startDate,
+                PeriodEndDate = endDate,
+                OneTimePayment = 0
+            };
+        }
+        else
+        {
+            PeriodAccruals = new PeriodAccruals
+            {
+                PeriodStartDate = startDate,
+                PeriodEndDate = endDate,
+                OneTimePayment = 0
+            };
+        }
     }
 
     public DateTime CurrentPeriodStartDate()
@@ -102,6 +123,18 @@ public class LoanBilling
     }
 }
 
+/*
+ * Аннуитетный:
+ * OneTimePayment фиксирована
+ * InterestAccrual увеличивается
+ * LoanBodyPayoff уменьшается
+ *
+ * Дифференцированный:
+ * OneTimePayment увеличивается
+ * InterestAccrual увеличивается
+ * LoanBodyPayoff фиксирована
+ */
+
 /// <summary>
 /// <b>Начисления за Период</b>
 /// </summary>
@@ -110,27 +143,27 @@ public class PeriodAccruals
     /// <summary>
     /// <b>Дата начала периода</b>
     /// </summary>
-    public DateTime PeriodStartDate { get; set; }
+    public required DateTime PeriodStartDate { get; set; }
 
     /// <summary>
     /// <b>Дата конца периода</b>
     /// </summary>
-    public DateTime PeriodEndDate { get; set; }
+    public required DateTime PeriodEndDate { get; set; }
 
     /// <summary>
     /// <b>Начисление процентов</b>
     /// </summary>
-    public decimal InterestAccrual { get; set; }
+    public decimal InterestAccrual { get; set; } = 0;
 
     /// <summary>
     /// <b>Выплата по Телу Кредита</b>
     /// </summary>
-    public decimal LoanBodyPayoff { get; set; }
+    public decimal LoanBodyPayoff { get; set; } = 0;
 
     /// <summary>
     /// <b>Начисление платы за Услуги</b>
     /// </summary>
-    public decimal ChargingForServices { get; set; }
+    public decimal ChargingForServices { get; set; } = 0;
 
     /// <summary>
     /// <b>Сумма единовременного Платежа</b>

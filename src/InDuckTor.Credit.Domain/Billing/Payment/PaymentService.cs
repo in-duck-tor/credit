@@ -1,6 +1,7 @@
 using InDuckTor.Credit.Domain.Billing.Payment.Models;
 using InDuckTor.Credit.Domain.Billing.Period;
 using InDuckTor.Credit.Domain.Exceptions;
+using InDuckTor.Credit.Domain.LoanManagement;
 
 namespace InDuckTor.Credit.Domain.Billing.Payment;
 
@@ -19,12 +20,13 @@ public interface IPaymentService
     /// <param name="payment">Платёж, который нужно распределить</param>
     Task DistributePayment(Payment payment);
 
-    Payment CreatePayment(NewPayment newPayment);
+    Task<Payment> CreatePayment(NewPayment newPayment, CancellationToken cancellationToken);
 }
 
 public class PaymentService(
     IPaymentRepository paymentRepository,
-    IPeriodBillingRepository periodBillingRepository) : IPaymentService
+    IPeriodBillingRepository periodBillingRepository,
+    ILoanRepository loanRepository) : IPaymentService
 {
     // В идеале, т.к. в реальном банке расчётные периоды закрываются каждый день, при закрытии нового периода создавать
     // таску, которая позже будет обработана. При этом, чтобы не начислить лишние проценты и не приписать долг в период,
@@ -63,8 +65,14 @@ public class PaymentService(
         DistributePayments(unpaidPeriods[0].LoanBilling, [payment], unpaidPeriods);
     }
 
-    public Payment CreatePayment(NewPayment newPayment)
+    public async Task<Payment> CreatePayment(NewPayment newPayment, CancellationToken cancellationToken)
     {
+        var isExists = await loanRepository.IsExists(newPayment.LoanId,
+            newPayment.ClientId,
+            cancellationToken);
+
+        if (!isExists) throw new Errors.Loan.NotFound("Loan with specified client id and loan id is not found");
+
         return new Payment
         {
             LoanId = newPayment.LoanId,

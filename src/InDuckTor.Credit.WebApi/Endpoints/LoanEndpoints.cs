@@ -1,5 +1,9 @@
+using InDuckTor.Credit.Feature.Feature.Loan;
+using InDuckTor.Credit.Feature.Feature.Loan.Payment;
+using InDuckTor.Credit.Feature.Feature.Loan.Payment.Models;
 using InDuckTor.Credit.WebApi.Contracts.Bodies;
-using InDuckTor.Credit.WebApi.Contracts.Responses;
+using InDuckTor.Shared.Models;
+using InDuckTor.Shared.Strategies;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,20 +17,10 @@ public static class LoanEndpoints
             .WithTags("Loan")
             .WithOpenApi();
 
-        // 1. Оплата текущего расчётного периода вместе с задолжностями и штрафами
-        // 2. Досрочное погашение
-        // 3. Получение размера платежа для погашения текущего расчётного периода вместе с задолжностями (сущность, с категориями)
-        // 4. Получение информации о кредите
-
         groupBuilder.MapPost("/{loanId:long}/pay/regularly", PayRegularly)
             .WithSummary("Внесение средств для оплаты кредита в регулярном порядке")
             .WithDescription("Если платёж клиента превысит сумму задолженностей и " +
-                             "платежа по текущему расчётному периоду, операция отклонится")
-            .WithOpenApi(o =>
-            {
-                o.Deprecated = true;
-                return o;
-            });
+                             "платежа по текущему расчётному периоду, операция отклонится");
 
         groupBuilder.MapPost("/{loanId:long}/pay/early", PayoffEarly)
             .WithSummary("Внесение средств для досрочной оплаты кредита")
@@ -39,45 +33,59 @@ public static class LoanEndpoints
             });
 
         groupBuilder.MapGet("/{loanId:long}", GetLoanInfoForClient)
-            .WithSummary("Получение клиентом информации о конкретном кредите")
-            .WithOpenApi(o =>
-            {
-                o.Deprecated = true;
-                return o;
-            });
+            .WithSummary("Получение клиентом информации о конкретном кредите");
 
         groupBuilder.MapGet("/client/{clientId:long}", GetAllClientLoans)
-            .WithSummary("Получение информации обо всех кредитах пользователя")
-            .WithOpenApi(o =>
-            {
-                o.Deprecated = true;
-                return o;
-            });
+            .WithSummary("Получение информации обо всех кредитах пользователя");
 
         return builder;
     }
 
-    private static Results<Ok, BadRequest, ForbidHttpResult> PayRegularly(
+    [ProducesResponseType(404)]
+    [ProducesResponseType(403)]
+    [ProducesResponseType(401)]
+    [ProducesResponseType(204)]
+    private static async Task<IResult> PayRegularly(
         [FromRoute] long loanId,
-        [FromBody] RegularPayBody body)
+        [FromBody] RegularPayBody body,
+        [FromServices] IExecutor<ISubmitRegularPayment, PaymentSubmission, Unit> submitRegularPayment,
+        CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var submission = new PaymentSubmission(loanId, body.ClientId, body.Payment);
+        await submitRegularPayment.Execute(submission, cancellationToken);
+        return TypedResults.NoContent();
     }
 
+    [ProducesResponseType(404)]
+    [ProducesResponseType(403)]
+    [ProducesResponseType(401)]
+    [ProducesResponseType(204)]
     private static Results<Ok, BadRequest, ForbidHttpResult> PayoffEarly(
         [FromRoute] long loanId,
-        [FromBody] EarlyPayoffBody body)
+        [FromBody] EarlyPayoffBody body,
+        CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
 
-    private static Ok<LoanInfoResponse> GetLoanInfoForClient([FromRoute] long loanId)
+    [ProducesResponseType(404)]
+    [ProducesResponseType(403)]
+    [ProducesResponseType(200)]
+    private static async Task<IResult> GetLoanInfoForClient(
+        [FromRoute] long loanId,
+        [FromServices] IExecutor<IGetLoanInfo, long, LoanInfoResponse> getLoanInfo,
+        CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        return TypedResults.Ok(await getLoanInfo.Execute(loanId, cancellationToken));
     }
 
-    private static Ok<LoanInfoShortResponse> GetAllClientLoans([FromRoute] long clientId)
+    [ProducesResponseType(404)]
+    [ProducesResponseType(200)]
+    private static async Task<IResult> GetAllClientLoans(
+        [FromRoute] long clientId,
+        [FromServices] IExecutor<IGetAllClientLoans, long, List<LoanInfoShortResponse>> getAllClientLoans,
+        CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        return TypedResults.Ok(await getAllClientLoans.Execute(clientId, cancellationToken));
     }
 }

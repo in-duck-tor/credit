@@ -46,7 +46,7 @@ public class Loan
     /// <summary>
     /// <b>Дата начисления кредитных средств</b>
     /// </summary>
-    public DateTime? BorrowingDate { get; private set; }
+    public DateTime? BorrowingDate { get; set; }
 
     /// <summary>
     /// <b>Статус Кредита</b>
@@ -100,7 +100,6 @@ public class Loan
     public void AttachLoanAccount(string accountNumber)
     {
         LoanAccountNumber = accountNumber;
-        BorrowingDate = DateTime.UtcNow;
     }
 
     public TimeSpan PeriodDuration()
@@ -223,5 +222,4 @@ public enum PaymentScheduleType
     [EnumMember(Value = "interval")] Interval
 }
 
-// todo: Перевод средств на расчётный счёт
 // todo: Досрочное погашение

@@ -2,7 +2,6 @@ using InDuckTor.Credit.Domain.Exceptions;
 using InDuckTor.Credit.Domain.LoanManagement;
 using InDuckTor.Credit.Infrastructure.Config.Database;
 using InDuckTor.Shared.Strategies;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace InDuckTor.Credit.Feature.Feature.Loan;
 
@@ -33,7 +32,7 @@ public record LoanInfoResponse(
 /// <summary>
 /// Возвращает информацию о Кредите
 /// </summary>
-public interface IGetLoanInfo : IQuery<long, LoanInfoResponse>;
+public interface IGetLoanInfo : ICommand<long, LoanInfoResponse>;
 
 public class GetLoanInfo(LoanDbContext context) : IGetLoanInfo
 {

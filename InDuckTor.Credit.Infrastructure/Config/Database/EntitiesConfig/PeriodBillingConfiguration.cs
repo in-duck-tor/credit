@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using InDuckTor.Credit.Domain.Billing.Period;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

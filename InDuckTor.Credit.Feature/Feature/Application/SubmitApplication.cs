@@ -1,7 +1,6 @@
 using InDuckTor.Credit.Domain.Financing.Application;
 using InDuckTor.Credit.Domain.Financing.Application.Model;
-using InDuckTor.Credit.Domain.LoanManagement;
-using InDuckTor.Credit.Feature.Feature.Common;
+using InDuckTor.Credit.Feature.Feature.Interceptors;
 using InDuckTor.Credit.Feature.Feature.Loan;
 using InDuckTor.Credit.Feature.Feature.Program.Model;
 using InDuckTor.Credit.Infrastructure.Config.Database;
@@ -52,14 +51,7 @@ public class SubmitApplication(
 {
     public async Task<LoanApplicationResponse> Execute(ApplicationInfo info, CancellationToken ct)
     {
-        var newApplication = new NewApplication
-        {
-            ClientId = info.ClientId,
-            LoanProgramId = info.LoanProgramId,
-            BorrowedAmount = info.BorrowedAmount,
-            LoanTerm = TimeSpan.FromSeconds(info.LoanTerm),
-            ClientAccountNumber = info.ClientAccountNumber,
-        };
+        var newApplication = FromInfo(info);
 
         var application = await applicationService.CreateApplication(newApplication);
         context.LoanApplications.Add(application);
@@ -68,5 +60,19 @@ public class SubmitApplication(
         var loan = await createLoan.Execute(application, ct);
 
         return LoanApplicationResponse.FromApplication(application, loan);
+    }
+
+    private static NewApplication FromInfo(ApplicationInfo info) => new()
+    {
+        ClientId = info.ClientId,
+        LoanProgramId = info.LoanProgramId,
+        BorrowedAmount = info.BorrowedAmount,
+        LoanTerm = TimeSpan.FromSeconds(info.LoanTerm),
+        ClientAccountNumber = info.ClientAccountNumber
+    };
+
+    private void EnqueueTransferMoneyJob(Domain.LoanManagement.Loan loan)
+    {
+        // BackgroundJob.Enqueue();
     }
 }

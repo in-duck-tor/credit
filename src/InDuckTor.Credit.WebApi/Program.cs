@@ -1,13 +1,12 @@
 using System.Reflection;
 using Hangfire;
-using Hangfire.PostgreSql;
 using InDuckTor.Credit.Feature.Feature.Application;
-using InDuckTor.Credit.Feature.Feature.Loan;
 using InDuckTor.Credit.Infrastructure.Config.Database;
 using InDuckTor.Credit.WebApi.Configuration;
 using InDuckTor.Credit.WebApi.Endpoints;
-using InDuckTor.Shared.Configuration;
-using InDuckTor.Shared.Security;
+using InDuckTor.Shared.Configuration.Swagger;
+using InDuckTor.Shared.Security.Http;
+using InDuckTor.Shared.Security.Jwt;
 using InDuckTor.Shared.Strategies;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +19,9 @@ services.AddStrategiesFrom(Assembly.GetAssembly(typeof(ISubmitApplication))!)
 services.AddProblemDetails().ConfigureJsonConverters();
 
 services.AddLoanDbContext(builder.Configuration);
+
+services.AddInDuckTorAuthentication(builder.Configuration.GetSection(nameof(JwtSettings)));
+services.AddAuthorization();
 services.AddInDuckTorSecurity();
 
 // Add services to the container.
@@ -44,15 +46,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHangfireDashboard();
-
 app.AddLoanApplicationEndpoints()
     .AddLoanProgramEndpoints()
-    .AddLoanEndpoints()
-    .MapHangfireDashboard();
+    .AddLoanEndpoints();
 
+app.UseInDuckTorSecurity();
 app.UseHttpsRedirection();
 
-app.RunBackgroundJobs();
+app.UseHangfire();
 
 app.Run();

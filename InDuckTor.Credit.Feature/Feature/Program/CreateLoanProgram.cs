@@ -1,7 +1,7 @@
 using InDuckTor.Credit.Domain.Financing.Program;
 using InDuckTor.Credit.Domain.Financing.Program.Model;
 using InDuckTor.Credit.Domain.LoanManagement;
-using InDuckTor.Credit.Feature.Feature.Common;
+using InDuckTor.Credit.Feature.Feature.Interceptors;
 using InDuckTor.Credit.Feature.Feature.Program.Model;
 using InDuckTor.Credit.Infrastructure.Config.Database;
 using InDuckTor.Shared.Strategies;
