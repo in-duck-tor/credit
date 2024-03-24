@@ -4,15 +4,15 @@ namespace InDuckTor.Credit.Domain.LoanManagement.Accounts;
 
 public class TransactionInfo
 {
-    public TransactionInfo(long id, TransactionType type, TransactionStatus status, DateTime autoCloseAt)
+    public TransactionInfo(long transactionId, TransactionType type, TransactionStatus status, DateTime autoCloseAt)
     {
-        Id = id;
+        TransactionId = transactionId;
         Type = type;
         Status = status;
         AutoCloseAt = autoCloseAt;
     }
 
-    public long Id { get; set; }
+    public long TransactionId { get; set; }
     public TransactionType Type { get; set; }
     public TransactionStatus Status { get; set; }
     public DateTime AutoCloseAt { get; set; }

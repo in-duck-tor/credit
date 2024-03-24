@@ -5,13 +5,15 @@ namespace InDuckTor.Credit.Feature.Repository;
 
 public record AccountInfoResponse(string AccountNumber);
 
+public record NewTransactionRequest(NewTransaction NewTransaction);
+
 public interface IAccountsRepositoryRefit
 {
     [Post("/api/v1/bank/account")]
     Task<AccountInfoResponse> CreateLoanAccount([Body] NewAccount newAccount, [Authorize] string token);
 
     [Post("/api/v1/bank/account/transaction")]
-    Task<TransactionInfo> InitiateTransaction([Body] NewTransaction newTransaction, [Authorize] string token);
+    Task<TransactionInfo> InitiateTransaction([Body] NewTransactionRequest newTransactionRequest, [Authorize] string token);
 
     [Post("/api/v1/bank/account/transaction/{transactionId}/commit")]
     Task CommitTransaction([AliasAs("transactionId")] long transactionId, [Authorize] string token);
@@ -34,7 +36,9 @@ public class AccountsRepository(
 
     public async Task<TransactionInfo> InitiateTransaction(NewTransaction newTransaction)
     {
-        return await accountsRepositoryRefit.InitiateTransaction(newTransaction, config.Token);
+        return await accountsRepositoryRefit.InitiateTransaction(
+            new NewTransactionRequest(newTransaction),
+            config.Token);
     }
 
     public async Task CommitTransaction(long transactionId)

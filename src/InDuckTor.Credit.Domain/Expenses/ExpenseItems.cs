@@ -1,4 +1,4 @@
-namespace InDuckTor.Credit.Domain.Billing.Period;
+namespace InDuckTor.Credit.Domain.Expenses;
 
 // todo: Переименовать сущность или сделать иерархию, чтобы были сущности статей расчёта, которые относятся только к периоду или ко всему кредиту в целом.
 /// <summary>
@@ -7,16 +7,16 @@ namespace InDuckTor.Credit.Domain.Billing.Period;
 /// <param name="interest">Сумма процентов</param>
 /// <param name="loanBodyPayoff">Остаток Платежа в пользу тела долга</param>
 /// <param name="chargingForServices">Сумма стоимости дополнительных Услуг</param>
-public class BillingItems(decimal interest, decimal loanBodyPayoff, decimal chargingForServices)
+public class ExpenseItems(decimal interest, decimal loanBodyPayoff, decimal chargingForServices)
 {
-    private BillingItems() : this(0, 0, 0)
+    private ExpenseItems() : this(0, 0, 0)
     {
         // EF Core((((
     }
     
-    public BillingItem Interest { get; private set; } = interest;
-    public BillingItem LoanBodyPayoff { get; private set; } = loanBodyPayoff;
-    public BillingItem ChargingForServices { get; private set; } = chargingForServices;
+    public ExpenseItem Interest { get; private set; } = interest;
+    public ExpenseItem LoanBodyPayoff { get; private set; } = loanBodyPayoff;
+    public ExpenseItem ChargingForServices { get; private set; } = chargingForServices;
 
     public void ChangeInterest(decimal amount)
     {
@@ -38,8 +38,8 @@ public class BillingItems(decimal interest, decimal loanBodyPayoff, decimal char
 
     public decimal GetTotalSum() => Interest + LoanBodyPayoff + ChargingForServices;
 
-    public BillingItems DeepCopy()
+    public ExpenseItems DeepCopy()
     {
-        return new BillingItems(Interest, LoanBodyPayoff, ChargingForServices);
+        return new ExpenseItems(Interest, LoanBodyPayoff, ChargingForServices);
     }
 }

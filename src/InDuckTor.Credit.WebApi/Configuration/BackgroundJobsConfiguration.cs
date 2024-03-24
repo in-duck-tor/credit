@@ -15,7 +15,7 @@ public static class BackgroundJobsConfiguration
         app.UseHangfireDashboard();
         app.MapHangfireDashboard();
 
-        AddLoanTickJob();
+        // AddLoanTickJob();
     }
 
     private static void AddLoanTickJob()
@@ -26,6 +26,8 @@ public static class BackgroundJobsConfiguration
             Cron.Minutely);
     }
 
+    // todo: Переделать на воркера, который будет смотерть отметки времени "следующее начисление процентов".
+    //  Отметки будут устанавливаться в домене. Также для масштабирования нужно добавить изоляцию строк
     public static IServiceCollection ConfigureHangfire(this IServiceCollection serviceCollection,
         IConfiguration configuration)
     {

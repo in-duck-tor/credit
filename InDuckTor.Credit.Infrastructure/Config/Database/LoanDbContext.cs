@@ -2,6 +2,7 @@ using System.Reflection;
 using InDuckTor.Credit.Domain.Billing;
 using InDuckTor.Credit.Domain.Billing.Payment;
 using InDuckTor.Credit.Domain.Billing.Period;
+using InDuckTor.Credit.Domain.Expenses;
 using InDuckTor.Credit.Domain.Financing.Application;
 using InDuckTor.Credit.Domain.Financing.Program;
 using InDuckTor.Credit.Domain.LoanManagement;
@@ -20,7 +21,6 @@ public class LoanDbContext : DbContext
     }
 
     public virtual DbSet<Loan> Loans { get; set; } = null!;
-    public virtual DbSet<LoanBilling> LoanBillings { get; set; } = null!;
     public virtual DbSet<PeriodBilling> PeriodsBillings { get; set; } = null!;
     public virtual DbSet<Payment> Payments { get; set; } = null!;
     public virtual DbSet<LoanApplication> LoanApplications { get; set; } = null!;
@@ -39,6 +39,6 @@ public class LoanDbContext : DbContext
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
         base.ConfigureConventions(configurationBuilder);
-        configurationBuilder.Properties<BillingItem>().HaveConversion<BillingItemConverter>();
+        configurationBuilder.Properties<ExpenseItem>().HaveConversion<BillingItemConverter>();
     }
 }

@@ -1,4 +1,6 @@
 using System.Linq.Expressions;
+using InDuckTor.Credit.Domain.Expenses;
+using InDuckTor.Credit.Domain.LoanManagement;
 
 namespace InDuckTor.Credit.Domain.Billing.Period;
 
@@ -9,7 +11,7 @@ public class PeriodBilling
 {
     public long Id { get; set; }
 
-    public required LoanBilling LoanBilling { get; init; }
+    public required Loan Loan { get; init; }
 
     /// <summary>
     /// <b>Дата начала периода</b>
@@ -29,7 +31,7 @@ public class PeriodBilling
     /// <summary>
     /// <b>Статьи расчёта</b>
     /// </summary>
-    public required BillingItems BillingItems { get; init; }
+    public required ExpenseItems ExpenseItems { get; init; }
 
     /// <summary>
     /// Имел ли пользователь задолженность по Периоду, к которому относится этот Расчёт
@@ -42,30 +44,18 @@ public class PeriodBilling
     /// если <see cref="IsDebt"/> равен <c>false</c>, оставшуюся плату за Расчётный Период.</para>
     /// <para>Если плата за Расчётный Период полностью внесена, значение поля будет <c>null</c>.</para>
     /// </summary>
-    public BillingItems? RemainingPayoff { get; set; }
+    public ExpenseItems? RemainingPayoff { get; set; }
 
     public bool IsPaid => RemainingPayoff == null;
 
     public decimal TotalRemainingPayment =>
         GetRemainingInterest() + GetRemainingLoanBodyPayoff() + GetRemainingChargingForServices();
 
-    public decimal GetRemainingInterest()
-    {
-        ArgumentNullException.ThrowIfNull(RemainingPayoff);
-        return RemainingPayoff.Interest;
-    }
+    public decimal GetRemainingInterest() => RemainingPayoff?.Interest ?? 0;
 
-    public decimal GetRemainingLoanBodyPayoff()
-    {
-        ArgumentNullException.ThrowIfNull(RemainingPayoff);
-        return RemainingPayoff.LoanBodyPayoff;
-    }
+    public decimal GetRemainingLoanBodyPayoff() => RemainingPayoff?.LoanBodyPayoff ?? 0;
 
-    public decimal GetRemainingChargingForServices()
-    {
-        ArgumentNullException.ThrowIfNull(RemainingPayoff);
-        return RemainingPayoff.ChargingForServices;
-    }
+    public decimal GetRemainingChargingForServices() => RemainingPayoff?.ChargingForServices ?? 0;
 
-    public decimal GetPaidLoanBody() => BillingItems.LoanBodyPayoff - GetRemainingLoanBodyPayoff();
+    public decimal GetPaidLoanBody() => ExpenseItems.LoanBodyPayoff - GetRemainingLoanBodyPayoff();
 }

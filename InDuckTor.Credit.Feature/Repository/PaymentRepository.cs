@@ -8,6 +8,6 @@ public class PaymentRepository(LoanDbContext context) : IPaymentRepository
 {
     public async Task<List<Payment>> GetAllNonDistributedPayments(long loanId)
     {
-        return await context.Payments.Where(payment => payment.IsDistributed == false).ToListAsync();
+        return await context.Payments.Where(payment => !payment.PaymentDistribution.IsDistributed).ToListAsync();
     }
 }

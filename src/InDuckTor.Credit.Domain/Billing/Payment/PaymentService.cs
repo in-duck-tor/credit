@@ -1,3 +1,4 @@
+using InDuckTor.Credit.Domain.Billing.Payment.Extensions;
 using InDuckTor.Credit.Domain.Billing.Payment.Models;
 using InDuckTor.Credit.Domain.Billing.Period;
 using InDuckTor.Credit.Domain.Exceptions;
@@ -41,7 +42,7 @@ public class PaymentService(
     public async Task DistributePaymentsForNewPeriod(long loanId, PeriodBilling periodBilling)
     {
         var payments = await paymentRepository.GetAllNonDistributedPayments(loanId);
-        DistributePayments(periodBilling.LoanBilling, payments, [periodBilling]);
+        DistributePayments(periodBilling.Loan, payments, [periodBilling]);
         if (!periodBilling.IsPaid) periodBilling.IsDebt = true;
     }
 
@@ -62,7 +63,7 @@ public class PaymentService(
         if (payment.PaymentToDistribute > totalRemainingPayment)
             throw Errors.Payment.InvalidRegularPaymentAmount.TooMuch();
 
-        DistributePayments(unpaidPeriods[0].LoanBilling, [payment], unpaidPeriods);
+        DistributePayments(unpaidPeriods[0].Loan, [payment], unpaidPeriods);
     }
 
     public async Task<Payment> CreatePayment(NewPayment newPayment, CancellationToken cancellationToken)
@@ -85,24 +86,28 @@ public class PaymentService(
     /// <summary>
     /// Распределяет Платежи по Расчётам за Период, а также изменяет значения по кредиту у: тела долга, задолженностей и штрафов 
     /// </summary>
-    /// <param name="loanBilling">Расчёт по Кредиту</param>
+    /// <param name="loan">Кредит</param>
     /// <param name="payments">Платежи для распределения</param>
     /// <param name="unpaidPeriods">Расчёты за Период, по которым происходит распределение</param>
     /// <exception cref="Errors.Payment.InvalidPaymentDistributionException">Выбрасывается, если после распределения,
     /// один из платежей не распределён полностью и период, по которому он распределялся, не оплачен</exception>
-    private void DistributePayments(LoanBilling loanBilling, List<Payment> payments, List<PeriodBilling> unpaidPeriods)
+    private static void DistributePayments(Loan loan, List<Payment> payments, List<PeriodBilling> unpaidPeriods)
     {
         if (payments.Count == 0) return;
         if (unpaidPeriods.Count == 0) return;
 
         using var paymentEnumerator = payments.GetEnumerator();
+        paymentEnumerator.MoveNext();
         var payment = paymentEnumerator.Current;
+        
         using var periodEnumerator = unpaidPeriods.GetEnumerator();
+        periodEnumerator.MoveNext();
         var period = periodEnumerator.Current;
 
+        var paymentItems = loan.GetBillingItemsForPeriod(period);
+        
         while (true)
         {
-            var paymentItems = loanBilling.GetBillingItemsForPeriod(period);
             payment.DistributeOn(period, paymentItems);
 
             if (!payment.IsDistributed && !period.IsPaid)
@@ -116,9 +121,10 @@ public class PaymentService(
             }
 
             if (!period.IsPaid) continue;
-
             if (!periodEnumerator.MoveNext()) return;
+            
             period = periodEnumerator.Current;
+            paymentItems = loan.GetBillingItemsForPeriod(period);
         }
     }
 }

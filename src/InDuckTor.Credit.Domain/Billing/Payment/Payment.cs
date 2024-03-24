@@ -1,4 +1,5 @@
 using InDuckTor.Credit.Domain.Billing.Period;
+using InDuckTor.Credit.Domain.Expenses;
 
 namespace InDuckTor.Credit.Domain.Billing.Payment;
 
@@ -26,55 +27,56 @@ public class Payment
 
     public decimal PaymentToDistribute => PaymentAmount - PaymentDistribution.CalculateDistributedPaymentSum();
 
-    public void DistributeOn(PeriodBilling periodBilling, List<IPrioritizedBillingItem> items)
+    public void DistributeOn(PeriodBilling periodBilling, List<IPrioritizedExpenseItem> items)
     {
-        if (periodBilling.IsPaid) return;
+        if (IsDistributed || periodBilling.IsPaid) return;
 
         var paymentToDistribute = PaymentToDistribute;
         if (paymentToDistribute == 0) return;
 
-        var paymentBillingItems = GetOrCreatePaymentBillingItems(periodBilling);
+        var paymentExpenseItems = GetOrCreatePaymentBillingItems(periodBilling);
 
         foreach (var item in items)
         {
             if (periodBilling.IsPaid) continue;
 
-            var min = decimal.Min(paymentToDistribute, periodBilling.GetRemainingInterest());
+            var min = decimal.Min(paymentToDistribute, item.Amount);
             item.ChangeAmount(-min);
             paymentToDistribute -= min;
 
-            // todo: ОТРЕФАКТОРИТЬ!
-            if (item.Priority == PaymentPriority.Penalty)
-            {
-                PaymentDistribution.Penalty?.ChangeAmount(min);
-            }
-
-            paymentBillingItems.ChangeBasedOnPriority(item.Priority, min);
+            IncreasePaymentExpenseItems(paymentExpenseItems, item.Priority, min);
         }
 
         if (paymentToDistribute == 0) PaymentDistribution.IsDistributed = true;
     }
 
-    private BillingItems GetOrCreatePaymentBillingItems(PeriodBilling periodBilling)
+    private void IncreasePaymentExpenseItems(ExpenseItems paymentExpenseItems, PaymentPriority priority, decimal amount)
     {
-        BillingItems paymentBillingItems;
+        // todo: отрефакторить: перенести Penalty в один с paymentExpenseItems список. Для этого можно создать отдельный утилитарный класс PaymentExpenseItems
+        if (priority == PaymentPriority.Penalty) PaymentDistribution.Penalty?.ChangeAmount(amount);
+        else paymentExpenseItems.ChangeBasedOnPriority(priority, amount);
+    }
+
+    private ExpenseItems GetOrCreatePaymentBillingItems(PeriodBilling periodBilling)
+    {
+        ExpenseItems paymentExpenseItems;
         var billingsPayoffs = PaymentDistribution.BillingsPayoffs;
 
         if (billingsPayoffs.Count == 0 || billingsPayoffs.Last().PeriodBilling.Id != periodBilling.Id)
         {
-            paymentBillingItems = new BillingItems(0, 0, 0);
+            paymentExpenseItems = new ExpenseItems(0, 0, 0);
             PaymentDistribution.BillingsPayoffs.Add(new BillingPayoff
             {
                 PeriodBilling = periodBilling,
-                BillingItems = paymentBillingItems
+                ExpenseItems = paymentExpenseItems
             });
         }
         else
         {
-            paymentBillingItems = billingsPayoffs.Last().BillingItems;
+            paymentExpenseItems = billingsPayoffs.Last().ExpenseItems;
         }
 
-        return paymentBillingItems;
+        return paymentExpenseItems;
     }
 }
 
@@ -95,11 +97,11 @@ public class PaymentDistribution
     /// <summary>
     /// Сумма Платежа, распределённая на оплату Штрафа 
     /// </summary>
-    public BillingItem? Penalty { get; set; }
+    public ExpenseItem? Penalty { get; set; }
 
     public decimal CalculateDistributedPaymentSum() => BillingsPayoffs
-        .Select(payoff => payoff.BillingItems.GetTotalSum())
-        .Aggregate((accumulate, periodDistribution) => accumulate + periodDistribution) + Penalty?.Amount ?? 0;
+        .Select(payoff => payoff.ExpenseItems.GetTotalSum())
+        .Aggregate(0m, (accumulate, periodDistribution) => accumulate + periodDistribution) + (Penalty?.Amount ?? 0m);
 }
 
 /// <summary>
@@ -117,5 +119,5 @@ public class BillingPayoff
     /// <summary>
     /// Статьи, по которым распределась часть текущего платежа
     /// </summary>
-    public required BillingItems BillingItems { get; set; }
+    public required ExpenseItems ExpenseItems { get; set; }
 }

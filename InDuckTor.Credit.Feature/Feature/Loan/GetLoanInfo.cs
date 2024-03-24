@@ -23,9 +23,9 @@ public record LoanInfoResponse(
         loan.BorrowingDate,
         loan.PlannedPaymentsNumber,
         loan.PaymentType,
-        loan.LoanBilling.LoanBody,
-        loan.LoanBilling.LoanDebt,
-        loan.LoanBilling.Penalty
+        loan.Body,
+        loan.Debt,
+        loan.Penalty
     );
 }
 

@@ -1,7 +1,6 @@
 using InDuckTor.Credit.Domain.Billing.Period;
 using InDuckTor.Credit.Domain.Exceptions;
 using InDuckTor.Credit.Domain.LoanManagement.Accounts;
-using InDuckTor.Credit.Domain.LoanManagement.Interactor;
 using InDuckTor.Credit.Domain.LoanManagement.Models;
 
 namespace InDuckTor.Credit.Domain.LoanManagement;
@@ -14,10 +13,7 @@ public interface ILoanService
     // public Task PayRegularly(long loanId, );
 }
 
-public class LoanService(
-    ILoanInteractorFactory loanInteractorFactory,
-    PeriodService periodService,
-    IAccountsRepository accountsRepository) : ILoanService
+public class LoanService(PeriodService periodService, IAccountsRepository accountsRepository) : ILoanService
 {
     public async Task<Loan> CreateLoan(NewLoan newLoan)
     {
@@ -25,14 +21,15 @@ public class LoanService(
         var newTransaction = new NewTransaction(
             newLoan.BorrowedAmount,
             new TransactionAccountInfo(newLoan.ClientAccountNumber, BankCodes.InDuckTorCode),
-            // todo: заменить на главную кассу кредитной организации
-            null
+            // todo: заменить на главную кассу кредитной организации (мастер-счёт)
+            null,
+            executeImmediate: true
         );
         var transactionInfo = await accountsRepository.InitiateTransaction(newTransaction);
 
         if (transactionInfo.Status == TransactionStatus.Canceled) throw new Errors.Loan.CannotProvideLoan();
 
-        var loan = Loan.CreateNewLoan(newLoan);
+        var loan = new Loan(newLoan);
 
         // Создание ссудного счёта для Кредита
         var newAccount = CreateNewLoanAccount(loan);
@@ -40,24 +37,21 @@ public class LoanService(
         loan.AttachLoanAccount(accountNumber);
 
         // Перевод долговой суммы на расчётный счёт
-        await accountsRepository.CommitTransaction(transactionInfo.Id);
-
-        loan.State = LoanState.Active;
-        loan.LoanBilling.StartNewPeriod();
+        // await accountsRepository.CommitTransaction(transactionInfo.TransactionId);
+        loan.BorrowingDate = DateTime.UtcNow;
+        loan.ActivateLoan();
 
         return loan;
     }
 
     public async Task Tick(Loan loan)
     {
-        var interactor = loanInteractorFactory.FromLoan(loan);
+        loan.AccrueInterestOnCurrentPeriod();
+        loan.ChargePenalty();
 
-        interactor.AccrueInterestOnCurrentPeriod();
-        interactor.ChargePenalty();
-
-        if (interactor.Loan.IsCurrentPeriodEnded())
+        if (loan.IsCurrentPeriodEnded())
         {
-            await CloseBillingPeriod(interactor);
+            await CloseBillingPeriod(loan);
         }
     }
 
@@ -68,9 +62,12 @@ public class LoanService(
         return new NewAccount(loan.ClientId, AccountType.Loan, "RUB", plannedExpiration);
     }
 
-    private async Task CloseBillingPeriod(LoanInteractor interactor)
+    private async Task CloseBillingPeriod(Loan loan)
     {
-        await periodService.CloseBillingPeriod(interactor.Loan.LoanBilling, DateTime.UtcNow);
-        if (interactor.IsRepaid) interactor.CloseLoan();
+        // todo: Разобраться, почему изменения в платежах не сохраняются (возможно там используется другой DbContext и нужен Unit of Work)
+        var periodBilling = await periodService.CloseBillingPeriod(loan);
+        loan.AddNewPeriodAndRecalculate(periodBilling);
+        if (loan.IsRepaid) loan.CloseLoan();
+        loan.StartNewPeriod();
     }
 }

@@ -11,7 +11,7 @@ public class PeriodBillingConfiguration : IEntityTypeConfiguration<PeriodBilling
     {
         builder.ToTable(nameof(PeriodBilling)).HasKey(l => l.Id);
 
-        builder.ComplexProperty(pb => pb.BillingItems, b => b.IsRequired());
+        builder.ComplexProperty(pb => pb.ExpenseItems, b => b.IsRequired());
         builder.OwnsOne(pb => pb.RemainingPayoff);
     }
 }

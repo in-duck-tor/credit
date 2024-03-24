@@ -11,6 +11,6 @@ public class BillingPayoffConfiguration : IEntityTypeConfiguration<BillingPayoff
         builder.ToTable(nameof(BillingPayoff)).HasKey(l => l.Id);
 
         builder.HasOne(bp => bp.PeriodBilling).WithMany();
-        builder.OwnsOne(bp => bp.BillingItems);
+        builder.OwnsOne(bp => bp.ExpenseItems);
     }
 }

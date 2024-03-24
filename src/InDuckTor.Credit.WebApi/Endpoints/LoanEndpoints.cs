@@ -1,3 +1,4 @@
+using Hangfire;
 using InDuckTor.Credit.Feature.Feature.Loan;
 using InDuckTor.Credit.Feature.Feature.Loan.Payment;
 using InDuckTor.Credit.Feature.Feature.Loan.Payment.Models;
@@ -22,7 +23,7 @@ public static class LoanEndpoints
             .WithDescription("Если платёж клиента превысит сумму задолженностей и " +
                              "платежа по текущему расчётному периоду, операция отклонится");
 
-        groupBuilder.MapPost("/{loanId:long}/pay/early", PayoffEarly)
+        groupBuilder.MapPost("/{loanId:long}/pay/early", PayEarly)
             .WithSummary("Внесение средств для досрочной оплаты кредита")
             .WithDescription("Досрочно можно оплачивать только если успешно внесена " +
                              "оплата за текущий расчётный период. Иначе операция отклонится")
@@ -38,7 +39,17 @@ public static class LoanEndpoints
         groupBuilder.MapGet("/client/{clientId:long}", GetAllClientLoans)
             .WithSummary("Получение информации обо всех кредитах пользователя");
 
+        groupBuilder.MapPost("/tick", TriggerTick)
+            .WithSummary("Вызвать начисление процентов по кредитам, а также закрытие расчётных периодов/кредитов");
+
         return builder;
+    }
+
+    private static NoContent TriggerTick()
+    {
+        BackgroundJob.Enqueue((IExecutor<ILoanInterestTick, Unit, Unit> loanInterestTick) =>
+            loanInterestTick.Execute(default, default));
+        return TypedResults.NoContent();
     }
 
     [ProducesResponseType(404)]
@@ -60,7 +71,7 @@ public static class LoanEndpoints
     [ProducesResponseType(403)]
     [ProducesResponseType(401)]
     [ProducesResponseType(204)]
-    private static Results<Ok, BadRequest, ForbidHttpResult> PayoffEarly(
+    private static Results<Ok, BadRequest, ForbidHttpResult> PayEarly(
         [FromRoute] long loanId,
         [FromBody] EarlyPayoffBody body,
         CancellationToken cancellationToken)

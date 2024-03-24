@@ -24,6 +24,12 @@ public static class Errors
             }
         }
 
+        public class CannotStartNewPeriod(string message) : BusinessLogicException(message)
+        {
+            public static CannotStartNewPeriod NotEndedYet() => new(
+                "You cannot start a new period because the current one has not ended yet");
+        }
+
         public class CannotProvideLoan(string message = "Cannot provide a loan to a client")
             : BusinessLogicException(message);
 

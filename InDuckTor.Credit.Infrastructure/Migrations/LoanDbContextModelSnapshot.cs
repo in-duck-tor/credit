@@ -26,34 +26,6 @@ namespace InDuckTor.Credit.Infrastructure.Migrations
 
             modelBuilder.HasSequence("loan_personal_code_seq");
 
-            modelBuilder.Entity("InDuckTor.Credit.Domain.Billing.LoanBilling", b =>
-                {
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint");
-
-                    b.ComplexProperty<Dictionary<string, object>>("LoanBody", "InDuckTor.Credit.Domain.Billing.LoanBilling.LoanBody#BillingItem", b1 =>
-                        {
-                            b1.Property<decimal>("Amount")
-                                .HasColumnType("numeric");
-                        });
-
-                    b.ComplexProperty<Dictionary<string, object>>("LoanDebt", "InDuckTor.Credit.Domain.Billing.LoanBilling.LoanDebt#BillingItem", b1 =>
-                        {
-                            b1.Property<decimal>("Amount")
-                                .HasColumnType("numeric");
-                        });
-
-                    b.ComplexProperty<Dictionary<string, object>>("Penalty", "InDuckTor.Credit.Domain.Billing.LoanBilling.Penalty#BillingItem", b1 =>
-                        {
-                            b1.Property<decimal>("Amount")
-                                .HasColumnType("numeric");
-                        });
-
-                    b.HasKey("Id");
-
-                    b.ToTable("LoanBilling", "credit");
-                });
-
             modelBuilder.Entity("InDuckTor.Credit.Domain.Billing.Payment.BillingPayoff", b =>
                 {
                     b.Property<long>("Id")
@@ -130,7 +102,7 @@ namespace InDuckTor.Credit.Infrastructure.Migrations
                     b.Property<bool>("IsDebt")
                         .HasColumnType("boolean");
 
-                    b.Property<long>("LoanBillingId")
+                    b.Property<long>("LoanId")
                         .HasColumnType("bigint");
 
                     b.Property<decimal>("OneTimePayment")
@@ -142,7 +114,7 @@ namespace InDuckTor.Credit.Infrastructure.Migrations
                     b.Property<DateTime>("PeriodStartDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.ComplexProperty<Dictionary<string, object>>("BillingItems", "InDuckTor.Credit.Domain.Billing.Period.PeriodBilling.BillingItems#BillingItems", b1 =>
+                    b.ComplexProperty<Dictionary<string, object>>("ExpenseItems", "InDuckTor.Credit.Domain.Billing.Period.PeriodBilling.ExpenseItems#ExpenseItems", b1 =>
                         {
                             b1.IsRequired();
 
@@ -158,7 +130,7 @@ namespace InDuckTor.Credit.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("LoanBillingId");
+                    b.HasIndex("LoanId");
 
                     b.ToTable("PeriodBilling", "credit");
                 });
@@ -253,7 +225,6 @@ namespace InDuckTor.Credit.Infrastructure.Migrations
                         .HasColumnType("numeric");
 
                     b.Property<string>("LoanAccountNumber")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("PaymentScheduleType")
@@ -271,53 +242,27 @@ namespace InDuckTor.Credit.Infrastructure.Migrations
                     b.Property<int>("State")
                         .HasColumnType("integer");
 
+                    b.ComplexProperty<Dictionary<string, object>>("Body", "InDuckTor.Credit.Domain.LoanManagement.Loan.Body#ExpenseItem", b1 =>
+                        {
+                            b1.Property<decimal>("Amount")
+                                .HasColumnType("numeric");
+                        });
+
+                    b.ComplexProperty<Dictionary<string, object>>("Debt", "InDuckTor.Credit.Domain.LoanManagement.Loan.Debt#ExpenseItem", b1 =>
+                        {
+                            b1.Property<decimal>("Amount")
+                                .HasColumnType("numeric");
+                        });
+
+                    b.ComplexProperty<Dictionary<string, object>>("Penalty", "InDuckTor.Credit.Domain.LoanManagement.Loan.Penalty#ExpenseItem", b1 =>
+                        {
+                            b1.Property<decimal>("Amount")
+                                .HasColumnType("numeric");
+                        });
+
                     b.HasKey("Id");
 
                     b.ToTable("Loan", "credit");
-                });
-
-            modelBuilder.Entity("InDuckTor.Credit.Domain.Billing.LoanBilling", b =>
-                {
-                    b.HasOne("InDuckTor.Credit.Domain.LoanManagement.Loan", "Loan")
-                        .WithOne("LoanBilling")
-                        .HasForeignKey("InDuckTor.Credit.Domain.Billing.LoanBilling", "Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.OwnsOne("InDuckTor.Credit.Domain.Billing.PeriodAccruals", "PeriodAccruals", b1 =>
-                        {
-                            b1.Property<long>("LoanBillingId")
-                                .HasColumnType("bigint");
-
-                            b1.Property<decimal>("ChargingForServices")
-                                .HasColumnType("numeric");
-
-                            b1.Property<decimal>("InterestAccrual")
-                                .HasColumnType("numeric");
-
-                            b1.Property<decimal>("LoanBodyPayoff")
-                                .HasColumnType("numeric");
-
-                            b1.Property<decimal>("OneTimePayment")
-                                .HasColumnType("numeric");
-
-                            b1.Property<DateTime>("PeriodEndDate")
-                                .HasColumnType("timestamp with time zone");
-
-                            b1.Property<DateTime>("PeriodStartDate")
-                                .HasColumnType("timestamp with time zone");
-
-                            b1.HasKey("LoanBillingId");
-
-                            b1.ToTable("LoanBilling", "credit");
-
-                            b1.WithOwner()
-                                .HasForeignKey("LoanBillingId");
-                        });
-
-                    b.Navigation("Loan");
-
-                    b.Navigation("PeriodAccruals");
                 });
 
             modelBuilder.Entity("InDuckTor.Credit.Domain.Billing.Payment.BillingPayoff", b =>
@@ -332,7 +277,7 @@ namespace InDuckTor.Credit.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsOne("InDuckTor.Credit.Domain.Billing.Period.BillingItems", "BillingItems", b1 =>
+                    b.OwnsOne("InDuckTor.Credit.Domain.Expenses.ExpenseItems", "ExpenseItems", b1 =>
                         {
                             b1.Property<long>("BillingPayoffId")
                                 .HasColumnType("bigint");
@@ -354,7 +299,7 @@ namespace InDuckTor.Credit.Infrastructure.Migrations
                                 .HasForeignKey("BillingPayoffId");
                         });
 
-                    b.Navigation("BillingItems")
+                    b.Navigation("ExpenseItems")
                         .IsRequired();
 
                     b.Navigation("PeriodBilling");
@@ -380,13 +325,13 @@ namespace InDuckTor.Credit.Infrastructure.Migrations
 
             modelBuilder.Entity("InDuckTor.Credit.Domain.Billing.Period.PeriodBilling", b =>
                 {
-                    b.HasOne("InDuckTor.Credit.Domain.Billing.LoanBilling", "LoanBilling")
+                    b.HasOne("InDuckTor.Credit.Domain.LoanManagement.Loan", "Loan")
                         .WithMany("PeriodsBillings")
-                        .HasForeignKey("LoanBillingId")
+                        .HasForeignKey("LoanId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsOne("InDuckTor.Credit.Domain.Billing.Period.BillingItems", "RemainingPayoff", b1 =>
+                    b.OwnsOne("InDuckTor.Credit.Domain.Expenses.ExpenseItems", "RemainingPayoff", b1 =>
                         {
                             b1.Property<long>("PeriodBillingId")
                                 .HasColumnType("bigint");
@@ -408,7 +353,7 @@ namespace InDuckTor.Credit.Infrastructure.Migrations
                                 .HasForeignKey("PeriodBillingId");
                         });
 
-                    b.Navigation("LoanBilling");
+                    b.Navigation("Loan");
 
                     b.Navigation("RemainingPayoff");
                 });
@@ -424,9 +369,40 @@ namespace InDuckTor.Credit.Infrastructure.Migrations
                     b.Navigation("LoanProgram");
                 });
 
-            modelBuilder.Entity("InDuckTor.Credit.Domain.Billing.LoanBilling", b =>
+            modelBuilder.Entity("InDuckTor.Credit.Domain.LoanManagement.Loan", b =>
                 {
-                    b.Navigation("PeriodsBillings");
+                    b.OwnsOne("InDuckTor.Credit.Domain.LoanManagement.PeriodAccruals", "PeriodAccruals", b1 =>
+                        {
+                            b1.Property<long>("LoanId")
+                                .HasColumnType("bigint");
+
+                            b1.Property<decimal>("ChargingForServices")
+                                .HasColumnType("numeric");
+
+                            b1.Property<decimal>("InterestAccrual")
+                                .HasColumnType("numeric");
+
+                            b1.Property<decimal>("LoanBodyPayoff")
+                                .HasColumnType("numeric");
+
+                            b1.Property<decimal>("OneTimePayment")
+                                .HasColumnType("numeric");
+
+                            b1.Property<DateTime>("PeriodEndDate")
+                                .HasColumnType("timestamp with time zone");
+
+                            b1.Property<DateTime>("PeriodStartDate")
+                                .HasColumnType("timestamp with time zone");
+
+                            b1.HasKey("LoanId");
+
+                            b1.ToTable("Loan", "credit");
+
+                            b1.WithOwner()
+                                .HasForeignKey("LoanId");
+                        });
+
+                    b.Navigation("PeriodAccruals");
                 });
 
             modelBuilder.Entity("InDuckTor.Credit.Domain.Billing.Payment.Payment", b =>
@@ -442,8 +418,7 @@ namespace InDuckTor.Credit.Infrastructure.Migrations
 
             modelBuilder.Entity("InDuckTor.Credit.Domain.LoanManagement.Loan", b =>
                 {
-                    b.Navigation("LoanBilling")
-                        .IsRequired();
+                    b.Navigation("PeriodsBillings");
                 });
 #pragma warning restore 612, 618
         }

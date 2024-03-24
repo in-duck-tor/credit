@@ -5,5 +5,6 @@ namespace InDuckTor.Credit.Domain.LoanManagement.PaymentCalculator;
 // 3. Рассчитать данные текущего Расчётного Периода
 public interface IPaymentCalculator
 {
+    void StartNewPeriod();
     void AccrueInterestOnCurrentPeriod();
 }

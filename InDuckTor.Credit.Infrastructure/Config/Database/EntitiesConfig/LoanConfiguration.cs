@@ -10,11 +10,11 @@ public class LoanConfiguration : IEntityTypeConfiguration<Loan>
     public void Configure(EntityTypeBuilder<Loan> builder)
     {
         builder.ToTable(nameof(Loan)).HasKey(l => l.Id);
+        
+        builder.ComplexProperty(lb => lb.Body, bi => bi.IsRequired());
+        builder.ComplexProperty(lb => lb.Debt, bi => bi.IsRequired());
+        builder.ComplexProperty(lb => lb.Penalty, bi => bi.IsRequired());
 
-        builder
-            .HasOne(l => l.LoanBilling)
-            .WithOne(lb => lb.Loan)
-            .HasForeignKey<LoanBilling>(l => l.Id)
-            .IsRequired();
+        builder.OwnsOne(lb => lb.PeriodAccruals);
     }
 }

@@ -1,47 +1,71 @@
 ﻿using System.Runtime.Serialization;
-using InDuckTor.Credit.Domain.Billing;
+using InDuckTor.Credit.Domain.Billing.Period;
+using InDuckTor.Credit.Domain.Exceptions;
+using InDuckTor.Credit.Domain.Expenses;
 using InDuckTor.Credit.Domain.LoanManagement.Models;
+using InDuckTor.Credit.Domain.LoanManagement.PaymentCalculator;
 
 namespace InDuckTor.Credit.Domain.LoanManagement;
 
-// todo: Переделать на конструктор, чтобы использовать приватные сеттеры
 public class Loan
 {
+    private const int DaysInRegularYear = 365;
+    private const int DaysInLeapYear = 364;
+
     public static TimeSpan InterestAccrualFrequency { get; } = new(0, 1, 0);
+
+    public Loan()
+    {
+        // EF Core constructor
+        _paymentCalculator = InitPaymentCalculator();
+    }
+
+    public Loan(NewLoan newLoan)
+    {
+        ClientId = newLoan.ClientId;
+        ClientAccountNumber = newLoan.ClientAccountNumber;
+        BorrowedAmount = newLoan.BorrowedAmount;
+        InterestRate = newLoan.InterestRate;
+        PaymentType = newLoan.PaymentType;
+        PaymentScheduleType = newLoan.PaymentScheduleType;
+        PeriodInterval = newLoan.PeriodInterval;
+        ApprovalDate = newLoan.ApprovalDate;
+
+        State = LoanState.Approved;
+        PlannedPaymentsNumber = CalculatePaymentsNumber(newLoan);
+        Body = newLoan.BorrowedAmount;
+
+        _paymentCalculator = InitPaymentCalculator();
+    }
 
     public long Id { get; set; }
 
-    public long ClientId { get; set; }
+    public long ClientId { get; init; }
 
     /// <summary>
     /// <b>Ссудный счёт</b>
     /// </summary>
-    public string LoanAccountNumber { get; private set; }
+    public string? LoanAccountNumber { get; private set; }
 
     /// <summary>
     /// <b>Счёт Клиента</b>
     /// </summary>
-    public required string ClientAccountNumber { get; set; }
+    public string ClientAccountNumber { get; init; }
 
     /// <summary>
     /// <b>Сумма Кредита</b>: сколько заёмшик взял в долг
     /// </summary>
-    public required decimal BorrowedAmount { get; init; }
+    public decimal BorrowedAmount { get; init; }
 
     /// <summary>
     /// <b>Процентная ставка</b> в диапазоне от 0 до 1
     /// </summary>
-    public required decimal InterestRate { get; init; }
+    public decimal InterestRate { get; init; }
 
     /// <summary>
     /// <b>Дата одобрения кредита</b>
     /// </summary>
-    public required DateTime ApprovalDate { get; init; }
-
-    /// <summary>
-    /// <b>Расчёт кредита</b>
-    /// </summary>
-    public LoanBilling LoanBilling { get; set; }
+    public DateTime ApprovalDate { get; init; }
 
     /// <summary>
     /// <b>Дата начисления кредитных средств</b>
@@ -51,50 +75,93 @@ public class Loan
     /// <summary>
     /// <b>Статус Кредита</b>
     /// </summary>
-    public required LoanState State { get; set; }
+    public LoanState State { get; private set; }
 
     /// <summary>
     /// <b>Планируемое число платежей</b>
     /// </summary>
-    public required int PlannedPaymentsNumber { get; set; }
+    public int PlannedPaymentsNumber { get; private set; }
 
     /// <summary>
     /// <b>Тип Платежа</b>
     /// </summary>
-    public required PaymentType PaymentType { get; set; }
+    public PaymentType PaymentType { get; init; }
 
     /// <summary>
     /// <b>Тип Платёжного графика</b>
     /// </summary>
-    public required PaymentScheduleType PaymentScheduleType { get; set; }
+    public PaymentScheduleType PaymentScheduleType { get; init; }
 
     // Чтобы выяснить, что, помимо регулярного начисления, также нужно закрыть расчётный период,
     // необходимо будет подтянуть информацию об этом из LoanBilling
-    public TimeSpan? PeriodInterval { get; set; }
+    public TimeSpan? PeriodInterval { get; init; }
 
-    public static Loan CreateNewLoan(NewLoan newLoan)
+    /// <summary>
+    /// <b>Остаток по телу кредита</b>
+    /// </summary>
+    public ExpenseItem Body { get; set; }
+
+    // todo: узнать, как работает погашение на самом деле: гасится полностью категория в рамках кредита или в рамках расчётного периода
+    /// <summary>
+    /// <b>Сумма Задолженности по Кредиту</b>
+    /// </summary>
+    public ExpenseItem Debt { get; private set; } = new();
+
+    /// <summary>
+    /// <b>Штраф по Задолженности</b>
+    /// </summary>
+    public ExpenseItem Penalty { get; private set; } = new();
+
+    /// <summary>
+    /// Процент Штрафа
+    /// </summary>
+    public const decimal PenaltyRate = 0.1m;
+
+    public List<PeriodBilling> PeriodsBillings { get; set; } = [];
+
+    /// <summary>
+    /// <para><b>Начисления за текущий Период</b></para>
+    /// <para>Если Кредит в состоянии<see cref="LoanState.Approved"/>, значение поля будет<c>null</c></para>
+    /// </summary>
+    public PeriodAccruals? PeriodAccruals { get; set; }
+
+
+    private readonly IPaymentCalculator _paymentCalculator;
+
+    public bool IsRepaid => Body + Debt + Penalty == 0;
+
+    public decimal MonthlyInterestRate => InterestRate / 12;
+
+    public void StartNewPeriod()
     {
-        var loan = new Loan
-        {
-            ClientId = newLoan.ClientId,
-            ClientAccountNumber = newLoan.ClientAccountNumber,
-            BorrowedAmount = newLoan.BorrowedAmount,
-            InterestRate = newLoan.InterestRate,
-            ApprovalDate = newLoan.ApprovalDate,
-            State = LoanState.Approved,
-            PlannedPaymentsNumber = CalculatePaymentsNumber(newLoan),
-            PaymentType = newLoan.PaymentType,
-            PaymentScheduleType = newLoan.PaymentScheduleType,
-            PeriodInterval = newLoan.PeriodInterval
-        };
+        if (PeriodAccruals != null && !IsCurrentPeriodEnded())
+            throw Errors.Loan.CannotStartNewPeriod.NotEndedYet();
+        _paymentCalculator.StartNewPeriod();
+    }
 
-        loan.LoanBilling = new LoanBilling
-        {
-            LoanBody = loan.BorrowedAmount,
-            Loan = loan,
-        };
+    public void AccrueInterestOnCurrentPeriod()
+    {
+        _paymentCalculator.AccrueInterestOnCurrentPeriod();
+    }
 
-        return loan;
+    public decimal CalculateTickInterest() =>
+        Body * InterestRate / (DateTime.IsLeapYear(DateTime.UtcNow.Year) ? DaysInLeapYear : DaysInRegularYear);
+
+    public void ChargePenalty()
+    {
+        Penalty += Debt * PenaltyRate;
+    }
+
+    public void AddNewPeriodAndRecalculate(PeriodBilling periodBilling)
+    {
+        PeriodsBillings.Add(periodBilling);
+
+        if (periodBilling.IsDebt)
+        {
+            Debt += periodBilling.GetRemainingInterest() + periodBilling.GetRemainingLoanBodyPayoff();
+        }
+
+        Body -= periodBilling.GetPaidLoanBody();
     }
 
     public void AttachLoanAccount(string accountNumber)
@@ -113,8 +180,24 @@ public class Loan
     public bool IsCurrentPeriodEnded()
     {
         // if (PaymentScheduleType == PaymentScheduleType.Calendar) return DateTime.UtcNow.Day == PeriodDay;
-        ArgumentNullException.ThrowIfNull(PeriodInterval);
-        return LoanBilling.CurrentPeriodStartDate().Add(PeriodInterval.Value) <= DateTime.UtcNow;
+        ArgumentNullException.ThrowIfNull(PeriodAccruals);
+        return PeriodAccruals.PeriodEndDate <= DateTime.UtcNow;
+    }
+
+    public void ActivateLoan()
+    {
+        State = LoanState.Active;
+        StartNewPeriod();
+    }
+
+    public void CloseLoan()
+    {
+        if (!IsRepaid)
+        {
+            throw new Errors.Loan.InvalidLoanStateChange("Can't close the loan because it hasn't been repaid yet");
+        }
+
+        State = LoanState.Closed;
     }
 
     private static int CalculatePaymentsNumber(NewLoan newLoan)
@@ -124,6 +207,16 @@ public class Loan
 
         ArgumentNullException.ThrowIfNull(newLoan.PeriodInterval);
         return (int)Math.Round(newLoan.LoanTerm / newLoan.PeriodInterval.Value);
+    }
+
+    private IPaymentCalculator InitPaymentCalculator()
+    {
+        return PaymentType switch
+        {
+            PaymentType.Annuity => new AnnuityPaymentCalculator(this),
+            PaymentType.Differentiated => new DifferentiatedPaymentCalculator(this),
+            _ => throw new ArgumentOutOfRangeException(nameof(PaymentType))
+        };
     }
 }
 
