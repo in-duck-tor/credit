@@ -28,8 +28,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\InDuckTor.Credit.Feature\InDuckTor.Credit.Feature.csproj" />
-    <ProjectReference Include="..\..\InDuckTor.Credit.Infrastructure\InDuckTor.Credit.Infrastructure.csproj" />
+    <ProjectReference Include="..\InDuckTor.Credit.Feature\InDuckTor.Credit.Feature.csproj" />
+    <ProjectReference Include="..\InDuckTor.Credit.Infrastructure\InDuckTor.Credit.Infrastructure.csproj" />
     <ProjectReference Include="..\InDuckTor.Credit.Domain\InDuckTor.Credit.Domain.csproj" />
   </ItemGroup>
 

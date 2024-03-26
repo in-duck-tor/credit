@@ -13,22 +13,6 @@ public class PaymentConfiguration : IEntityTypeConfiguration<Payment>
         builder.Property(p => p.Id).HasColumnName("Id");
 
         builder.HasOne<Loan>().WithMany().HasForeignKey(p => p.LoanId);
-    }
-}
-
-public class PaymentDistributionConfiguration : IEntityTypeConfiguration<PaymentDistribution>
-{
-    public void Configure(EntityTypeBuilder<PaymentDistribution> builder)
-    {
-        builder.ToTable(nameof(Payment)).HasKey(pd => pd.Id);
-        builder.Property(pd => pd.Id).HasColumnName("Id");
-
-        builder.HasOne<Payment>()
-            .WithOne(p => p.PaymentDistribution)
-            .HasForeignKey<PaymentDistribution>(pd => pd.Id)
-            .OnDelete(DeleteBehavior.Cascade)
-            .Metadata.IsRequired = true;
-
         builder.HasMany(pd => pd.BillingsPayoffs).WithOne();
     }
 }

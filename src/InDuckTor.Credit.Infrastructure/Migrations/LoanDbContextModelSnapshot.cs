@@ -34,7 +34,7 @@ namespace InDuckTor.Credit.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<long?>("PaymentDistributionId")
+                    b.Property<long?>("PaymentId")
                         .HasColumnType("bigint");
 
                     b.Property<long>("PeriodBillingId")
@@ -42,7 +42,7 @@ namespace InDuckTor.Credit.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PaymentDistributionId");
+                    b.HasIndex("PaymentId");
 
                     b.HasIndex("PeriodBillingId");
 
@@ -61,32 +61,21 @@ namespace InDuckTor.Credit.Infrastructure.Migrations
                     b.Property<long>("ClientId")
                         .HasColumnType("bigint");
 
+                    b.Property<bool>("IsDistributed")
+                        .HasColumnType("boolean");
+
                     b.Property<long>("LoanId")
                         .HasColumnType("bigint");
 
                     b.Property<decimal>("PaymentAmount")
                         .HasColumnType("numeric");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("LoanId");
-
-                    b.ToTable("Payment", "credit");
-                });
-
-            modelBuilder.Entity("InDuckTor.Credit.Domain.Billing.Payment.PaymentDistribution", b =>
-                {
-                    b.Property<long>("Id")
-                        .HasColumnType("bigint")
-                        .HasColumnName("Id");
-
-                    b.Property<bool>("IsDistributed")
-                        .HasColumnType("boolean");
-
                     b.Property<decimal?>("Penalty")
                         .HasColumnType("numeric");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("LoanId");
 
                     b.ToTable("Payment", "credit");
                 });
@@ -267,9 +256,9 @@ namespace InDuckTor.Credit.Infrastructure.Migrations
 
             modelBuilder.Entity("InDuckTor.Credit.Domain.Billing.Payment.BillingPayoff", b =>
                 {
-                    b.HasOne("InDuckTor.Credit.Domain.Billing.Payment.PaymentDistribution", null)
+                    b.HasOne("InDuckTor.Credit.Domain.Billing.Payment.Payment", null)
                         .WithMany("BillingsPayoffs")
-                        .HasForeignKey("PaymentDistributionId");
+                        .HasForeignKey("PaymentId");
 
                     b.HasOne("InDuckTor.Credit.Domain.Billing.Period.PeriodBilling", "PeriodBilling")
                         .WithMany()
@@ -310,15 +299,6 @@ namespace InDuckTor.Credit.Infrastructure.Migrations
                     b.HasOne("InDuckTor.Credit.Domain.LoanManagement.Loan", null)
                         .WithMany()
                         .HasForeignKey("LoanId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("InDuckTor.Credit.Domain.Billing.Payment.PaymentDistribution", b =>
-                {
-                    b.HasOne("InDuckTor.Credit.Domain.Billing.Payment.Payment", null)
-                        .WithOne("PaymentDistribution")
-                        .HasForeignKey("InDuckTor.Credit.Domain.Billing.Payment.PaymentDistribution", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -406,12 +386,6 @@ namespace InDuckTor.Credit.Infrastructure.Migrations
                 });
 
             modelBuilder.Entity("InDuckTor.Credit.Domain.Billing.Payment.Payment", b =>
-                {
-                    b.Navigation("PaymentDistribution")
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("InDuckTor.Credit.Domain.Billing.Payment.PaymentDistribution", b =>
                 {
                     b.Navigation("BillingsPayoffs");
                 });

@@ -14,7 +14,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\InDuckTor.Credit.Infrastructure\InDuckTor.Credit.Infrastructure.csproj" />
-      <ProjectReference Include="..\src\InDuckTor.Credit.Domain\InDuckTor.Credit.Domain.csproj" />
+      <ProjectReference Include="..\InDuckTor.Credit.Domain\InDuckTor.Credit.Domain.csproj" />
     </ItemGroup>
 
 </Project>

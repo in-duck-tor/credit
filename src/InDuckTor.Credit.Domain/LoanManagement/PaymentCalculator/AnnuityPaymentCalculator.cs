@@ -26,6 +26,11 @@ public class AnnuityPaymentCalculator : IPaymentCalculator
         periodAccruals.LoanBodyPayoff -= periodAccruals.InterestAccrual;
     }
 
+    // todo: Решить проблему с сохранением платежей
+    // todo: Решить проблему с бесконечными расчётными периодами: после того, как сумма погашений по телу станет равна остатку по кредиту,
+    //  создавать расчётные периоды с нулевым погашением по телу.
+    // todo: Генерализировать крайний случай с последним платежём, когда общая сумма меньше фиксированного платежа
+    //  (проценты увеличиваются в ущерб телу, если общая их сумма равна фиксу)
     private decimal CalculateOneTimePayment()
     {
         var monthlyInterestRate = (double)_loan.MonthlyInterestRate;

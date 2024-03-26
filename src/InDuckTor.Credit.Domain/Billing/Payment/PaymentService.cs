@@ -24,11 +24,21 @@ public interface IPaymentService
     Task<Payment> CreatePayment(NewPayment newPayment, CancellationToken cancellationToken);
 }
 
-public class PaymentService(
-    IPaymentRepository paymentRepository,
-    IPeriodBillingRepository periodBillingRepository,
-    ILoanRepository loanRepository) : IPaymentService
+public class PaymentService : IPaymentService
 {
+    private readonly IPaymentRepository _paymentRepository;
+    private readonly IPeriodBillingRepository _periodBillingRepository;
+    private readonly ILoanRepository _loanRepository;
+
+    public PaymentService(IPaymentRepository paymentRepository,
+        IPeriodBillingRepository periodBillingRepository,
+        ILoanRepository loanRepository)
+    {
+        _paymentRepository = paymentRepository;
+        _periodBillingRepository = periodBillingRepository;
+        _loanRepository = loanRepository;
+    }
+
     // В идеале, т.к. в реальном банке расчётные периоды закрываются каждый день, при закрытии нового периода создавать
     // таску, которая позже будет обработана. При этом, чтобы не начислить лишние проценты и не приписать долг в период,
     // нужно проверить, есть ли у пользователя нераспределённые платежи, а также создать механизм перерасчёта процентов,
@@ -41,7 +51,7 @@ public class PaymentService(
     /// <param name="periodBilling">Расчёт за Период, по которому распределются Платежи</param>
     public async Task DistributePaymentsForNewPeriod(long loanId, PeriodBilling periodBilling)
     {
-        var payments = await paymentRepository.GetAllNonDistributedPayments(loanId);
+        var payments = await _paymentRepository.GetAllNonDistributedPayments(loanId);
         DistributePayments(periodBilling.Loan, payments, [periodBilling]);
         if (!periodBilling.IsPaid) periodBilling.IsDebt = true;
     }
@@ -52,7 +62,7 @@ public class PaymentService(
     /// <param name="payment">Платёж, который нужно распределить</param>
     public async Task DistributePayment(Payment payment)
     {
-        var unpaidPeriods = await periodBillingRepository.GetAllUnpaidPeriodBillings(payment.LoanId);
+        var unpaidPeriods = await _periodBillingRepository.GetAllUnpaidPeriodBillings(payment.LoanId);
 
         if (unpaidPeriods.Count == 0) return;
 
@@ -68,7 +78,7 @@ public class PaymentService(
 
     public async Task<Payment> CreatePayment(NewPayment newPayment, CancellationToken cancellationToken)
     {
-        var isExists = await loanRepository.IsExists(newPayment.LoanId,
+        var isExists = await _loanRepository.IsExists(newPayment.LoanId,
             newPayment.ClientId,
             cancellationToken);
 
@@ -78,8 +88,7 @@ public class PaymentService(
         {
             LoanId = newPayment.LoanId,
             ClientId = newPayment.ClientId,
-            PaymentAmount = newPayment.PaymentAmount,
-            PaymentDistribution = new PaymentDistribution()
+            PaymentAmount = newPayment.PaymentAmount
         };
     }
 
@@ -99,13 +108,13 @@ public class PaymentService(
         using var paymentEnumerator = payments.GetEnumerator();
         paymentEnumerator.MoveNext();
         var payment = paymentEnumerator.Current;
-        
+
         using var periodEnumerator = unpaidPeriods.GetEnumerator();
         periodEnumerator.MoveNext();
         var period = periodEnumerator.Current;
 
         var paymentItems = loan.GetBillingItemsForPeriod(period);
-        
+
         while (true)
         {
             payment.DistributeOn(period, paymentItems);
@@ -122,7 +131,7 @@ public class PaymentService(
 
             if (!period.IsPaid) continue;
             if (!periodEnumerator.MoveNext()) return;
-            
+
             period = periodEnumerator.Current;
             paymentItems = loan.GetBillingItemsForPeriod(period);
         }

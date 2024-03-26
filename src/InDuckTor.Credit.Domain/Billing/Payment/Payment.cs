@@ -8,7 +8,7 @@ namespace InDuckTor.Credit.Domain.Billing.Payment;
 /// </summary>
 public class Payment
 {
-    public long Id { get; set; }
+    public long Id { get; init; }
 
     public required long LoanId { get; init; }
     public required long ClientId { get; init; }
@@ -18,14 +18,20 @@ public class Payment
     /// </summary>
     public required decimal PaymentAmount { get; init; }
 
+    public bool IsDistributed { get; set; }
+
     /// <summary>
-    /// Распределение Платежа формируется в конце Расчётного Периода
+    /// Погашения за Период, относящиеся к данному Платежу
     /// </summary>
-    public PaymentDistribution PaymentDistribution { get; init; } = new();
+    public List<BillingPayoff> BillingsPayoffs { get; } = [];
 
-    public bool IsDistributed => PaymentDistribution.IsDistributed;
+    /// <summary>
+    /// Сумма Платежа, распределённая на оплату Штрафа 
+    /// </summary>
+    // todo: начать сетать
+    public ExpenseItem? Penalty { get; set; }
 
-    public decimal PaymentToDistribute => PaymentAmount - PaymentDistribution.CalculateDistributedPaymentSum();
+    public decimal PaymentToDistribute => PaymentAmount - CalculateDistributedPaymentSum();
 
     public void DistributeOn(PeriodBilling periodBilling, List<IPrioritizedExpenseItem> items)
     {
@@ -47,25 +53,28 @@ public class Payment
             IncreasePaymentExpenseItems(paymentExpenseItems, item.Priority, min);
         }
 
-        if (paymentToDistribute == 0) PaymentDistribution.IsDistributed = true;
+        if (paymentToDistribute == 0) IsDistributed = true;
     }
+
+    private decimal CalculateDistributedPaymentSum() => BillingsPayoffs
+        .Select(payoff => payoff.ExpenseItems.GetTotalSum())
+        .Aggregate(0m, (accumulate, periodDistribution) => accumulate + periodDistribution) + (Penalty?.Amount ?? 0m);
 
     private void IncreasePaymentExpenseItems(ExpenseItems paymentExpenseItems, PaymentPriority priority, decimal amount)
     {
         // todo: отрефакторить: перенести Penalty в один с paymentExpenseItems список. Для этого можно создать отдельный утилитарный класс PaymentExpenseItems
-        if (priority == PaymentPriority.Penalty) PaymentDistribution.Penalty?.ChangeAmount(amount);
+        if (priority == PaymentPriority.Penalty) Penalty?.ChangeAmount(amount);
         else paymentExpenseItems.ChangeBasedOnPriority(priority, amount);
     }
 
     private ExpenseItems GetOrCreatePaymentBillingItems(PeriodBilling periodBilling)
     {
         ExpenseItems paymentExpenseItems;
-        var billingsPayoffs = PaymentDistribution.BillingsPayoffs;
 
-        if (billingsPayoffs.Count == 0 || billingsPayoffs.Last().PeriodBilling.Id != periodBilling.Id)
+        if (BillingsPayoffs.Count == 0 || BillingsPayoffs.Last().PeriodBilling.Id != periodBilling.Id)
         {
             paymentExpenseItems = new ExpenseItems(0, 0, 0);
-            PaymentDistribution.BillingsPayoffs.Add(new BillingPayoff
+            BillingsPayoffs.Add(new BillingPayoff
             {
                 PeriodBilling = periodBilling,
                 ExpenseItems = paymentExpenseItems
@@ -73,35 +82,11 @@ public class Payment
         }
         else
         {
-            paymentExpenseItems = billingsPayoffs.Last().ExpenseItems;
+            paymentExpenseItems = BillingsPayoffs.Last().ExpenseItems;
         }
 
         return paymentExpenseItems;
     }
-}
-
-/// <summary>
-/// <b>Распределение Платежа</b> по различным категориям
-/// </summary>
-public class PaymentDistribution
-{
-    public long Id { get; set; }
-
-    public bool IsDistributed { get; set; }
-
-    /// <summary>
-    /// Погашения за Период, относящиеся к данному Платежу
-    /// </summary>
-    public List<BillingPayoff> BillingsPayoffs { get; } = [];
-
-    /// <summary>
-    /// Сумма Платежа, распределённая на оплату Штрафа 
-    /// </summary>
-    public ExpenseItem? Penalty { get; set; }
-
-    public decimal CalculateDistributedPaymentSum() => BillingsPayoffs
-        .Select(payoff => payoff.ExpenseItems.GetTotalSum())
-        .Aggregate(0m, (accumulate, periodDistribution) => accumulate + periodDistribution) + (Penalty?.Amount ?? 0m);
 }
 
 /// <summary>

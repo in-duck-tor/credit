@@ -7,9 +7,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InDuckTor.Credit.WebApi", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InDuckTor.Credit.Domain", "src\InDuckTor.Credit.Domain\InDuckTor.Credit.Domain.csproj", "{57260306-73C5-405B-AED8-D068BA8F1C73}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InDuckTor.Credit.Feature", "InDuckTor.Credit.Feature\InDuckTor.Credit.Feature.csproj", "{ADE3AB7C-59C3-4C4F-8B6D-D26A07D48D59}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InDuckTor.Credit.Feature", "src\InDuckTor.Credit.Feature\InDuckTor.Credit.Feature.csproj", "{ADE3AB7C-59C3-4C4F-8B6D-D26A07D48D59}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InDuckTor.Credit.Infrastructure", "InDuckTor.Credit.Infrastructure\InDuckTor.Credit.Infrastructure.csproj", "{00A31E8E-7CCF-4FEF-B7E2-DFA457A2CC71}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InDuckTor.Credit.Infrastructure", "src\InDuckTor.Credit.Infrastructure\InDuckTor.Credit.Infrastructure.csproj", "{00A31E8E-7CCF-4FEF-B7E2-DFA457A2CC71}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
