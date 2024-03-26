@@ -1,7 +1,10 @@
 version: "3.9"
 
 services:
-  app:
+  credit:
+    container_name: credit.in-duck-tor
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
     build:
       context: .
       dockerfile: Dockerfile
@@ -9,29 +12,16 @@ services:
         - GH_USERNAME
         - GH_TOKEN
     ports:
-      - "8081:8081"
-    depends_on: 
-      - postgres
-    
-  postgres:
-    image: postgres:14-alpine3.18
-    container_name: credit-db
-    environment:
-      POSTGRES_USER: vlad
-      POSTGRES_PASSWORD: aqswedzxc1314
-      POSTGRES_DB: credit
-      PGDATA: /var/lib/postgresql/data/pgdata
-    ports:
-      - "5442:5432"
-    volumes:
-      - credit-postgres:/var/lib/docker/volumes
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U vlad -d credit" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-    restart: unless-stopped
+      - "8080:8080"
+    expose:
+      - "8080"
+    networks:
+      - in-duck-tor
 
 volumes:
   credit-postgres:
+
+networks:
+  in-duck-tor:
+    name: in-duck-tor
+    external: true
