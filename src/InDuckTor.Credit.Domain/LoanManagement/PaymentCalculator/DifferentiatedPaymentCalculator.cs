@@ -12,7 +12,7 @@ public class DifferentiatedPaymentCalculator : IPaymentCalculator
     public void StartNewPeriod()
     {
         var (startDate, endDate) = _loan.GetNewPeriodDates();
-        _loan.PeriodAccruals = NewPeriodAccruals(startDate, endDate, _loan.Body);
+        _loan.PeriodAccruals = NewPeriodAccruals(startDate, endDate, CalculateFixedBody());
     }
 
     public void AccrueInterestOnCurrentPeriod()
@@ -25,6 +25,15 @@ public class DifferentiatedPaymentCalculator : IPaymentCalculator
 
         _loan.PeriodAccruals.InterestAccrual += interest;
         _loan.PeriodAccruals.OneTimePayment += interest;
+    }
+
+    private decimal CalculateFixedBody()
+    {
+        var regularFixedBody = _loan.BorrowedAmount / _loan.PlannedPaymentsNumber;
+        if (regularFixedBody <= _loan.Body) return regularFixedBody;
+
+        // Последний платёж
+        return _loan.Body;
     }
 
     private static PeriodAccruals NewPeriodAccruals(DateTime startDate, DateTime endDate, decimal fixedBody) => new()

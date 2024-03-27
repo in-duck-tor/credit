@@ -6,6 +6,7 @@ using InDuckTor.Shared.Strategies;
 namespace InDuckTor.Credit.Feature.Feature.Loan;
 
 public record LoanInfoResponse(
+    long Id,
     decimal BorrowedAmount,
     decimal InterestRate,
     DateTime ApprovalDate,
@@ -17,6 +18,7 @@ public record LoanInfoResponse(
     decimal Penalty)
 {
     public static LoanInfoResponse FromLoan(Domain.LoanManagement.Loan loan) => new(
+        loan.Id,
         loan.BorrowedAmount,
         loan.InterestRate,
         loan.ApprovalDate,

@@ -35,7 +35,9 @@ public static class LoanApplicationEndpoints
         return builder;
     }
 
-    private static async Task<Ok<LoanApplicationResponse>> CreateApplication(
+    [ProducesResponseType(404)]
+    [ProducesResponseType<LoanApplicationResponse>(200)]
+    private static async Task<IResult> CreateApplication(
         [FromBody] ApplicationInfo body,
         [FromServices] IExecutor<ISubmitApplication, ApplicationInfo, LoanApplicationResponse> submitApplication,
         CancellationToken cancellationToken)

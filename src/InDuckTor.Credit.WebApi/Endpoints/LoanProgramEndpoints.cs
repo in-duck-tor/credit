@@ -25,6 +25,7 @@ public static class LoanProgramEndpoints
     }
 
     // В будущем добавить эндпонит на получение доступных только клиенту программ кредитования
+    [ProducesResponseType<List<LoanProgramResponse>>(200)]
     private static async Task<IResult> GetAllLoanPrograms(
         [FromServices] IExecutor<IGetAllLoanPrograms, Unit, List<LoanProgramResponse>> getAllLoanPrograms,
         CancellationToken cancellationToken
@@ -34,6 +35,7 @@ public static class LoanProgramEndpoints
     }
 
     // Здесь должна быть проверка прав вызывающего
+    [ProducesResponseType<LoanProgramResponse>(200)]
     private static async Task<IResult> CreateLoanProgram(
         [FromBody] LoanProgramInfo body,
         [FromServices] IExecutor<ICreateLoanProgram, LoanProgramInfo, LoanProgramResponse> createLoanProgram,

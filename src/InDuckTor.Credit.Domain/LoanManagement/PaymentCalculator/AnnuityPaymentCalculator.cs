@@ -22,21 +22,27 @@ public class AnnuityPaymentCalculator : IPaymentCalculator
         var periodAccruals = _loan.PeriodAccruals;
         ArgumentNullException.ThrowIfNull(periodAccruals);
 
-        periodAccruals.InterestAccrual += _loan.CalculateTickInterest();
-        periodAccruals.LoanBodyPayoff -= periodAccruals.InterestAccrual;
+        var interestAccrual = _loan.CalculateTickInterest();
+        periodAccruals.InterestAccrual += interestAccrual;
+        periodAccruals.LoanBodyPayoff -= interestAccrual;
     }
 
-    // todo: Решить проблему с сохранением платежей
-    // todo: Решить проблему с бесконечными расчётными периодами: после того, как сумма погашений по телу станет равна остатку по кредиту,
-    //  создавать расчётные периоды с нулевым погашением по телу.
-    // todo: Генерализировать крайний случай с последним платежём, когда общая сумма меньше фиксированного платежа
-    //  (проценты увеличиваются в ущерб телу, если общая их сумма равна фиксу)
+    // Если ввести округление, то платёж также нужно будет распределять на округление.
+    // То есть после распределения по процентам и телу, нужно будет распределить платёж по сумме округления.
+    // Скорее всего сумма округления должна быть отдельной категорией, то есть отдельным столбцом.
     private decimal CalculateOneTimePayment()
     {
         var monthlyInterestRate = (double)_loan.MonthlyInterestRate;
-        return _loan.BorrowedAmount * (decimal)Math.Ceiling(
-            monthlyInterestRate / (1 - Math.Pow(1 + monthlyInterestRate, -_loan.PlannedPaymentsNumber))
-        );
+        var k = (decimal)(monthlyInterestRate / (1 - Math.Pow(1 + monthlyInterestRate, -_loan.PlannedPaymentsNumber)));
+        var regularOneTimePayment = _loan.BorrowedAmount * k;
+        
+        var periodInterest = _loan.Body * _loan.MonthlyInterestRate;
+        var regularPaymentBody = regularOneTimePayment - periodInterest;
+
+        if (regularPaymentBody <= _loan.Body) return regularOneTimePayment;
+
+        // Последний платёж
+        return _loan.Body + periodInterest;
     }
 
     private static PeriodAccruals NewPeriodAccruals(DateTime startDate, DateTime endDate, decimal oneTimePayment) => new()

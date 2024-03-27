@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 namespace InDuckTor.Credit.Feature.Feature.Loan;
 
 public record LoanInfoShortResponse(
+    long Id,
     decimal BorrowedAmount,
     decimal InterestRate,
     int PlannedPaymentsNumber,
@@ -13,6 +14,7 @@ public record LoanInfoShortResponse(
     decimal Penalty)
 {
     public static LoanInfoShortResponse FromLoan(Domain.LoanManagement.Loan loan) => new(
+        loan.Id,
         loan.BorrowedAmount,
         loan.InterestRate,
         loan.PlannedPaymentsNumber,

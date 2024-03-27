@@ -71,7 +71,7 @@ public static class LoanEndpoints
     [ProducesResponseType(403)]
     [ProducesResponseType(401)]
     [ProducesResponseType(204)]
-    private static Results<Ok, BadRequest, ForbidHttpResult> PayEarly(
+    private static Task<IResult> PayEarly(
         [FromRoute] long loanId,
         [FromBody] EarlyPayoffBody body,
         CancellationToken cancellationToken)
@@ -81,7 +81,7 @@ public static class LoanEndpoints
 
     [ProducesResponseType(404)]
     [ProducesResponseType(403)]
-    [ProducesResponseType(200)]
+    [ProducesResponseType<LoanInfoResponse>(200)]
     private static async Task<IResult> GetLoanInfoForClient(
         [FromRoute] long loanId,
         [FromServices] IExecutor<IGetLoanInfo, long, LoanInfoResponse> getLoanInfo,
@@ -91,7 +91,7 @@ public static class LoanEndpoints
     }
 
     [ProducesResponseType(404)]
-    [ProducesResponseType(200)]
+    [ProducesResponseType<List<LoanInfoShortResponse>>(200)]
     private static async Task<IResult> GetAllClientLoans(
         [FromRoute] long clientId,
         [FromServices] IExecutor<IGetAllClientLoans, long, List<LoanInfoShortResponse>> getAllClientLoans,
