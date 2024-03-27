@@ -5,10 +5,22 @@ using InDuckTor.Shared.Strategies;
 
 namespace InDuckTor.Credit.Feature.Feature.Loan;
 
+/// <param name="Id">Id Кредита</param>
+/// <param name="BorrowedAmount">Сумма займа</param>
+/// <param name="InterestRate">Процентная ставка</param>
+/// <param name="ClientAccountNumber">Счёт клиента</param>
+/// <param name="ApprovalDate">Дата одобрения кредита</param>
+/// <param name="BorrowingDate">Дата начисления кредитных средств</param>
+/// <param name="PlannedPaymentsNumber">Планируемое число платежей</param>
+/// <param name="PaymentType">Тип Платежа</param>
+/// <param name="LoanBody">Остаток по телу кредита</param>
+/// <param name="LoanDebt">Сумма Задолженности по Кредиту</param>
+/// <param name="Penalty">Штраф по Задолженности</param>
 public record LoanInfoResponse(
     long Id,
     decimal BorrowedAmount,
-    decimal InterestRate,
+    string InterestRate,
+    string ClientAccountNumber,
     DateTime ApprovalDate,
     DateTime? BorrowingDate,
     int PlannedPaymentsNumber,
@@ -20,7 +32,8 @@ public record LoanInfoResponse(
     public static LoanInfoResponse FromLoan(Domain.LoanManagement.Loan loan) => new(
         loan.Id,
         loan.BorrowedAmount,
-        loan.InterestRate,
+        loan.InterestRate * 100 + "%",
+        loan.ClientAccountNumber,
         loan.ApprovalDate,
         loan.BorrowingDate,
         loan.PlannedPaymentsNumber,

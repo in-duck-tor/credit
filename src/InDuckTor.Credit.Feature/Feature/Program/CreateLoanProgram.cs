@@ -12,19 +12,19 @@ namespace InDuckTor.Credit.Feature.Feature.Program;
 /// <param name="PaymentType">Тип платежа: Аннуитетный или Дифференцированный</param>
 /// <param name="PaymentScheduleType">Тип кредитного графика (сейчас всегда выбирать interval)</param>
 /// <param name="PeriodInterval">Длительность Расчётного Периода (для интервального графика)</param>
-public record LoanProgramInfo(
+public record LoanProgramInfoRequest(
     decimal InterestRate,
     PaymentType PaymentType,
     PaymentScheduleType PaymentScheduleType,
     long PeriodInterval
 );
 
-public interface ICreateLoanProgram : ICommand<LoanProgramInfo, LoanProgramResponse>;
+public interface ICreateLoanProgram : ICommand<LoanProgramInfoRequest, LoanProgramResponse>;
 
-[Intercept(typeof(SaveChangesInterceptor<LoanProgramInfo, LoanProgramResponse>))]
+[Intercept(typeof(SaveChangesInterceptor<LoanProgramInfoRequest, LoanProgramResponse>))]
 public class CreateLoanProgram(LoanDbContext context, ILoanProgramService loanProgramService) : ICreateLoanProgram
 {
-    public async Task<LoanProgramResponse> Execute(LoanProgramInfo input, CancellationToken ct)
+    public async Task<LoanProgramResponse> Execute(LoanProgramInfoRequest input, CancellationToken ct)
     {
         var newProgram = new NewProgram(
             input.InterestRate / 100,

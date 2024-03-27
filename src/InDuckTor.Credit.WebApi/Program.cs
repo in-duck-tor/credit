@@ -22,14 +22,8 @@ services.AddInDuckTorAuthentication(builder.Configuration.GetSection(nameof(JwtS
 services.AddAuthorization();
 // services.AddInDuckTorSecurity();
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 services.AddEndpointsApiExplorer();
-services.AddSwaggerGen(cfg =>
-{
-    cfg.ConfigureJwtAuth();
-    cfg.ConfigureEnumMemberValues();
-});
+services.AddCreditSwaggerGen();
 
 services.ConfigureHangfire(builder.Configuration);
 
@@ -37,7 +31,6 @@ services.ConfigureRefit(builder.Configuration);
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

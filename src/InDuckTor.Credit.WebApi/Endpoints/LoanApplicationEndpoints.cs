@@ -38,8 +38,8 @@ public static class LoanApplicationEndpoints
     [ProducesResponseType(404)]
     [ProducesResponseType<LoanApplicationResponse>(200)]
     private static async Task<IResult> CreateApplication(
-        [FromBody] ApplicationInfo body,
-        [FromServices] IExecutor<ISubmitApplication, ApplicationInfo, LoanApplicationResponse> submitApplication,
+        [FromBody] ApplicationInfoRequest body,
+        [FromServices] IExecutor<ISubmitApplication, ApplicationInfoRequest, LoanApplicationResponse> submitApplication,
         CancellationToken cancellationToken)
     {
         var result = await submitApplication.Execute(body, cancellationToken);

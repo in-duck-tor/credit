@@ -1,4 +1,5 @@
 using InDuckTor.Credit.Domain.Financing.Application;
+using InDuckTor.Credit.Domain.Financing.Program;
 using InDuckTor.Credit.Domain.LoanManagement;
 using InDuckTor.Credit.Domain.LoanManagement.Models;
 using InDuckTor.Credit.Infrastructure.Config.Database;
@@ -9,7 +10,7 @@ namespace InDuckTor.Credit.Feature.Feature.Loan;
 // Сделать это как background job. Нужно собрать все апрувнутые кредиты и создать их (потом скорее всего нужно будет отрефакторить)
 public interface ICreateLoan : ICommand<LoanApplication, Domain.LoanManagement.Loan>;
 
-public class CreateLoan(
+public class CreateLoanHandler(
     LoanDbContext context,
     ILoanService loanService) : ICreateLoan
 {

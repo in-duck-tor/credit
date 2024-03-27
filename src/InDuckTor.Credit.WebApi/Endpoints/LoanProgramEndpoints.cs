@@ -37,8 +37,8 @@ public static class LoanProgramEndpoints
     // Здесь должна быть проверка прав вызывающего
     [ProducesResponseType<LoanProgramResponse>(200)]
     private static async Task<IResult> CreateLoanProgram(
-        [FromBody] LoanProgramInfo body,
-        [FromServices] IExecutor<ICreateLoanProgram, LoanProgramInfo, LoanProgramResponse> createLoanProgram,
+        [FromBody] LoanProgramInfoRequest body,
+        [FromServices] IExecutor<ICreateLoanProgram, LoanProgramInfoRequest, LoanProgramResponse> createLoanProgram,
         CancellationToken cancellationToken
     )
     {
