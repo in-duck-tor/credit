@@ -8,6 +8,11 @@ namespace InDuckTor.Credit.Domain.Billing.Payment;
 
 public interface IPaymentService
 {
+    // В идеале, т.к. в реальном банке расчётные периоды закрываются каждый день, при закрытии нового периода создавать
+    // таску, которая позже будет обработана. При этом, чтобы не начислить лишние проценты и не приписать долг в период,
+    // нужно проверить, есть ли у пользователя нераспределённые платежи, а также создать механизм перерасчёта процентов,
+    // чтобы, если проценты без учёта нового тела успели начислиться, можно было их пересчитать.
+    // Но, т.к. это сложно, мы будем производить распределение платежей для созданного периода сразу при его создании.
     /// <summary>
     /// Распределяет Платёж для только что созданного Расчётного Периода. В конце операции все платежи должны распределиться.
     /// </summary>
@@ -18,8 +23,9 @@ public interface IPaymentService
     /// <summary>
     /// Распределяет Платеж по Задолженностям, если такие имеются
     /// </summary>
+    /// <param name="loan">Кредит, для которого распределяется Платёж</param>
     /// <param name="payment">Платёж, который нужно распределить</param>
-    Task DistributePayment(Payment payment);
+    Task DistributePayment(Loan loan, Payment payment);
 
     Task<Payment> CreatePayment(NewPayment newPayment, CancellationToken cancellationToken);
 }
@@ -39,16 +45,6 @@ public class PaymentService : IPaymentService
         _loanRepository = loanRepository;
     }
 
-    // В идеале, т.к. в реальном банке расчётные периоды закрываются каждый день, при закрытии нового периода создавать
-    // таску, которая позже будет обработана. При этом, чтобы не начислить лишние проценты и не приписать долг в период,
-    // нужно проверить, есть ли у пользователя нераспределённые платежи, а также создать механизм перерасчёта процентов,
-    // чтобы, если проценты без учёта нового тела успели начислиться, можно было их пересчитать.
-    // Но, т.к. это сложно, мы будем производить распределение платежей для созданного периода сразу при его создании.
-    /// <summary>
-    /// Распределяет Платёж для только что созданного Расчётного Периода. В конце операции все платежи должны распределиться.
-    /// </summary>
-    /// <param name="loanId">Id кредита, для которого происходит распределение</param>
-    /// <param name="periodBilling">Расчёт за Период, по которому распределются Платежи</param>
     public async Task DistributePaymentsForNewPeriod(long loanId, PeriodBilling periodBilling)
     {
         var payments = await _paymentRepository.GetAllNonDistributedPayments(loanId);
@@ -56,24 +52,20 @@ public class PaymentService : IPaymentService
         if (!periodBilling.IsPaid) periodBilling.IsDebt = true;
     }
 
-    /// <summary>
-    /// Распределяет Платеж по Задолженностям, если такие имеются
-    /// </summary>
-    /// <param name="payment">Платёж, который нужно распределить</param>
-    public async Task DistributePayment(Payment payment)
+    public async Task DistributePayment(Loan loan, Payment payment)
     {
-        var unpaidPeriods = await _periodBillingRepository.GetAllUnpaidPeriodBillings(payment.LoanId);
+        var unpaidPeriods = await _periodBillingRepository.GetAllUnpaidPeriodBillings(loan.Id);
 
         if (unpaidPeriods.Count == 0) return;
 
         var totalRemainingPayment = unpaidPeriods
             .Select(periodBilling => periodBilling.TotalRemainingPayment)
-            .Sum();
+            .Sum() + loan.GetPlannedOneTimePayment();
 
         if (payment.PaymentToDistribute > totalRemainingPayment)
             throw Errors.Payment.InvalidRegularPaymentAmount.TooMuch();
 
-        DistributePayments(unpaidPeriods[0].Loan, [payment], unpaidPeriods);
+        DistributePayments(loan, [payment], unpaidPeriods);
     }
 
     public async Task<Payment> CreatePayment(NewPayment newPayment, CancellationToken cancellationToken)
@@ -113,7 +105,7 @@ public class PaymentService : IPaymentService
         periodEnumerator.MoveNext();
         var period = periodEnumerator.Current;
 
-        var paymentItems = loan.GetBillingItemsForPeriod(period);
+        var paymentItems = loan.GetExpenseItemsForPeriod(period);
 
         while (true)
         {
@@ -133,7 +125,7 @@ public class PaymentService : IPaymentService
             if (!periodEnumerator.MoveNext()) return;
 
             period = periodEnumerator.Current;
-            paymentItems = loan.GetBillingItemsForPeriod(period);
+            paymentItems = loan.GetExpenseItemsForPeriod(period);
         }
     }
 }

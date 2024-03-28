@@ -38,7 +38,7 @@ public record LoanInfoResponse(
         loan.BorrowingDate,
         loan.PlannedPaymentsNumber,
         loan.PaymentType,
-        loan.Body,
+        loan.CurrentBody,
         loan.Debt,
         loan.Penalty
     );
@@ -47,14 +47,14 @@ public record LoanInfoResponse(
 /// <summary>
 /// Возвращает информацию о Кредите
 /// </summary>
-public interface IGetLoanInfo : ICommand<long, LoanInfoResponse>;
+public interface IGetLoanInfo : IQuery<long, LoanInfoResponse>;
 
 public class GetLoanInfo(LoanDbContext context) : IGetLoanInfo
 {
     public async Task<LoanInfoResponse> Execute(long loanId, CancellationToken ct)
     {
         var loan = await context.Loans.FindAsync([loanId], cancellationToken: ct)
-                   ?? throw new Errors.LoanProgram.NotFound(loanId);
+                   ?? throw new Errors.Loan.NotFound(loanId);
         return LoanInfoResponse.FromLoan(loan);
     }
 }

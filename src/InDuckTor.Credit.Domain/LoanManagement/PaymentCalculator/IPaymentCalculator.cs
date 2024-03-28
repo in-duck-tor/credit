@@ -7,4 +7,5 @@ public interface IPaymentCalculator
 {
     void StartNewPeriod();
     void AccrueInterestOnCurrentPeriod();
+    decimal GetPlannedOneTimePayment();
 }

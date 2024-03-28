@@ -39,7 +39,8 @@ if (app.Environment.IsDevelopment())
 
 app.AddLoanApplicationEndpoints()
     .AddLoanProgramEndpoints()
-    .AddLoanEndpoints();
+    .AddLoanEndpoints()
+    .AddTestEndpoints();
 
 // app.UseInDuckTorSecurity();
 app.UseHttpsRedirection();

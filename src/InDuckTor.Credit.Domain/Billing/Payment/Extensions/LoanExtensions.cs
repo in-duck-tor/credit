@@ -8,7 +8,12 @@ namespace InDuckTor.Credit.Domain.Billing.Payment.Extensions;
 
 public static class LoanExtensions
 {
-    public static List<IPrioritizedExpenseItem> GetBillingItemsForPeriod(this Loan loan, PeriodBilling periodBilling)
+    // Вместо того, чтобы возвращать изменяемые статьи, можно возвращать только информацию о сумме, которую нужно оплатить
+    // и приоритете статьи. Далее, при распределении платежа, будет составляться "Распределение Платежа по Периоду", которое потом
+    // применится к периоду, а несколько таких распределений применятся к кредиту.
+    // Либо можно продолжить создавать изменяемые статьи, но не включать в них категории кредита, и изменять по схеме выше.
+    // Нужно это для того, чтобы централизовать изменения полей сущностей, упростив дебаг.
+    public static List<IPrioritizedExpenseItem> GetExpenseItemsForPeriod(this Loan loan, PeriodBilling periodBilling)
     {
         if (periodBilling.Loan.Id != loan.Id)
             throw Errors.EntitiesIsNotRelatedException.WithNames(nameof(Loan), nameof(PeriodBilling));
@@ -20,7 +25,7 @@ public static class LoanExtensions
             items.Add(periodBilling.GetInterestItem(PaymentPriority.DebtInterest)
                 .ChainWith(loan.Debt));
             items.Add(periodBilling.GetLoanBodyItem(PaymentPriority.DebtBody)
-                .ChainWith(loan.Body)
+                .ChainWith(loan.CurrentBody)
                 .ChainWith(loan.Debt));
         }
 
@@ -30,7 +35,7 @@ public static class LoanExtensions
         {
             items.Add(periodBilling.GetInterestItem(PaymentPriority.RegularInterest));
             items.Add(periodBilling.GetLoanBodyItem(PaymentPriority.RegularBody)
-                .ChainWith(loan.Body));
+                .ChainWith(loan.CurrentBody));
         }
 
         items.Add(periodBilling.GetServicesItem(PaymentPriority.ChargingForServices));

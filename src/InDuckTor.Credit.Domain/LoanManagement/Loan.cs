@@ -33,7 +33,8 @@ public class Loan
 
         State = LoanState.Approved;
         PlannedPaymentsNumber = CalculatePaymentsNumber(newLoan);
-        Body = newLoan.BorrowedAmount;
+        CurrentBody = newLoan.BorrowedAmount;
+        BodyAfterPayoffs = newLoan.BorrowedAmount;
 
         _paymentCalculator = InitPaymentCalculator();
     }
@@ -58,7 +59,7 @@ public class Loan
     public decimal BorrowedAmount { get; init; }
 
     /// <summary>
-    /// <b>Процентная ставка</b> в диапазоне от 0 до 1
+    /// <b>Годовая Процентная ставка</b> в диапазоне от 0 до 1
     /// </summary>
     public decimal InterestRate { get; init; }
 
@@ -99,25 +100,27 @@ public class Loan
     /// <summary>
     /// <b>Остаток по телу кредита</b>
     /// </summary>
-    public ExpenseItem Body { get; set; }
+    public ExpenseItem CurrentBody { get; set; }
+
+    public ExpenseItem BodyAfterPayoffs { get; set; }
 
     // todo: узнать, как работает погашение на самом деле: гасится полностью категория в рамках кредита или в рамках расчётного периода
     /// <summary>
     /// <b>Сумма Задолженности по Кредиту</b>
     /// </summary>
-    public ExpenseItem Debt { get; private set; } = new();
+    public ExpenseItem Debt { get; private set; } = ExpenseItem.Zero;
 
     /// <summary>
     /// <b>Штраф по Задолженности</b>
     /// </summary>
-    public ExpenseItem Penalty { get; private set; } = new();
+    public ExpenseItem Penalty { get; private set; } = ExpenseItem.Zero;
 
     /// <summary>
     /// Процент Штрафа
     /// </summary>
     public const decimal PenaltyRate = 0.1m;
 
-    public List<PeriodBilling> PeriodsBillings { get; set; } = [];
+    public List<PeriodBilling> PeriodsBillings { get; init; } = [];
 
     /// <summary>
     /// <para><b>Начисления за текущий Период</b></para>
@@ -128,9 +131,21 @@ public class Loan
 
     private readonly IPaymentCalculator _paymentCalculator;
 
-    public bool IsRepaid => Body + Debt + Penalty == 0;
+    public bool IsRepaid => CurrentBody + Debt + Penalty == 0;
 
-    public decimal MonthlyInterestRate => InterestRate / 12;
+    public TimeSpan PeriodDuration
+    {
+        get
+        {
+            ArgumentNullException.ThrowIfNull(PeriodInterval);
+
+            // todo: Добавить вариант для календарного графика
+            return PeriodInterval.Value;
+        }
+    }
+
+    // Возмонжо стоит определять не годовой процент, а процент для минимального срока взятия кредита
+    public decimal GetPeriodInterestRate() => InterestRate / (decimal)NumberOfPeriodsPerYear();
 
     public void StartNewPeriod()
     {
@@ -139,13 +154,12 @@ public class Loan
         _paymentCalculator.StartNewPeriod();
     }
 
-    public void AccrueInterestOnCurrentPeriod()
-    {
-        _paymentCalculator.AccrueInterestOnCurrentPeriod();
-    }
+    public decimal GetPlannedOneTimePayment() => _paymentCalculator.GetPlannedOneTimePayment();
+
+    public void AccrueInterestOnCurrentPeriod() => _paymentCalculator.AccrueInterestOnCurrentPeriod();
 
     public decimal CalculateTickInterest() =>
-        Body * InterestRate / (DateTime.IsLeapYear(DateTime.UtcNow.Year) ? DaysInLeapYear : DaysInRegularYear);
+        CurrentBody * (InterestRate / (decimal)(NumberOfPeriodsPerYear() * PeriodDuration / InterestAccrualFrequency));
 
     public void ChargePenalty()
     {
@@ -155,26 +169,16 @@ public class Loan
     public void AddNewPeriodAndRecalculate(PeriodBilling periodBilling)
     {
         PeriodsBillings.Add(periodBilling);
+        BodyAfterPayoffs -= periodBilling.ExpenseItems.LoanBodyPayoff;
 
-        if (periodBilling.IsDebt)
-        {
-            Debt += periodBilling.GetRemainingInterest() + periodBilling.GetRemainingLoanBodyPayoff();
-        }
+        if (!periodBilling.IsDebt) return;
 
-        Body -= periodBilling.GetPaidLoanBody();
+        Debt += periodBilling.GetRemainingInterest() + periodBilling.GetRemainingLoanBodyPayoff();
     }
 
     public void AttachLoanAccount(string accountNumber)
     {
         LoanAccountNumber = accountNumber;
-    }
-
-    public TimeSpan PeriodDuration()
-    {
-        ArgumentNullException.ThrowIfNull(PeriodInterval);
-
-        // todo: Добавить вариант для календарного графика
-        return PeriodInterval.Value;
     }
 
     public bool IsCurrentPeriodEnded()
@@ -217,6 +221,15 @@ public class Loan
             PaymentType.Differentiated => new DifferentiatedPaymentCalculator(this),
             _ => throw new ArgumentOutOfRangeException(nameof(PaymentType))
         };
+    }
+
+    private double NumberOfPeriodsPerYear()
+    {
+        var yearDuration = TimeSpan.FromDays(
+            DateTime.IsLeapYear(DateTime.UtcNow.Year) ? DaysInLeapYear : DaysInRegularYear
+        );
+        var numberOfPeriodsPerYear = yearDuration / PeriodDuration;
+        return numberOfPeriodsPerYear;
     }
 }
 

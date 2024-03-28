@@ -25,7 +25,7 @@ public record LoanInfoShortResponse(
         loan.BorrowedAmount,
         loan.InterestRate,
         loan.PlannedPaymentsNumber,
-        loan.Body,
+        loan.CurrentBody,
         loan.Debt,
         loan.Penalty
     );

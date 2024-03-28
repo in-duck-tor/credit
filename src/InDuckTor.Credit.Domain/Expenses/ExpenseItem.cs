@@ -6,18 +6,24 @@ public interface IExpenseItem
     void ChangeAmount(decimal amount);
 }
 
-public struct ExpenseItem(decimal amount) : IExpenseItem
+public class ExpenseItem(decimal amount) : IExpenseItem
 {
-    public ExpenseItem() : this(0)
+    private ExpenseItem() : this(0)
     {
     }
 
+    private const decimal RoundingValue = 0.0000001m;
+
     public decimal Amount { get; private set; } = amount;
+
+    public static ExpenseItem Zero => new();
 
     public void ChangeAmount(decimal amount)
     {
-        ArgumentOutOfRangeException.ThrowIfNegative(Amount + amount);
-        Amount += amount;
+        var newAmount = Amount + amount;
+        if (Math.Abs(newAmount) <= RoundingValue) newAmount = 0;
+        ArgumentOutOfRangeException.ThrowIfNegative(newAmount);
+        Amount = newAmount;
     }
 
     public static implicit operator ExpenseItem(decimal d) => new(d);

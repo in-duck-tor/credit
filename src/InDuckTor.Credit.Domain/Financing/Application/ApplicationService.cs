@@ -25,6 +25,9 @@ public class ApplicationService(
 {
     public async Task<LoanApplication> CreateApplication(NewApplication newApplication)
     {
+        if (newApplication.BorrowedAmount > LoanApplication.MaxLoanSum)
+            throw new Errors.LoanApplication.LoanSumIsTooBig();
+
         // Сюда можно добавить валидацию заявки
         var loanProgram = await loanProgramRepository.GetLoanProgramById(newApplication.LoanProgramId)
                           ?? throw new Errors.LoanProgram.NotFound(newApplication.LoanProgramId);

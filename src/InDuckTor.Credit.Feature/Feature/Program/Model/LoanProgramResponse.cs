@@ -10,14 +10,14 @@ namespace InDuckTor.Credit.Feature.Feature.Program.Model;
 /// <param name="PeriodInterval">Длительность Расчётного Периода в секундах (для интервального графика)</param>
 public record LoanProgramResponse(
     long Id,
-    decimal InterestRate,
+    string InterestRate,
     PaymentType PaymentType,
     PaymentScheduleType PaymentScheduleType,
     long? PeriodInterval)
 {
     public static LoanProgramResponse FromLoanProgram(LoanProgram loanProgram) => new(
         loanProgram.Id,
-        loanProgram.InterestRate * 100,
+        loanProgram.InterestRate * 100 + "%",
         loanProgram.PaymentType,
         loanProgram.PaymentScheduleType,
         loanProgram.PeriodInterval?.Seconds);

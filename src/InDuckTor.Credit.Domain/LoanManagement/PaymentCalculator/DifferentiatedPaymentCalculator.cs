@@ -27,14 +27,18 @@ public class DifferentiatedPaymentCalculator : IPaymentCalculator
         _loan.PeriodAccruals.OneTimePayment += interest;
     }
 
+    public decimal GetPlannedOneTimePayment() => CalculateFixedBody() + CalculatePlannedPeriodInterest();
+
     private decimal CalculateFixedBody()
     {
         var regularFixedBody = _loan.BorrowedAmount / _loan.PlannedPaymentsNumber;
-        if (regularFixedBody <= _loan.Body) return regularFixedBody;
+        if (regularFixedBody <= _loan.CurrentBody) return regularFixedBody;
 
         // Последний платёж
-        return _loan.Body;
+        return _loan.CurrentBody;
     }
+
+    private decimal CalculatePlannedPeriodInterest() => _loan.CurrentBody * _loan.GetPeriodInterestRate();
 
     private static PeriodAccruals NewPeriodAccruals(DateTime startDate, DateTime endDate, decimal fixedBody) => new()
     {

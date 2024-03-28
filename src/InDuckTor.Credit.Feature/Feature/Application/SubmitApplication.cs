@@ -51,7 +51,6 @@ public record LoanApplicationResponse(
 
 public interface ISubmitApplication : ICommand<ApplicationInfoRequest, LoanApplicationResponse>;
 
-[Intercept(typeof(SaveChangesInterceptor<ApplicationInfoRequest, LoanApplicationResponse>))]
 public class SubmitApplication(
     LoanDbContext context,
     IApplicationService applicationService,
@@ -67,6 +66,8 @@ public class SubmitApplication(
         // todo: Создаётся сразу, т.к. у нас нет модерации. В будущем надо создавать либо через джобу, либо сразу после одобрения
         var loan = await createLoan.Execute(application, ct);
 
+        await context.SaveChangesAsync(ct);
+
         return LoanApplicationResponse.FromApplication(application, loan);
     }
 
@@ -78,9 +79,4 @@ public class SubmitApplication(
         LoanTerm = TimeSpan.FromSeconds(infoRequest.LoanTerm),
         ClientAccountNumber = infoRequest.ClientAccountNumber
     };
-
-    private void EnqueueTransferMoneyJob(Domain.LoanManagement.Loan loan)
-    {
-        // BackgroundJob.Enqueue();
-    }
 }

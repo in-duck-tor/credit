@@ -15,6 +15,8 @@ public static class Errors
 
     public class NotFound(string message) : Exception(message);
 
+    public class BadRequest(string message) : Exception(message);
+
     public static class Loan
     {
         public class NotFound(string message) : Errors.NotFound(message)
@@ -39,6 +41,8 @@ public static class Errors
     public static class LoanApplication
     {
         public class NotFound(long id) : Errors.NotFound($"LoanApplication with id '{id}' is not found");
+
+        public class LoanSumIsTooBig(string message = "Sum borrowed by client is too big") : BadRequest(message);
     }
 
     public static class LoanProgram

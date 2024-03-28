@@ -1,4 +1,3 @@
-using System.Linq.Expressions;
 using InDuckTor.Credit.Domain.Expenses;
 using InDuckTor.Credit.Domain.LoanManagement;
 
@@ -46,7 +45,16 @@ public class PeriodBilling
     /// </summary>
     public ExpenseItems? RemainingPayoff { get; set; }
 
-    public bool IsPaid => RemainingPayoff == null;
+    public bool IsPaid
+    {
+        get
+        {
+            if (RemainingPayoff == null) return true;
+            if (RemainingPayoff.GetTotalSum() != 0) return false;
+            RemainingPayoff = null;
+            return true;
+        }
+    }
 
     public decimal TotalRemainingPayment =>
         GetRemainingInterest() + GetRemainingLoanBodyPayoff() + GetRemainingChargingForServices();
@@ -56,6 +64,4 @@ public class PeriodBilling
     public decimal GetRemainingLoanBodyPayoff() => RemainingPayoff?.LoanBodyPayoff ?? 0;
 
     public decimal GetRemainingChargingForServices() => RemainingPayoff?.ChargingForServices ?? 0;
-
-    public decimal GetPaidLoanBody() => ExpenseItems.LoanBodyPayoff - GetRemainingLoanBodyPayoff();
 }

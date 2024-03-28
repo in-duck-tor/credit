@@ -36,20 +36,25 @@ public static class LoanEndpoints
         groupBuilder.MapGet("/{loanId:long}", GetLoanInfoForClient)
             .WithSummary("Получение клиентом информации о конкретном кредите");
 
-        groupBuilder.MapGet("/client/{clientId:long}", GetAllClientLoans)
+        groupBuilder.MapGet("/{loanId:long}/paymentinfo", GetPeriodPaymentInfo)
             .WithSummary("Получение информации обо всех кредитах пользователя");
 
-        groupBuilder.MapPost("/tick", TriggerTick)
-            .WithSummary("Вызвать начисление процентов по кредитам, а также закрытие расчётных периодов/кредитов");
+        groupBuilder.MapGet("/client/{clientId:long}", GetAllClientLoans)
+            .WithSummary("Получение информации обо всех кредитах пользователя");
 
         return builder;
     }
 
-    private static NoContent TriggerTick()
+    [ProducesResponseType(404)]
+    [ProducesResponseType(403)]
+    [ProducesResponseType(401)]
+    [ProducesResponseType<PaymentInfoResponse>(200)]
+    private static async Task<IResult> GetPeriodPaymentInfo(
+        [FromRoute] long loanId,
+        [FromServices] IExecutor<IGetPaymentInfo, long, PaymentInfoResponse> getPeriodPaymentInfo,
+        CancellationToken cancellationToken)
     {
-        BackgroundJob.Enqueue((IExecutor<ILoanInterestTick, Unit, Unit> loanInterestTick) =>
-            loanInterestTick.Execute(default, default));
-        return TypedResults.NoContent();
+        return TypedResults.Ok(await getPeriodPaymentInfo.Execute(loanId, cancellationToken));
     }
 
     [ProducesResponseType(404)]

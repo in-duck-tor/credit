@@ -8,6 +8,9 @@ public class PeriodBillingRepository(LoanDbContext context) : IPeriodBillingRepo
 {
     public async Task<List<PeriodBilling>> GetAllUnpaidPeriodBillings(long loanId)
     {
-        return await context.PeriodsBillings.Where(pb => pb.RemainingPayoff != null).ToListAsync();
+        return await context.PeriodsBillings
+            .Include(pb => pb.Loan)
+            .Where(pb => pb.Loan.Id == loanId && pb.RemainingPayoff != null)
+            .ToListAsync();
     }
 }

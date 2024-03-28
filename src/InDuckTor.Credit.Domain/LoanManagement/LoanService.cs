@@ -57,7 +57,7 @@ public class LoanService(PeriodService periodService, IAccountsRepository accoun
 
     private static NewAccount CreateNewLoanAccount(Loan loan)
     {
-        var extendedLoanTerm = loan.PeriodDuration() * (loan.PlannedPaymentsNumber + 2);
+        var extendedLoanTerm = loan.PeriodDuration * (loan.PlannedPaymentsNumber + 2);
         var plannedExpiration = DateTime.UtcNow.Add(extendedLoanTerm);
         return new NewAccount(loan.ClientId, AccountType.Loan, "RUB", plannedExpiration);
     }

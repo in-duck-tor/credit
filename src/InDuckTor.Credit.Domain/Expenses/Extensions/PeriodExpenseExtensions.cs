@@ -8,22 +8,20 @@ public static class PeriodExpenseExtensions
         PaymentPriority paymentPriority)
     {
         ArgumentNullException.ThrowIfNull(periodBilling.RemainingPayoff);
-        return new PeriodPaymentExpenseItem(periodBilling, paymentPriority,
-            periodBilling.RemainingPayoff.LoanBodyPayoff);
+        return new PrioritizedExpenseItem(paymentPriority, periodBilling.RemainingPayoff.LoanBodyPayoff);
     }
 
     public static IPrioritizedExpenseItem GetInterestItem(this PeriodBilling periodBilling,
         PaymentPriority paymentPriority)
     {
         ArgumentNullException.ThrowIfNull(periodBilling.RemainingPayoff);
-        return new PeriodPaymentExpenseItem(periodBilling, paymentPriority, periodBilling.RemainingPayoff.Interest);
+        return new PrioritizedExpenseItem(paymentPriority, periodBilling.RemainingPayoff.Interest);
     }
 
     public static IPrioritizedExpenseItem GetServicesItem(this PeriodBilling periodBilling,
         PaymentPriority paymentPriority)
     {
         ArgumentNullException.ThrowIfNull(periodBilling.RemainingPayoff);
-        return new PeriodPaymentExpenseItem(periodBilling, paymentPriority,
-            periodBilling.RemainingPayoff.ChargingForServices);
+        return new PrioritizedExpenseItem(paymentPriority, periodBilling.RemainingPayoff.ChargingForServices);
     }
 }

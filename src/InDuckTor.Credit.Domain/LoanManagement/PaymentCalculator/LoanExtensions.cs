@@ -12,7 +12,7 @@ internal static class LoanExtensions
         var now = DateTime.UtcNow;
         var startDate = loan.PeriodAccruals?.PeriodEndDate
                         ?? new DateTime(now.Year, now.Month, now.Day, now.Hour, 0, 0, now.Kind);
-        var endDate = now + loan.PeriodDuration();
+        var endDate = now + loan.PeriodDuration;
         return (startDate, endDate);
     }
 }

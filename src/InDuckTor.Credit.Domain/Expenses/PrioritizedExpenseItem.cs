@@ -1,5 +1,3 @@
-using InDuckTor.Credit.Domain.Billing.Period;
-
 namespace InDuckTor.Credit.Domain.Expenses;
 
 public interface IPrioritizedExpenseItem : IExpenseItem
@@ -22,49 +20,20 @@ public class PrioritizedExpenseItem : IPrioritizedExpenseItem
 
     public void ChangeAmount(decimal amount)
     {
-        ArgumentOutOfRangeException.ThrowIfNegative(Amount + amount);
         ExpenseItem.ChangeAmount(amount);
     }
 }
 
-public class PeriodPaymentExpenseItem : IPrioritizedExpenseItem
+public class ChainedItem : IPrioritizedExpenseItem
 {
-    public PeriodPaymentExpenseItem(PeriodBilling periodBilling, PaymentPriority priority, ExpenseItem expenseItem) :
-        this(
-            periodBilling, new PrioritizedExpenseItem(priority, expenseItem))
-    {
-    }
-
-    public PeriodPaymentExpenseItem(PeriodBilling periodBilling, PrioritizedExpenseItem prioritizedExpenseItem)
+    public ChainedItem(IPrioritizedExpenseItem prioritizedExpenseItem, IExpenseItem chained)
     {
         PrioritizedExpenseItem = prioritizedExpenseItem;
-        PeriodBilling = periodBilling;
-    }
-
-    private PrioritizedExpenseItem PrioritizedExpenseItem { get; }
-    private PeriodBilling PeriodBilling { get; }
-
-    public decimal Amount => PrioritizedExpenseItem.Amount;
-    public PaymentPriority Priority => PrioritizedExpenseItem.Priority;
-
-    public void ChangeAmount(decimal amount)
-    {
-        ArgumentNullException.ThrowIfNull(PeriodBilling.RemainingPayoff);
-        PrioritizedExpenseItem.ChangeAmount(amount);
-        if (PeriodBilling.RemainingPayoff.GetTotalSum() == 0) PeriodBilling.RemainingPayoff = null;
-    }
-}
-
-public class ChainedPrioritizedItem : IPrioritizedExpenseItem
-{
-    public ChainedPrioritizedItem(IPrioritizedExpenseItem prioritizedExpenseItem, IExpenseItem chainedItem)
-    {
-        PrioritizedExpenseItem = prioritizedExpenseItem;
-        ChainedItem = chainedItem;
+        Chained = chained;
     }
 
     private IPrioritizedExpenseItem PrioritizedExpenseItem { get; }
-    private IExpenseItem ChainedItem { get; }
+    private IExpenseItem Chained { get; }
 
     public decimal Amount => PrioritizedExpenseItem.Amount;
     public PaymentPriority Priority => PrioritizedExpenseItem.Priority;
@@ -73,7 +42,7 @@ public class ChainedPrioritizedItem : IPrioritizedExpenseItem
     public void ChangeAmount(decimal amount)
     {
         PrioritizedExpenseItem.ChangeAmount(amount);
-        ChainedItem.ChangeAmount(amount);
+        Chained.ChangeAmount(amount);
     }
 }
 
@@ -89,9 +58,9 @@ public enum PaymentPriority
 
 public static class BillingItemExtensions
 {
-    public static ChainedPrioritizedItem ChainWith(this IPrioritizedExpenseItem prioritized, IExpenseItem item)
+    public static IPrioritizedExpenseItem ChainWith(this IPrioritizedExpenseItem prioritized, IExpenseItem item)
     {
-        return new ChainedPrioritizedItem(prioritized, item);
+        return new ChainedItem(prioritized, item);
     }
 }
 

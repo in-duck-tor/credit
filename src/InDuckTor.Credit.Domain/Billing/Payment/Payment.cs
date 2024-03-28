@@ -44,7 +44,7 @@ public class Payment
 
         foreach (var item in items)
         {
-            if (periodBilling.IsPaid) continue;
+            if (paymentToDistribute == 0 || periodBilling.IsPaid) break;
 
             var min = decimal.Min(paymentToDistribute, item.Amount);
             item.ChangeAmount(-min);
