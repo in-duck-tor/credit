@@ -20,5 +20,5 @@ public record LoanProgramResponse(
         loanProgram.InterestRate * 100 + "%",
         loanProgram.PaymentType,
         loanProgram.PaymentScheduleType,
-        loanProgram.PeriodInterval?.Seconds);
+        (long?)loanProgram.PeriodInterval?.TotalSeconds);
 }

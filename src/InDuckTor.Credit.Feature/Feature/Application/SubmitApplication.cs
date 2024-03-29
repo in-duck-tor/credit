@@ -43,7 +43,7 @@ public record LoanApplicationResponse(
         application.ClientId,
         LoanProgramResponse.FromLoanProgram(application.LoanProgram),
         application.BorrowedAmount,
-        application.LoanTerm.Seconds,
+        (long)application.LoanTerm.TotalSeconds,
         application.ApplicationState,
         LoanInfoResponse.FromLoan(loan)
     );
