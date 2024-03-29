@@ -1,3 +1,4 @@
+using InDuckTor.Credit.Domain.LoanManagement;
 using InDuckTor.Credit.Infrastructure.Config.Database;
 using InDuckTor.Shared.Strategies;
 using Microsoft.EntityFrameworkCore;
@@ -7,7 +8,7 @@ namespace InDuckTor.Credit.Feature.Feature.Loan;
 /// <param name="Id">Id Кредита</param>
 /// <param name="BorrowedAmount">Сумма займа</param>
 /// <param name="InterestRate">Процентная ставка</param>
-/// <param name="PlannedPaymentsNumber">Планируемое число платежей</param>
+/// <param name="State">Статус Кредита</param>
 /// <param name="LoanBody">Остаток по телу кредита</param>
 /// <param name="LoanDebt">Сумма Задолженности по Кредиту</param>
 /// <param name="Penalty">Штраф по Задолженности</param>
@@ -15,7 +16,7 @@ public record LoanInfoShortResponse(
     long Id,
     decimal BorrowedAmount,
     decimal InterestRate,
-    int PlannedPaymentsNumber,
+    LoanState State,
     decimal LoanBody,
     decimal LoanDebt,
     decimal Penalty)
@@ -24,7 +25,7 @@ public record LoanInfoShortResponse(
         loan.Id,
         loan.BorrowedAmount,
         loan.InterestRate,
-        loan.PlannedPaymentsNumber,
+        loan.State,
         loan.CurrentBody,
         loan.Debt,
         loan.Penalty

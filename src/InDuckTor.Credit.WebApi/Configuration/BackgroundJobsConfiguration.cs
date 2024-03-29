@@ -15,7 +15,7 @@ public static class BackgroundJobsConfiguration
         app.UseHangfireDashboard();
         app.MapHangfireDashboard();
 
-        // AddLoanTickJob();
+        AddLoanTickJob();
     }
 
     private static void AddLoanTickJob()

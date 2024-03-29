@@ -36,8 +36,8 @@ public static class LoanEndpoints
         groupBuilder.MapGet("/{loanId:long}", GetLoanInfoForClient)
             .WithSummary("Получение клиентом информации о конкретном кредите");
 
-        groupBuilder.MapGet("/{loanId:long}/paymentinfo", GetPeriodPaymentInfo)
-            .WithSummary("Получение информации обо всех кредитах пользователя");
+        groupBuilder.MapGet("/{loanId:long}/paymentinfo", GetPaymentInfo)
+            .WithSummary("Получение информации о платежу по кредиту");
 
         groupBuilder.MapGet("/client/{clientId:long}", GetAllClientLoans)
             .WithSummary("Получение информации обо всех кредитах пользователя");
@@ -49,7 +49,7 @@ public static class LoanEndpoints
     [ProducesResponseType(403)]
     [ProducesResponseType(401)]
     [ProducesResponseType<PaymentInfoResponse>(200)]
-    private static async Task<IResult> GetPeriodPaymentInfo(
+    private static async Task<IResult> GetPaymentInfo(
         [FromRoute] long loanId,
         [FromServices] IExecutor<IGetPaymentInfo, long, PaymentInfoResponse> getPeriodPaymentInfo,
         CancellationToken cancellationToken)

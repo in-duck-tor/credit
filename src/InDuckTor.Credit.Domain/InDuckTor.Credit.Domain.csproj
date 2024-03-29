@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="inducktor.shared" Version="1.1.4" />
+    <PackageReference Include="inducktor.shared" Version="2.1.4" />
   </ItemGroup>
 
 </Project>

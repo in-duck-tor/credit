@@ -11,7 +11,7 @@ namespace InDuckTor.Credit.Feature.Feature.Loan;
 /// <param name="ClientAccountNumber">Счёт клиента</param>
 /// <param name="ApprovalDate">Дата одобрения кредита</param>
 /// <param name="BorrowingDate">Дата начисления кредитных средств</param>
-/// <param name="PlannedPaymentsNumber">Планируемое число платежей</param>
+/// <param name="State">Статус Кредита</param>
 /// <param name="PaymentType">Тип Платежа</param>
 /// <param name="PeriodInterest">Проценты по текущему периоду</param>
 /// <param name="LoanBody">Остаток по телу кредита</param>
@@ -24,7 +24,7 @@ public record LoanInfoResponse(
     string ClientAccountNumber,
     DateTime ApprovalDate,
     DateTime? BorrowingDate,
-    int PlannedPaymentsNumber,
+    LoanState State,
     PaymentType PaymentType,
     decimal PeriodInterest,
     decimal LoanBody,
@@ -38,7 +38,7 @@ public record LoanInfoResponse(
         loan.ClientAccountNumber,
         loan.ApprovalDate,
         loan.BorrowingDate,
-        loan.PlannedPaymentsNumber,
+        loan.State,
         loan.PaymentType,
         loan.AccruedInterest,
         loan.CurrentBody,
