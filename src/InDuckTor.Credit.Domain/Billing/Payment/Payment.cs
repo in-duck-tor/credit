@@ -28,7 +28,6 @@ public class Payment
     /// <summary>
     /// Сумма Платежа, распределённая на оплату Штрафа 
     /// </summary>
-    // todo: начать сетать
     public ExpenseItem? Penalty { get; set; }
 
     public decimal PaymentToDistribute => PaymentAmount - CalculateDistributedPaymentSum();
@@ -50,7 +49,7 @@ public class Payment
             item.ChangeAmount(-min);
             paymentToDistribute -= min;
 
-            IncreasePaymentExpenseItems(paymentExpenseItems, item.Priority, min);
+            IncreasePaymentExpenseItem(paymentExpenseItems, item.Priority, min);
         }
 
         if (paymentToDistribute == 0) IsDistributed = true;
@@ -58,12 +57,16 @@ public class Payment
 
     private decimal CalculateDistributedPaymentSum() => BillingsPayoffs
         .Select(payoff => payoff.ExpenseItems.GetTotalSum())
-        .Aggregate(0m, (accumulate, periodDistribution) => accumulate + periodDistribution) + (Penalty?.Amount ?? 0m);
+        .Aggregate(0m, (accumulate, periodDistribution) => accumulate + periodDistribution) + (Penalty ?? 0m);
 
-    private void IncreasePaymentExpenseItems(ExpenseItems paymentExpenseItems, PaymentPriority priority, decimal amount)
+    private void IncreasePaymentExpenseItem(ExpenseItems paymentExpenseItems, PaymentPriority priority, decimal amount)
     {
         // todo: отрефакторить: перенести Penalty в один с paymentExpenseItems список. Для этого можно создать отдельный утилитарный класс PaymentExpenseItems
-        if (priority == PaymentPriority.Penalty) Penalty?.ChangeAmount(amount);
+        if (priority == PaymentPriority.Penalty)
+        {
+            Penalty ??= ExpenseItem.Zero;
+            Penalty.ChangeAmount(amount);
+        }
         else paymentExpenseItems.ChangeBasedOnPriority(priority, amount);
     }
 
@@ -94,15 +97,15 @@ public class Payment
 /// </summary>
 public class BillingPayoff
 {
-    public long Id { get; set; }
+    public long Id { get; init; }
 
     /// <summary>
     /// Расчётный Период, к которому относится текущее Погашение 
     /// </summary>
-    public required PeriodBilling PeriodBilling { get; set; }
+    public required PeriodBilling PeriodBilling { get; init; }
 
     /// <summary>
     /// Статьи, по которым распределась часть текущего платежа
     /// </summary>
-    public required ExpenseItems ExpenseItems { get; set; }
+    public required ExpenseItems ExpenseItems { get; init; }
 }

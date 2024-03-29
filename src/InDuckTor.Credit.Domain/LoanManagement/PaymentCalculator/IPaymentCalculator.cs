@@ -6,6 +6,11 @@ namespace InDuckTor.Credit.Domain.LoanManagement.PaymentCalculator;
 public interface IPaymentCalculator
 {
     void StartNewPeriod();
+    void ClosePeriod();
     void AccrueInterestOnCurrentPeriod();
-    decimal GetPlannedOneTimePayment();
+
+    decimal GetCurrentTotalPayment();
+    decimal GetExpectedOneTimePayment();
+    decimal GetExpectedBody();
+    decimal GetExpectedInterest();
 }

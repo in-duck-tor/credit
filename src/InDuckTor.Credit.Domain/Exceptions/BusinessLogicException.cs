@@ -36,6 +36,12 @@ public static class Errors
             : BusinessLogicException(message);
 
         public class InvalidLoanStateChange(string message) : BusinessLogicException(message);
+
+        public class InvalidLoanState(string message) : BusinessLogicException(message)
+        {
+            public static InvalidLoanState Closed(long loanId) =>
+                new InvalidLoanState($"Cannot perform action: the loan with id '{loanId}' is closed");
+        }
     }
 
     public static class LoanApplication
@@ -61,6 +67,9 @@ public static class Errors
         {
             public static InvalidRegularPaymentAmount TooMuch() =>
                 new("Payments exceed the amount of debts and regular payments");
+
+            public static InvalidRegularPaymentAmount NotPositive() =>
+                new("The payment amount must be positive");
         }
 
         public class InvalidPaymentDistributionException(string message) : BusinessLogicException(message);

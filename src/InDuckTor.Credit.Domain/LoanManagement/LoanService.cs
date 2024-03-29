@@ -64,10 +64,13 @@ public class LoanService(PeriodService periodService, IAccountsRepository accoun
 
     private async Task CloseBillingPeriod(Loan loan)
     {
-        // todo: Разобраться, почему изменения в платежах не сохраняются (возможно там используется другой DbContext и нужен Unit of Work)
-        var periodBilling = await periodService.CloseBillingPeriod(loan);
-        loan.AddNewPeriodAndRecalculate(periodBilling);
-        if (loan.IsRepaid) loan.CloseLoan();
+        await periodService.CloseBillingPeriod(loan);
+        if (loan.IsRepaid)
+        {
+            loan.CloseLoan();
+            return;
+        }
+
         loan.StartNewPeriod();
     }
 }

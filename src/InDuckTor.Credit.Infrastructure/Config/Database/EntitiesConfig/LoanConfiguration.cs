@@ -12,6 +12,7 @@ public class LoanConfiguration : IEntityTypeConfiguration<Loan>
         builder.ToTable(nameof(Loan)).HasKey(l => l.Id);
         
         builder.ComplexProperty(lb => lb.CurrentBody, bi => bi.IsRequired());
+        builder.ComplexProperty(lb => lb.BodyAfterPayoffs, bi => bi.IsRequired());
         builder.ComplexProperty(lb => lb.Debt, bi => bi.IsRequired());
         builder.ComplexProperty(lb => lb.Penalty, bi => bi.IsRequired());
 

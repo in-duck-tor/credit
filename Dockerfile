@@ -19,5 +19,5 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0 as runtime
 VOLUME /app/certs
 WORKDIR /app
 COPY --from=build /app/publish .
-ENV ASPNETCORE_URLS=http://*:8080
+ENV ASPNETCORE_URLS=http://*:80
 ENTRYPOINT ["dotnet", "InDuckTor.Credit.WebApi.dll"]

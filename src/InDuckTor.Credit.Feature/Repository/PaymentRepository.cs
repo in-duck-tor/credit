@@ -12,9 +12,12 @@ public class PaymentRepository : IPaymentRepository
     }
 
     private readonly LoanDbContext _context;
-    
+
     public async Task<List<Payment>> GetAllNonDistributedPayments(long loanId)
     {
-        return await _context.Payments.Where(payment => !payment.IsDistributed).ToListAsync();
+        return await _context.Payments
+            .Include(p => p.BillingsPayoffs)
+            .ThenInclude(bp => bp.PeriodBilling)
+            .Where(payment => !payment.IsDistributed).ToListAsync();
     }
 }

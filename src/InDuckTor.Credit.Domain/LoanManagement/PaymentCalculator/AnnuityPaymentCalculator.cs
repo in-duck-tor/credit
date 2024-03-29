@@ -12,35 +12,71 @@ public class AnnuityPaymentCalculator : IPaymentCalculator
     public void StartNewPeriod()
     {
         var (startDate, endDate) = _loan.GetNewPeriodDates();
-        var oneTimePayment = CalculateOneTimePayment();
+        _loan.PeriodAccruals = NewPeriodAccruals(startDate, endDate);
+    }
 
-        _loan.PeriodAccruals = NewPeriodAccruals(startDate, endDate, oneTimePayment);
+    public void ClosePeriod()
+    {
+        var periodAccruals = _loan.PeriodAccruals;
+        ArgumentNullException.ThrowIfNull(periodAccruals);
+        periodAccruals.LoanBodyPayoff = GetExpectedBodyFromInterest(periodAccruals.InterestAccrual);
     }
 
     public void AccrueInterestOnCurrentPeriod()
     {
         var periodAccruals = _loan.PeriodAccruals;
         ArgumentNullException.ThrowIfNull(periodAccruals);
-        
-        var interestAccrual = _loan.CalculateTickInterest();
-        // Добавить изменение тела, если это последний(ие) платёж(и)
-        periodAccruals.InterestAccrual += interestAccrual;
-        periodAccruals.LoanBodyPayoff -= interestAccrual;
+
+        periodAccruals.InterestAccrual += _loan.CalculateTickInterest();
     }
 
-    public decimal GetPlannedOneTimePayment() => CalculateOneTimePayment();
+    public decimal GetCurrentTotalPayment() => _loan.Debt + GetExpectedOneTimePayment();
+
+    public decimal GetExpectedOneTimePayment()
+    {
+        var interest = GetExpectedInterest();
+        var body = GetExpectedBodyFromInterest(interest);
+
+        return body + interest;
+    }
+
+    public decimal GetExpectedBody()
+    {
+        var interest = GetExpectedInterest();
+        var regularOneTimePayment = CalculateRegularOneTimePayment();
+        var regularBody = regularOneTimePayment - interest;
+
+        return Math.Min(_loan.BodyAfterPayoffs, regularBody);
+    }
+
+    public decimal GetExpectedInterest()
+    {
+        var periodAccruals = _loan.PeriodAccruals;
+        var accruedInterest = periodAccruals?.InterestAccrual ?? 0;
+        var periodTimeLeft = (periodAccruals?.PeriodEndDate - DateTime.UtcNow)?.Duration() ?? _loan.PeriodDuration;
+        var numberOfAccrualsLeft = (int)(periodTimeLeft / Loan.InterestAccrualFrequency);
+        var interestAfterPayoffs = _loan.BodyAfterPayoffs * _loan.TickInterestRate * numberOfAccrualsLeft;
+
+        return accruedInterest + interestAfterPayoffs;
+    }
+
+    private decimal GetExpectedBodyFromInterest(decimal interest)
+    {
+        var regularOneTimePayment = CalculateRegularOneTimePayment();
+        var regularBody = regularOneTimePayment - interest;
+
+        return Math.Min(_loan.BodyAfterPayoffs, regularBody);
+    }
 
     // Если ввести округление, то платёж также нужно будет распределять на округление.
     // То есть после распределения по процентам и телу, нужно будет распределить платёж по сумме округления.
     // Скорее всего сумма округления должна быть отдельной категорией, то есть отдельным столбцом.
     private decimal CalculateOneTimePayment()
     {
-        var periodInterestRate = (double)_loan.GetPeriodInterestRate();
-        var k = (decimal)(periodInterestRate / (1 - Math.Pow(1 + periodInterestRate, -_loan.PlannedPaymentsNumber)));
-        var regularOneTimePayment = _loan.BorrowedAmount * k;
+        var regularOneTimePayment = CalculateRegularOneTimePayment();
 
         // добавить расчёт тела на текущий период
-        var periodInterest = _loan.CurrentBody * _loan.GetPeriodInterestRate();
+        var periodInterest = _loan.CurrentBody * _loan.PeriodInterestRate;
         var regularPaymentBody = regularOneTimePayment - periodInterest;
 
         if (regularPaymentBody <= _loan.CurrentBody) return regularOneTimePayment;
@@ -49,13 +85,19 @@ public class AnnuityPaymentCalculator : IPaymentCalculator
         return _loan.CurrentBody + periodInterest;
     }
 
-    private static PeriodAccruals NewPeriodAccruals(DateTime startDate, DateTime endDate, decimal oneTimePayment) =>
+    private decimal CalculateRegularOneTimePayment()
+    {
+        var periodInterestRate = (double)_loan.PeriodInterestRate;
+        var k = (decimal)(periodInterestRate / (1 - Math.Pow(1 + periodInterestRate, -_loan.PlannedPaymentsNumber)));
+        return _loan.BorrowedAmount * k;
+    }
+
+    private static PeriodAccruals NewPeriodAccruals(DateTime startDate, DateTime endDate) =>
         new()
         {
             PeriodStartDate = startDate,
             PeriodEndDate = endDate,
-            OneTimePayment = oneTimePayment,
-            LoanBodyPayoff = oneTimePayment,
+            LoanBodyPayoff = 0,
             InterestAccrual = 0,
             ChargingForServices = 0
         };

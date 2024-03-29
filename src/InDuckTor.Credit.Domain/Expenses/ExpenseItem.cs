@@ -27,5 +27,5 @@ public class ExpenseItem(decimal amount) : IExpenseItem
     }
 
     public static implicit operator ExpenseItem(decimal d) => new(d);
-    public static implicit operator decimal(ExpenseItem b) => b.Amount;
+    public static implicit operator decimal(ExpenseItem ei) => ei.Amount;
 }

@@ -42,8 +42,5 @@ public class PeriodAccruals
     /// </summary>
     public decimal ChargingForServices { get; set; }
 
-    /// <summary>
-    /// <b>Сумма единовременного Платежа</b>
-    /// </summary>
-    public decimal OneTimePayment { get; set; }
+    public decimal CurrentOneTimePayment => InterestAccrual + LoanBodyPayoff + ChargingForServices;
 }

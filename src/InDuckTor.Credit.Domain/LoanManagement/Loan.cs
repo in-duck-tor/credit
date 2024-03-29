@@ -12,9 +12,16 @@ public class Loan
     private const int DaysInRegularYear = 365;
     private const int DaysInLeapYear = 364;
 
+    private static readonly TimeSpan YearDuration = TimeSpan.FromDays(
+        DateTime.IsLeapYear(DateTime.UtcNow.Year) ? DaysInLeapYear : DaysInRegularYear
+    );
+
     public static TimeSpan InterestAccrualFrequency { get; } = new(0, 1, 0);
 
-    public Loan()
+    // ReSharper disable once UnusedMember.Local
+#pragma warning disable CS8618
+    private Loan()
+#pragma warning restore CS8618
     {
         // EF Core constructor
         _paymentCalculator = InitPaymentCalculator();
@@ -35,6 +42,8 @@ public class Loan
         PlannedPaymentsNumber = CalculatePaymentsNumber(newLoan);
         CurrentBody = newLoan.BorrowedAmount;
         BodyAfterPayoffs = newLoan.BorrowedAmount;
+        Debt = ExpenseItem.Zero;
+        Penalty = ExpenseItem.Zero;
 
         _paymentCalculator = InitPaymentCalculator();
     }
@@ -76,6 +85,7 @@ public class Loan
     /// <summary>
     /// <b>Статус Кредита</b>
     /// </summary>
+    // todo: реализовать паттерн State для всех состояний, чтобы избежать использования методов, запрещённых для разных состояний кредита
     public LoanState State { get; private set; }
 
     /// <summary>
@@ -100,20 +110,20 @@ public class Loan
     /// <summary>
     /// <b>Остаток по телу кредита</b>
     /// </summary>
-    public ExpenseItem CurrentBody { get; set; }
+    public ExpenseItem CurrentBody { get; init; }
 
-    public ExpenseItem BodyAfterPayoffs { get; set; }
+    public ExpenseItem BodyAfterPayoffs { get; init; }
 
     // todo: узнать, как работает погашение на самом деле: гасится полностью категория в рамках кредита или в рамках расчётного периода
     /// <summary>
-    /// <b>Сумма Задолженности по Кредиту</b>
+    /// <b>Сумма Задолженности по Кредиту</b>. В неё входит задолженность по телу и процентам.
     /// </summary>
-    public ExpenseItem Debt { get; private set; } = ExpenseItem.Zero;
+    public ExpenseItem Debt { get; init; }
 
     /// <summary>
     /// <b>Штраф по Задолженности</b>
     /// </summary>
-    public ExpenseItem Penalty { get; private set; } = ExpenseItem.Zero;
+    public ExpenseItem Penalty { get; init; }
 
     /// <summary>
     /// Процент Штрафа
@@ -145,35 +155,55 @@ public class Loan
     }
 
     // Возмонжо стоит определять не годовой процент, а процент для минимального срока взятия кредита
-    public decimal GetPeriodInterestRate() => InterestRate / (decimal)NumberOfPeriodsPerYear();
+    public decimal PeriodInterestRate => InterestRate / (decimal)(YearDuration / PeriodDuration);
+    public decimal TickInterestRate => InterestRate / (decimal)(YearDuration / InterestAccrualFrequency);
+    public ExpenseItem AccruedInterest => PeriodAccruals?.InterestAccrual ?? 0;
 
     public void StartNewPeriod()
     {
+        if (State == LoanState.Closed) throw Errors.Loan.InvalidLoanState.Closed(Id);
         if (PeriodAccruals != null && !IsCurrentPeriodEnded())
             throw Errors.Loan.CannotStartNewPeriod.NotEndedYet();
         _paymentCalculator.StartNewPeriod();
     }
 
-    public decimal GetPlannedOneTimePayment() => _paymentCalculator.GetPlannedOneTimePayment();
+    public PeriodBilling ClosePeriod()
+    {
+        ArgumentNullException.ThrowIfNull(PeriodAccruals);
+
+        _paymentCalculator.ClosePeriod();
+
+        var billingItems = new ExpenseItems(
+            PeriodAccruals.InterestAccrual,
+            PeriodAccruals.LoanBodyPayoff,
+            PeriodAccruals.ChargingForServices);
+
+        var periodBilling = new PeriodBilling
+        {
+            Loan = this,
+            PeriodStartDate = PeriodAccruals.PeriodStartDate,
+            PeriodEndDate = PeriodAccruals.PeriodEndDate,
+            OneTimePayment = PeriodAccruals.CurrentOneTimePayment,
+            ExpenseItems = billingItems,
+            RemainingPayoff = billingItems.DeepCopy(),
+        };
+
+        PeriodsBillings.Add(periodBilling);
+        BodyAfterPayoffs.ChangeAmount(-periodBilling.ExpenseItems.LoanBodyPayoff);
+
+        return periodBilling;
+    }
+
+    public decimal GetCurrentTotalPayment() => _paymentCalculator.GetCurrentTotalPayment();
+    public decimal GetExpectedOneTimePayment() => _paymentCalculator.GetExpectedOneTimePayment();
 
     public void AccrueInterestOnCurrentPeriod() => _paymentCalculator.AccrueInterestOnCurrentPeriod();
 
-    public decimal CalculateTickInterest() =>
-        CurrentBody * (InterestRate / (decimal)(NumberOfPeriodsPerYear() * PeriodDuration / InterestAccrualFrequency));
+    public decimal CalculateTickInterest() => CurrentBody * TickInterestRate;
 
     public void ChargePenalty()
     {
-        Penalty += Debt * PenaltyRate;
-    }
-
-    public void AddNewPeriodAndRecalculate(PeriodBilling periodBilling)
-    {
-        PeriodsBillings.Add(periodBilling);
-        BodyAfterPayoffs -= periodBilling.ExpenseItems.LoanBodyPayoff;
-
-        if (!periodBilling.IsDebt) return;
-
-        Debt += periodBilling.GetRemainingInterest() + periodBilling.GetRemainingLoanBodyPayoff();
+        Penalty.ChangeAmount(Debt * PenaltyRate);
     }
 
     public void AttachLoanAccount(string accountNumber)
@@ -197,9 +227,7 @@ public class Loan
     public void CloseLoan()
     {
         if (!IsRepaid)
-        {
             throw new Errors.Loan.InvalidLoanStateChange("Can't close the loan because it hasn't been repaid yet");
-        }
 
         State = LoanState.Closed;
     }
@@ -221,53 +249,6 @@ public class Loan
             PaymentType.Differentiated => new DifferentiatedPaymentCalculator(this),
             _ => throw new ArgumentOutOfRangeException(nameof(PaymentType))
         };
-    }
-
-    private double NumberOfPeriodsPerYear()
-    {
-        var yearDuration = TimeSpan.FromDays(
-            DateTime.IsLeapYear(DateTime.UtcNow.Year) ? DaysInLeapYear : DaysInRegularYear
-        );
-        var numberOfPeriodsPerYear = yearDuration / PeriodDuration;
-        return numberOfPeriodsPerYear;
-    }
-}
-
-public static class TimeSpanExtensions
-{
-    public static string ToCron(this TimeSpan timeSpan)
-    {
-        List<string> cron = ["*", "*", "*", "*", "*"];
-
-        string.Format("{1} {2} {3} {4} {5}",
-            timeSpan.Days
-        );
-        return "";
-    }
-}
-
-public class D
-{
-    public static void Main()
-    {
-        // var interestAccrualFreq = new TimeSpan(1, 0, 0, 0);
-        var interestAccrualFreq = new TimeSpan(10, 0, 2, 30);
-        var loanSpan = new TimeSpan(20, 0, 4, 28);
-
-        var c = loanSpan / interestAccrualFreq;
-        var cRounded = Math.Round(c);
-        var realLoanSpan = interestAccrualFreq * cRounded;
-
-        Console.WriteLine(c);
-        Console.WriteLine(c % 1);
-        Console.WriteLine(cRounded);
-        Console.WriteLine(realLoanSpan);
-
-        var time = new TimeSpan(-10, 10, 10);
-        Console.WriteLine(time);
-        Console.WriteLine(time.Duration());
-
-        Console.WriteLine((int)Math.Round(new TimeSpan(860, 0, 0, 0).Days / (double)30));
     }
 }
 

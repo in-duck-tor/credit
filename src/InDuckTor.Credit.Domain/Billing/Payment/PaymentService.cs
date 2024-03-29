@@ -45,6 +45,34 @@ public class PaymentService : IPaymentService
         _loanRepository = loanRepository;
     }
 
+    public async Task<Payment> CreatePayment(NewPayment newPayment, CancellationToken cancellationToken)
+    {
+        if (newPayment.PaymentAmount <= 0) throw Errors.Payment.InvalidRegularPaymentAmount.NotPositive();
+        
+        var isExists = await _loanRepository.IsExists(newPayment.LoanId,
+            newPayment.ClientId,
+            cancellationToken);
+
+        if (!isExists) throw new Errors.Loan.NotFound("Loan with specified client id and loan id is not found");
+
+        var loan = await _loanRepository.GetById(newPayment.LoanId, cancellationToken)
+                   ?? throw new Errors.Loan.NotFound(newPayment.LoanId);
+        var undistributedPayments = await _paymentRepository.GetAllNonDistributedPayments(loan.Id);
+
+        var totalRemainingPayment = loan.GetCurrentTotalPayment();
+        var totalPaymentToDistributeSum = undistributedPayments.Select(p => p.PaymentToDistribute).Sum();
+
+        if (newPayment.PaymentAmount > totalRemainingPayment - totalPaymentToDistributeSum)
+            throw Errors.Payment.InvalidRegularPaymentAmount.TooMuch();
+
+        return new Payment
+        {
+            LoanId = newPayment.LoanId,
+            ClientId = newPayment.ClientId,
+            PaymentAmount = newPayment.PaymentAmount
+        };
+    }
+
     public async Task DistributePaymentsForNewPeriod(long loanId, PeriodBilling periodBilling)
     {
         var payments = await _paymentRepository.GetAllNonDistributedPayments(loanId);
@@ -58,30 +86,7 @@ public class PaymentService : IPaymentService
 
         if (unpaidPeriods.Count == 0) return;
 
-        var totalRemainingPayment = unpaidPeriods
-            .Select(periodBilling => periodBilling.TotalRemainingPayment)
-            .Sum() + loan.GetPlannedOneTimePayment();
-
-        if (payment.PaymentToDistribute > totalRemainingPayment)
-            throw Errors.Payment.InvalidRegularPaymentAmount.TooMuch();
-
         DistributePayments(loan, [payment], unpaidPeriods);
-    }
-
-    public async Task<Payment> CreatePayment(NewPayment newPayment, CancellationToken cancellationToken)
-    {
-        var isExists = await _loanRepository.IsExists(newPayment.LoanId,
-            newPayment.ClientId,
-            cancellationToken);
-
-        if (!isExists) throw new Errors.Loan.NotFound("Loan with specified client id and loan id is not found");
-
-        return new Payment
-        {
-            LoanId = newPayment.LoanId,
-            ClientId = newPayment.ClientId,
-            PaymentAmount = newPayment.PaymentAmount
-        };
     }
 
     /// <summary>
@@ -113,7 +118,7 @@ public class PaymentService : IPaymentService
 
             if (!payment.IsDistributed && !period.IsPaid)
                 throw new Errors.Payment.InvalidPaymentDistributionException(
-                    "Платёж не может быть не распределён при неоплаченном периоде");
+                    "The payment cannot be undistributed for an unpaid period");
 
             if (payment.IsDistributed)
             {
