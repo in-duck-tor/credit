@@ -1,5 +1,6 @@
 using InDuckTor.Credit.Feature.Feature.Program;
 using InDuckTor.Credit.Feature.Feature.Program.Model;
+using InDuckTor.Credit.WebApi.Configuration.Exceptions;
 using InDuckTor.Shared.Models;
 using InDuckTor.Shared.Strategies;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -25,6 +26,7 @@ public static class LoanProgramEndpoints
     }
 
     // В будущем добавить эндпонит на получение доступных только клиенту программ кредитования
+    [ProducesResponseType<ErrorResponse>(500)]
     [ProducesResponseType<List<LoanProgramResponse>>(200)]
     private static async Task<IResult> GetAllLoanPrograms(
         [FromServices] IExecutor<IGetAllLoanPrograms, Unit, List<LoanProgramResponse>> getAllLoanPrograms,
@@ -35,6 +37,8 @@ public static class LoanProgramEndpoints
     }
 
     // Здесь должна быть проверка прав вызывающего
+    [ProducesResponseType<ErrorResponse>(500)]
+    [ProducesResponseType<ErrorResponse>(401)]
     [ProducesResponseType<LoanProgramResponse>(200)]
     private static async Task<IResult> CreateLoanProgram(
         [FromBody] LoanProgramInfoRequest body,

@@ -2,6 +2,7 @@ using InDuckTor.Credit.Domain.Billing.Period;
 using InDuckTor.Credit.Feature.Feature.Loan;
 using InDuckTor.Credit.Feature.Feature.Loan.Payment;
 using InDuckTor.Credit.Feature.Feature.Loan.Payment.Models;
+using InDuckTor.Credit.WebApi.Configuration.Exceptions;
 using InDuckTor.Credit.WebApi.Contracts.Bodies;
 using InDuckTor.Shared.Models;
 using InDuckTor.Shared.Strategies;
@@ -46,9 +47,10 @@ public static class LoanEndpoints
         return builder;
     }
 
-    [ProducesResponseType(404)]
-    [ProducesResponseType(403)]
-    [ProducesResponseType(401)]
+    [ProducesResponseType<ErrorResponse>(500)]
+    [ProducesResponseType<ErrorResponse>(404)]
+    [ProducesResponseType<ErrorResponse>(403)]
+    [ProducesResponseType<ErrorResponse>(401)]
     [ProducesResponseType<PaymentInfoResponse>(200)]
     private static async Task<IResult> GetPaymentInfo(
         [FromRoute] long loanId,
@@ -58,9 +60,10 @@ public static class LoanEndpoints
         return TypedResults.Ok(await getPeriodPaymentInfo.Execute(loanId, cancellationToken));
     }
 
-    [ProducesResponseType(404)]
-    [ProducesResponseType(403)]
-    [ProducesResponseType(401)]
+    [ProducesResponseType<ErrorResponse>(500)]
+    [ProducesResponseType<ErrorResponse>(404)]
+    [ProducesResponseType<ErrorResponse>(403)]
+    [ProducesResponseType<ErrorResponse>(401)]
     [ProducesResponseType<List<PeriodInfo>>(200)]
     private static async Task<IResult> GetOverduePeriods(
         [FromRoute] long loanId,
@@ -70,9 +73,10 @@ public static class LoanEndpoints
         return TypedResults.Ok(await getOverduePeriods.Execute(loanId, cancellationToken));
     }
 
-    [ProducesResponseType(404)]
-    [ProducesResponseType(403)]
-    [ProducesResponseType(401)]
+    [ProducesResponseType<ErrorResponse>(500)]
+    [ProducesResponseType<ErrorResponse>(404)]
+    [ProducesResponseType<ErrorResponse>(403)]
+    [ProducesResponseType<ErrorResponse>(401)]
     [ProducesResponseType(204)]
     private static async Task<IResult> PayRegularly(
         [FromRoute] long loanId,
@@ -85,9 +89,10 @@ public static class LoanEndpoints
         return TypedResults.NoContent();
     }
 
-    [ProducesResponseType(404)]
-    [ProducesResponseType(403)]
-    [ProducesResponseType(401)]
+    [ProducesResponseType<ErrorResponse>(500)]
+    [ProducesResponseType<ErrorResponse>(404)]
+    [ProducesResponseType<ErrorResponse>(403)]
+    [ProducesResponseType<ErrorResponse>(401)]
     [ProducesResponseType(204)]
     private static Task<IResult> PayEarly(
         [FromRoute] long loanId,
@@ -97,8 +102,9 @@ public static class LoanEndpoints
         throw new NotImplementedException();
     }
 
-    [ProducesResponseType(404)]
-    [ProducesResponseType(403)]
+    [ProducesResponseType<ErrorResponse>(500)]
+    [ProducesResponseType<ErrorResponse>(404)]
+    [ProducesResponseType<ErrorResponse>(403)]
     [ProducesResponseType<LoanInfoResponse>(200)]
     private static async Task<IResult> GetLoanInfoForClient(
         [FromRoute] long loanId,
@@ -108,7 +114,8 @@ public static class LoanEndpoints
         return TypedResults.Ok(await getLoanInfo.Execute(loanId, cancellationToken));
     }
 
-    [ProducesResponseType(404)]
+    [ProducesResponseType<ErrorResponse>(500)]
+    [ProducesResponseType<ErrorResponse>(404)]
     [ProducesResponseType<List<LoanInfoShortResponse>>(200)]
     private static async Task<IResult> GetAllClientLoans(
         [FromRoute] long clientId,

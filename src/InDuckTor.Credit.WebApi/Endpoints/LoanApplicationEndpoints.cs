@@ -1,4 +1,5 @@
 using InDuckTor.Credit.Feature.Feature.Application;
+using InDuckTor.Credit.WebApi.Configuration.Exceptions;
 using InDuckTor.Shared.Strategies;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -35,7 +36,8 @@ public static class LoanApplicationEndpoints
         return builder;
     }
 
-    [ProducesResponseType(404)]
+    [ProducesResponseType<ErrorResponse>(500)]
+    [ProducesResponseType<ErrorResponse>(404)]
     [ProducesResponseType<LoanApplicationResponse>(200)]
     private static async Task<IResult> CreateApplication(
         [FromBody] ApplicationInfoRequest body,
