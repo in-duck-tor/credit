@@ -30,7 +30,7 @@ public class AnnuityPaymentCalculator : IPaymentCalculator
         periodAccruals.InterestAccrual += _loan.CalculateTickInterest();
     }
 
-    public decimal GetCurrentTotalPayment() => _loan.Debt + GetExpectedOneTimePayment();
+    public decimal GetCurrentTotalPayment() => _loan.Penalty + _loan.Debt + GetExpectedOneTimePayment();
 
     public decimal GetExpectedOneTimePayment()
     {

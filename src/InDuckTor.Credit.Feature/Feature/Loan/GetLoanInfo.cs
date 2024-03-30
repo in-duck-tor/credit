@@ -19,17 +19,17 @@ namespace InDuckTor.Credit.Feature.Feature.Loan;
 /// <param name="Penalty">Штраф по Задолженности</param>
 public record LoanInfoResponse(
     long Id,
-    decimal BorrowedAmount,
+    MoneyView BorrowedAmount,
     string InterestRate,
     string ClientAccountNumber,
     DateTime ApprovalDate,
     DateTime? BorrowingDate,
     LoanState State,
     PaymentType PaymentType,
-    decimal PeriodInterest,
-    decimal LoanBody,
-    decimal LoanDebt,
-    decimal Penalty)
+    MoneyView PeriodInterest,
+    MoneyView LoanBody,
+    MoneyView LoanDebt,
+    MoneyView Penalty)
 {
     public static LoanInfoResponse FromLoan(Domain.LoanManagement.Loan loan) => new(
         loan.Id,

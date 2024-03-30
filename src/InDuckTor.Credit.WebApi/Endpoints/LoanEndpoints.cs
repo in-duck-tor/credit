@@ -7,6 +7,7 @@ using InDuckTor.Credit.WebApi.Contracts.Bodies;
 using InDuckTor.Shared.Models;
 using InDuckTor.Shared.Strategies;
 using Microsoft.AspNetCore.Mvc;
+using PaymentInfoResponse = InDuckTor.Credit.Feature.Feature.Loan.Payment.PaymentInfoResponse;
 
 namespace InDuckTor.Credit.WebApi.Endpoints;
 
@@ -64,10 +65,10 @@ public static class LoanEndpoints
     [ProducesResponseType<ErrorResponse>(404)]
     [ProducesResponseType<ErrorResponse>(403)]
     [ProducesResponseType<ErrorResponse>(401)]
-    [ProducesResponseType<List<PeriodInfo>>(200)]
+    [ProducesResponseType<List<PeriodInfoResponse>>(200)]
     private static async Task<IResult> GetOverduePeriods(
         [FromRoute] long loanId,
-        [FromServices] IExecutor<IGetOverduePeriods, long, List<PeriodInfo>> getOverduePeriods,
+        [FromServices] IExecutor<IGetOverduePeriods, long, List<PeriodInfoResponse>> getOverduePeriods,
         CancellationToken cancellationToken)
     {
         return TypedResults.Ok(await getOverduePeriods.Execute(loanId, cancellationToken));
@@ -81,10 +82,11 @@ public static class LoanEndpoints
     private static async Task<IResult> PayRegularly(
         [FromRoute] long loanId,
         [FromBody] RegularPayBody body,
-        [FromServices] IExecutor<ISubmitRegularPayment, PaymentSubmission, Unit> submitRegularPayment,
+        [FromServices]
+        IExecutor<ISubmitRegularPayment, PaymentSubmissionRequest, PaymentInfoResponse> submitRegularPayment,
         CancellationToken cancellationToken)
     {
-        var submission = new PaymentSubmission(loanId, body.ClientId, body.Payment);
+        var submission = new PaymentSubmissionRequest(loanId, body.ClientId, body.Payment);
         await submitRegularPayment.Execute(submission, cancellationToken);
         return TypedResults.NoContent();
     }

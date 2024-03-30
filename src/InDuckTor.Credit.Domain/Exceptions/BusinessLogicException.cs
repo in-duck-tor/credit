@@ -69,8 +69,10 @@ public static class Errors
             public static InvalidRegularPaymentAmount TooMuch() =>
                 new("Payments exceed the amount of debts and regular payments");
 
-            public static InvalidRegularPaymentAmount NotPositive() =>
-                new("The payment amount must be positive");
+            public static void ThrowIfNotPositive(decimal amount)
+            {
+                if (amount <= 0) throw new InvalidRegularPaymentAmount("The payment amount must be positive");
+            }
         }
 
         public class InvalidPaymentDistributionException(string message) : BusinessLogicException(message);

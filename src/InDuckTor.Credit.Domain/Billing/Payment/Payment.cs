@@ -1,4 +1,5 @@
 using InDuckTor.Credit.Domain.Billing.Period;
+using InDuckTor.Credit.Domain.Exceptions;
 using InDuckTor.Credit.Domain.Expenses;
 
 namespace InDuckTor.Credit.Domain.Billing.Payment;
@@ -8,22 +9,34 @@ namespace InDuckTor.Credit.Domain.Billing.Payment;
 /// </summary>
 public class Payment
 {
-    public long Id { get; init; }
+    public Payment(long loanId, long clientId, decimal paymentAmount)
+    {
+        Errors.Payment.InvalidRegularPaymentAmount.ThrowIfNotPositive(paymentAmount);
 
-    public required long LoanId { get; init; }
-    public required long ClientId { get; init; }
+        LoanId = loanId;
+        ClientId = clientId;
+        PaymentAmount = paymentAmount;
+
+        IsDistributed = false;
+        BillingsPayoffs = [];
+        Penalty = null;
+    }
+
+    public long Id { get; init; }
+    public long LoanId { get; init; }
+    public long ClientId { get; init; }
 
     /// <summary>
     /// <b>Сумма Платежа</b>
     /// </summary>
-    public required decimal PaymentAmount { get; init; }
+    public decimal PaymentAmount { get; init; }
 
     public bool IsDistributed { get; set; }
 
     /// <summary>
     /// Погашения за Период, относящиеся к данному Платежу
     /// </summary>
-    public List<BillingPayoff> BillingsPayoffs { get; } = [];
+    public List<BillingPayoff> BillingsPayoffs { get; }
 
     /// <summary>
     /// Сумма Платежа, распределённая на оплату Штрафа 

@@ -8,23 +8,23 @@ namespace InDuckTor.Credit.Feature.Feature.Loan;
 /// <param name="PeriodEndDate">Дата окончания периода</param>
 /// <param name="OneTimePayment">Сумма единовременного платежа по периоду</param>
 /// <param name="RemainingPayment">Оставшийся платёж по периоду</param>
-public record PeriodInfo(
+public record PeriodInfoResponse(
     DateTime PeriodStartDate,
     DateTime PeriodEndDate,
-    decimal OneTimePayment,
-    decimal RemainingPayment);
+    MoneyView OneTimePayment,
+    MoneyView RemainingPayment);
 
-public interface IGetOverduePeriods : IQuery<long, List<PeriodInfo>>;
+public interface IGetOverduePeriods : IQuery<long, List<PeriodInfoResponse>>;
 
 public class GetOverduePeriods(LoanDbContext context) : IGetOverduePeriods
 {
     // todo: Добавить проверку id клиента из токена
-    public async Task<List<PeriodInfo>> Execute(long loanId, CancellationToken ct)
+    public async Task<List<PeriodInfoResponse>> Execute(long loanId, CancellationToken ct)
     {
         return await context.PeriodsBillings
             .Where(pb => pb.Loan.Id == loanId && pb.IsDebt)
             .Select(pb =>
-                new PeriodInfo(pb.PeriodStartDate, pb.PeriodEndDate, pb.OneTimePayment, pb.TotalRemainingPayment))
+                new PeriodInfoResponse(pb.PeriodStartDate, pb.PeriodEndDate, pb.OneTimePayment, pb.TotalRemainingPayment))
             .ToListAsync(ct);
     }
 }

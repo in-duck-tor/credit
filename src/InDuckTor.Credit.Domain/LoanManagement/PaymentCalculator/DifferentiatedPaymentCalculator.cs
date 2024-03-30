@@ -31,7 +31,7 @@ public class DifferentiatedPaymentCalculator : IPaymentCalculator
         _loan.PeriodAccruals.InterestAccrual += _loan.CalculateTickInterest();
     }
 
-    public decimal GetCurrentTotalPayment() => _loan.Debt + GetExpectedOneTimePayment();
+    public decimal GetCurrentTotalPayment() => _loan.Penalty + _loan.Debt + GetExpectedOneTimePayment();
 
     public decimal GetExpectedOneTimePayment() => GetExpectedBody() + GetExpectedInterest();
 

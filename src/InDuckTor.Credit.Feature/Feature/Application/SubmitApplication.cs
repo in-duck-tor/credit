@@ -15,7 +15,7 @@ namespace InDuckTor.Credit.Feature.Feature.Application;
 public record ApplicationInfoRequest(
     long ClientId,
     long LoanProgramId,
-    decimal BorrowedAmount,
+    MoneyView BorrowedAmount,
     long LoanTerm,
     string ClientAccountNumber);
 
@@ -30,7 +30,7 @@ public record LoanApplicationResponse(
     long Id,
     long ClientId,
     LoanProgramResponse LoanProgram,
-    decimal BorrowedAmount,
+    MoneyView BorrowedAmount,
     long LoanTerm,
     ApplicationState ApplicationState,
     // todo: разделить на несколько запросов

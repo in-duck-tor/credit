@@ -8,6 +8,8 @@ namespace InDuckTor.Credit.Domain.Billing.Payment;
 
 public interface IPaymentService
 {
+    Task<Payment> CreatePayment(Loan loan, NewPayment newPayment, CancellationToken cancellationToken);
+
     // В идеале, т.к. в реальном банке расчётные периоды закрываются каждый день, при закрытии нового периода создавать
     // таску, которая позже будет обработана. При этом, чтобы не начислить лишние проценты и не приписать долг в период,
     // нужно проверить, есть ли у пользователя нераспределённые платежи, а также создать механизм перерасчёта процентов,
@@ -26,51 +28,38 @@ public interface IPaymentService
     /// <param name="loan">Кредит, для которого распределяется Платёж</param>
     /// <param name="payment">Платёж, который нужно распределить</param>
     Task DistributePayment(Loan loan, Payment payment);
-
-    Task<Payment> CreatePayment(NewPayment newPayment, CancellationToken cancellationToken);
 }
 
 public class PaymentService : IPaymentService
 {
     private readonly IPaymentRepository _paymentRepository;
     private readonly IPeriodBillingRepository _periodBillingRepository;
-    private readonly ILoanRepository _loanRepository;
 
     public PaymentService(IPaymentRepository paymentRepository,
-        IPeriodBillingRepository periodBillingRepository,
-        ILoanRepository loanRepository)
+        IPeriodBillingRepository periodBillingRepository)
     {
         _paymentRepository = paymentRepository;
         _periodBillingRepository = periodBillingRepository;
-        _loanRepository = loanRepository;
     }
 
-    public async Task<Payment> CreatePayment(NewPayment newPayment, CancellationToken cancellationToken)
+    public async Task<Payment> CreatePayment(Loan loan, NewPayment newPayment, CancellationToken cancellationToken)
     {
-        if (newPayment.PaymentAmount <= 0) throw Errors.Payment.InvalidRegularPaymentAmount.NotPositive();
-        
-        var isExists = await _loanRepository.IsExists(newPayment.LoanId,
-            newPayment.ClientId,
-            cancellationToken);
+        Errors.Payment.InvalidRegularPaymentAmount.ThrowIfNotPositive(newPayment.PaymentAmount);
 
-        if (!isExists) throw new Errors.Loan.NotFound("Loan with specified client id and loan id is not found");
+        if (loan.Id != newPayment.LoanId || loan.ClientId != newPayment.ClientId)
+            throw new Errors.Loan.NotFound("Loan with specified client id and loan id is not found");
 
-        var loan = await _loanRepository.GetById(newPayment.LoanId, cancellationToken)
-                   ?? throw new Errors.Loan.NotFound(newPayment.LoanId);
         var undistributedPayments = await _paymentRepository.GetAllNonDistributedPayments(loan.Id);
 
         var totalRemainingPayment = loan.GetCurrentTotalPayment();
         var totalPaymentToDistributeSum = undistributedPayments.Select(p => p.PaymentToDistribute).Sum();
+        var currentMaxPayment = totalRemainingPayment - totalPaymentToDistributeSum;
 
-        if (newPayment.PaymentAmount > totalRemainingPayment - totalPaymentToDistributeSum)
-            throw Errors.Payment.InvalidRegularPaymentAmount.TooMuch();
+        var realPaymentAmount = newPayment.PaymentAmount > currentMaxPayment
+            ? currentMaxPayment
+            : newPayment.PaymentAmount;
 
-        return new Payment
-        {
-            LoanId = newPayment.LoanId,
-            ClientId = newPayment.ClientId,
-            PaymentAmount = newPayment.PaymentAmount
-        };
+        return new Payment(newPayment.LoanId, newPayment.ClientId, realPaymentAmount);
     }
 
     public async Task DistributePaymentsForNewPeriod(long loanId, PeriodBilling periodBilling)
