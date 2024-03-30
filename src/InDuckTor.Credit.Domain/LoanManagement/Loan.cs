@@ -138,18 +138,16 @@ public class Loan
     /// </summary>
     public PeriodAccruals? PeriodAccruals { get; set; }
 
-
     private readonly IPaymentCalculator _paymentCalculator;
 
     public bool IsRepaid => CurrentBody + Debt + Penalty == 0;
 
     public TimeSpan PeriodDuration
     {
+        // todo: Добавить вариант для календарного графика
         get
         {
             ArgumentNullException.ThrowIfNull(PeriodInterval);
-
-            // todo: Добавить вариант для календарного графика
             return PeriodInterval.Value;
         }
     }

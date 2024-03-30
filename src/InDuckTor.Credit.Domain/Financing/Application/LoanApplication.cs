@@ -8,7 +8,7 @@ namespace InDuckTor.Credit.Domain.Financing.Application;
 /// </summary>
 public class LoanApplication
 {
-    public const int MaxLoanSum = 5_000_000;
+    public const int MaxLoanSum = int.MaxValue;
     
     public long Id { get; set; }
 

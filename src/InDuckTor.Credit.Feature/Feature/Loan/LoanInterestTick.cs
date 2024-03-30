@@ -18,10 +18,7 @@ public class LoanInterestTick(LoanDbContext context, ILoanService loanService) :
             .Where(loan => loan.State == LoanState.Active)
             .ToListAsync(cancellationToken: ct);
 
-        foreach (var loan in loans)
-        {
-            await loanService.Tick(loan);
-        }
+        foreach (var loan in loans) await loanService.Tick(loan);
 
         return default;
     }

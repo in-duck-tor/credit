@@ -11,7 +11,7 @@ public static class TestEndpoints
     public static IEndpointRouteBuilder AddTestEndpoints(this IEndpointRouteBuilder builder)
     {
         var groupBuilder = builder.MapGroup("/api/v1/test")
-            .WithTags("Test")
+            .WithTags(SwaggerTags.Test)
             .WithOpenApi();
 
         groupBuilder.MapPost("/tick", TriggerTick)

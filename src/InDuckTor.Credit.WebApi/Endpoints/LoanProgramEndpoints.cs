@@ -12,7 +12,7 @@ public static class LoanProgramEndpoints
     public static IEndpointRouteBuilder AddLoanProgramEndpoints(this IEndpointRouteBuilder builder)
     {
         var groupBuilder = builder.MapGroup("/api/v1/program")
-            .WithTags("Program")
+            .WithTags(SwaggerTags.Program)
             .WithOpenApi();
 
         groupBuilder.MapGet("", GetAllLoanPrograms)

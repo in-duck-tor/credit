@@ -18,7 +18,7 @@ public class PeriodBilling
     public required DateTime PeriodStartDate { get; init; }
 
     /// <summary>
-    /// <b>Дата начала периода</b>
+    /// <b>Дата окончания периода</b>
     /// </summary>
     public required DateTime PeriodEndDate { get; init; }
 

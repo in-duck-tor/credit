@@ -13,13 +13,13 @@ public static class Errors
         }
     }
 
-    public class NotFound(string message) : Exception(message);
+    public class NotFoundException(string message) : Exception(message);
 
-    public class BadRequest(string message) : Exception(message);
+    public class BadRequestException(string message) : Exception(message);
 
     public static class Loan
     {
-        public class NotFound(string message) : Errors.NotFound(message)
+        public class NotFound(string message) : NotFoundException(message)
         {
             public NotFound(long id) : this($"Loan with id '{id}' is not found")
             {
@@ -29,7 +29,7 @@ public static class Errors
         public class CannotStartNewPeriod(string message) : BusinessLogicException(message)
         {
             public static CannotStartNewPeriod NotEndedYet() => new(
-                "You cannot start a new period because the current one has not ended yet");
+                "Cannot start a new period because the current one has not ended yet");
         }
 
         public class CannotProvideLoan(string message = "Cannot provide a loan to a client")
@@ -40,20 +40,21 @@ public static class Errors
         public class InvalidLoanState(string message) : BusinessLogicException(message)
         {
             public static InvalidLoanState Closed(long loanId) =>
-                new InvalidLoanState($"Cannot perform action: the loan with id '{loanId}' is closed");
+                new($"Cannot perform action: the loan with id '{loanId}' is closed");
         }
     }
 
     public static class LoanApplication
     {
-        public class NotFound(long id) : Errors.NotFound($"LoanApplication with id '{id}' is not found");
+        public class NotFound(long id) : NotFoundException($"LoanApplication with id '{id}' is not found");
 
-        public class LoanSumIsTooBig(string message = "Sum borrowed by client is too big") : BadRequest(message);
+        public class LoanSumIsTooBig(decimal maxAmount) : BadRequestException(
+            $"The amount borrowed by client is too large. The max loan amount is {maxAmount}");
     }
 
     public static class LoanProgram
     {
-        public class NotFound(string message) : Errors.NotFound(message)
+        public class NotFound(string message) : NotFoundException(message)
         {
             public NotFound(long id) : this($"LoanProgram with id '{id}' is not found")
             {
@@ -63,7 +64,7 @@ public static class Errors
 
     public static class Payment
     {
-        public class InvalidRegularPaymentAmount(string message) : BusinessLogicException(message)
+        public class InvalidRegularPaymentAmount(string message) : BadRequestException(message)
         {
             public static InvalidRegularPaymentAmount TooMuch() =>
                 new("Payments exceed the amount of debts and regular payments");

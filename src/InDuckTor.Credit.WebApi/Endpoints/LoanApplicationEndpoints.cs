@@ -10,7 +10,7 @@ public static class LoanApplicationEndpoints
     public static IEndpointRouteBuilder AddLoanApplicationEndpoints(this IEndpointRouteBuilder builder)
     {
         var groupBuilder = builder.MapGroup("/api/v1/application")
-            .WithTags("LoanApplication")
+            .WithTags(SwaggerTags.Application)
             .WithOpenApi();
 
         groupBuilder.MapPost("", CreateApplication)

@@ -2,8 +2,10 @@ using System.Reflection;
 using InDuckTor.Credit.Feature.Feature.Application;
 using InDuckTor.Credit.Infrastructure.Config.Database;
 using InDuckTor.Credit.WebApi.Configuration;
+using InDuckTor.Credit.WebApi.Configuration.Exceptions;
 using InDuckTor.Credit.WebApi.Endpoints;
 using InDuckTor.Shared.Configuration.Swagger;
+using InDuckTor.Shared.Security.Http;
 using InDuckTor.Shared.Security.Jwt;
 using InDuckTor.Shared.Strategies;
 
@@ -15,12 +17,13 @@ services.AddStrategiesFrom(Assembly.GetAssembly(typeof(ISubmitApplication))!)
     .ConfigureDomain(builder.Configuration);
 
 services.AddProblemDetails().ConfigureJsonConverters();
+services.AddExceptionHandler<GlobalExceptionHandler>();
 
 services.AddLoanDbContext(builder.Configuration);
 
 services.AddInDuckTorAuthentication(builder.Configuration.GetSection(nameof(JwtSettings)));
 services.AddAuthorization();
-// services.AddInDuckTorSecurity();
+services.AddInDuckTorSecurity();
 
 services.AddEndpointsApiExplorer();
 services.AddCreditSwaggerGen();
@@ -42,8 +45,13 @@ app.AddLoanApplicationEndpoints()
     .AddLoanEndpoints()
     .AddTestEndpoints();
 
-// app.UseInDuckTorSecurity();
-app.UseHttpsRedirection();
+app.UseExceptionHandler();
+
+app.UseInDuckTorSecurity();
+// app.UseAuthentication();
+// app.UseAuthorization();
+
+// app.UseHttpsRedirection();
 
 app.UseHangfire();
 
