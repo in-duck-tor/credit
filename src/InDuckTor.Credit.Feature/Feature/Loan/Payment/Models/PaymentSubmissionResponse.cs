@@ -1,6 +1,6 @@
 namespace InDuckTor.Credit.Feature.Feature.Loan.Payment.Models;
 
-public record PaymentInfoResponse(
+public record PaymentSubmissionResponse(
     long LoanId,
     long ClientId,
     MoneyView PaymentAmount);

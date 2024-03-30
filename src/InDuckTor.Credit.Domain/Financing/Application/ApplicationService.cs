@@ -32,9 +32,9 @@ public class ApplicationService(
         var loanProgram = await loanProgramRepository.GetLoanProgramById(newApplication.LoanProgramId)
                           ?? throw new Errors.LoanProgram.NotFound(newApplication.LoanProgramId);
 
-        // Расчёт реальной продолжительности Кредита, для предотвращения наеботеки
-        var interestFreq = Loan.InterestAccrualFrequency;
-        var realLoanTerm = interestFreq * Math.Round(newApplication.LoanTerm / interestFreq);
+        // Сделать продолжительность кредита кратной интервалам. Лучше выкидывать ошибку, но я забочусь о фронте
+        var realLoanTerm = MakeMultiple(newApplication.LoanTerm, Loan.InterestAccrualFrequency);
+        realLoanTerm = MakeMultiple(realLoanTerm, loanProgram.PeriodInterval!.Value);
 
         return new LoanApplication
         {
@@ -47,6 +47,13 @@ public class ApplicationService(
             ApplicationState = ApplicationState.Approved,
             ApprovalDate = DateTime.UtcNow
         };
+    }
+
+    private TimeSpan MakeMultiple(TimeSpan changeable, TimeSpan multiple)
+    {
+        var round = Math.Round(changeable / multiple);
+        if (round == 0) return multiple;
+        return multiple * round;
     }
 
     // Лучше крутить джобу, которая будет искать одобренные заявки и создавать кредиты, но создать кредит сразу легче

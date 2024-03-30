@@ -1,6 +1,5 @@
 ﻿using System.Runtime.Serialization;
 using InDuckTor.Credit.Domain.Billing.Period;
-using InDuckTor.Credit.Domain.Exceptions;
 using InDuckTor.Credit.Domain.Expenses;
 using InDuckTor.Credit.Domain.LoanManagement.Models;
 using InDuckTor.Credit.Domain.LoanManagement.PaymentCalculator;
@@ -26,7 +25,6 @@ public class Loan
     {
         // EF Core constructor
         PaymentCalculator = InitPaymentCalculator();
-        _state = InitState();
     }
 
     public Loan(NewLoan newLoan)
@@ -48,7 +46,6 @@ public class Loan
         Penalty = ExpenseItem.Zero;
 
         PaymentCalculator = InitPaymentCalculator();
-        _state = InitState();
     }
 
     public long Id { get; set; }
@@ -88,7 +85,6 @@ public class Loan
     /// <summary>
     /// <b>Статус Кредита</b>
     /// </summary>
-    // todo: реализовать паттерн State для всех состояний, чтобы избежать использования методов, запрещённых для разных состояний кредита
     public LoanState State { get; private set; }
 
     /// <summary>
@@ -142,7 +138,14 @@ public class Loan
     public PeriodAccruals? PeriodAccruals { get; set; }
 
     protected internal readonly IPaymentCalculator PaymentCalculator;
-    private ILoanState _state;
+
+    private ILoanState? _stateInteractor;
+
+    private ILoanState StateInteractor
+    {
+        get => _stateInteractor ??= InitState();
+        set => _stateInteractor = value;
+    }
 
     public bool IsRepaid => CurrentBody + Debt + Penalty == 0;
     public bool IsClientAhuel => PeriodsBillings.Count - PlannedPaymentsNumber >= 3;
@@ -162,33 +165,33 @@ public class Loan
     public decimal TickInterestRate => InterestRate / (decimal)(YearDuration / InterestAccrualFrequency);
     public ExpenseItem AccruedInterest => PeriodAccruals?.InterestAccrual ?? 0;
 
-    public void StartNewPeriod() => _state.StartNewPeriod();
+    public void StartNewPeriod() => StateInteractor.StartNewPeriod();
 
-    public PeriodBilling ClosePeriod() => _state.ClosePeriod();
+    public PeriodBilling ClosePeriod() => StateInteractor.ClosePeriod();
 
-    public decimal GetCurrentTotalPayment() => _state.GetCurrentTotalPayment();
-    public decimal GetExpectedOneTimePayment() => _state.GetExpectedOneTimePayment();
+    public decimal GetCurrentTotalPayment() => StateInteractor.GetCurrentTotalPayment();
+    public decimal GetExpectedOneTimePayment() => StateInteractor.GetExpectedOneTimePayment();
 
-    public void AccrueInterestOnCurrentPeriod() => _state.AccrueInterestOnCurrentPeriod();
+    public void AccrueInterestOnCurrentPeriod() => StateInteractor.AccrueInterestOnCurrentPeriod();
 
-    public decimal CalculateTickInterest() => _state.CalculateTickInterest();
+    public decimal CalculateTickInterest() => StateInteractor.CalculateTickInterest();
 
-    public void ChargePenalty() => _state.ChargePenalty();
+    public void ChargePenalty() => StateInteractor.ChargePenalty();
 
-    public void AttachLoanAccount(string accountNumber) => _state.AttachLoanAccount(accountNumber);
+    public void AttachLoanAccount(string accountNumber) => StateInteractor.AttachLoanAccount(accountNumber);
 
-    public bool IsCurrentPeriodEnded() => _state.IsCurrentPeriodEnded();
+    public bool IsCurrentPeriodEnded() => StateInteractor.IsCurrentPeriodEnded();
 
-    public void ActivateLoan() => _state.ActivateLoan();
+    public void ActivateLoan() => StateInteractor.ActivateLoan();
 
-    public void CloseLoan() => _state.CloseLoan();
+    public void CloseLoan() => StateInteractor.CloseLoan();
 
-    public void SellToCollectors() => _state.SellToCollectors();
+    public void SellToCollectors() => StateInteractor.SellToCollectors();
 
     protected internal void SetState(LoanState state)
     {
         State = state;
-        _state = LoanStateFactory.CreateState(this);
+        StateInteractor = LoanStateFactory.CreateState(this);
     }
 
     private static int CalculatePaymentsNumber(NewLoan newLoan)
@@ -197,7 +200,11 @@ public class Loan
             return (int)Math.Round(newLoan.LoanTerm.Days / (double)30);
 
         ArgumentNullException.ThrowIfNull(newLoan.PeriodInterval);
-        return (int)Math.Round(newLoan.LoanTerm / newLoan.PeriodInterval.Value);
+        
+        var paymentsNumber = (int)Math.Round(newLoan.LoanTerm / newLoan.PeriodInterval.Value);
+        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(paymentsNumber, 0);
+
+        return paymentsNumber;
     }
 
     private IPaymentCalculator InitPaymentCalculator()

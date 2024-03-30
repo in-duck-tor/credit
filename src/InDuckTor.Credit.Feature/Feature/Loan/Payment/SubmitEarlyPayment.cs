@@ -4,11 +4,11 @@ using InDuckTor.Shared.Strategies;
 
 namespace InDuckTor.Credit.Feature.Feature.Loan.Payment;
 
-public interface ISubmitEarlyPayment : ICommand<PaymentSubmissionRequest, Unit>;
+public interface ISubmitEarlyPayment : ICommand<PaymentSubmissionRequest, PaymentSubmissionResponse>;
 
 public class SubmitEarlyPayment : ISubmitEarlyPayment
 {
-    public Task<Unit> Execute(PaymentSubmissionRequest input, CancellationToken ct)
+    public Task<PaymentSubmissionResponse> Execute(PaymentSubmissionRequest input, CancellationToken ct)
     {
         throw new NotImplementedException();
     }

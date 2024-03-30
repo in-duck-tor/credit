@@ -280,7 +280,7 @@ namespace InDuckTor.Credit.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsOne("InDuckTor.Credit.Domain.Expenses.ExpenseItems", "ExpenseItems", b1 =>
+                    b.OwnsOne("InDuckTor.Credit.Domain.Billing.Payment.BillingPayoff.ExpenseItems#InDuckTor.Credit.Domain.Expenses.ExpenseItems", "ExpenseItems", b1 =>
                         {
                             b1.Property<long>("BillingPayoffId")
                                 .HasColumnType("bigint");
@@ -325,7 +325,7 @@ namespace InDuckTor.Credit.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsOne("InDuckTor.Credit.Domain.Expenses.ExpenseItems", "RemainingPayoff", b1 =>
+                    b.OwnsOne("InDuckTor.Credit.Domain.Billing.Period.PeriodBilling.RemainingPayoff#InDuckTor.Credit.Domain.Expenses.ExpenseItems", "RemainingPayoff", b1 =>
                         {
                             b1.Property<long>("PeriodBillingId")
                                 .HasColumnType("bigint");
@@ -365,7 +365,7 @@ namespace InDuckTor.Credit.Infrastructure.Migrations
 
             modelBuilder.Entity("InDuckTor.Credit.Domain.LoanManagement.Loan", b =>
                 {
-                    b.OwnsOne("InDuckTor.Credit.Domain.LoanManagement.PeriodAccruals", "PeriodAccruals", b1 =>
+                    b.OwnsOne("InDuckTor.Credit.Domain.LoanManagement.Loan.PeriodAccruals#InDuckTor.Credit.Domain.LoanManagement.PeriodAccruals", "PeriodAccruals", b1 =>
                         {
                             b1.Property<long>("LoanId")
                                 .HasColumnType("bigint");

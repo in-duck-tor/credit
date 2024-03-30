@@ -55,6 +55,8 @@ public class PaymentService : IPaymentService
         var totalPaymentToDistributeSum = undistributedPayments.Select(p => p.PaymentToDistribute).Sum();
         var currentMaxPayment = totalRemainingPayment - totalPaymentToDistributeSum;
 
+        if (currentMaxPayment == 0) Errors.Payment.InvalidRegularPaymentAmount.TooMuch();
+
         var realPaymentAmount = newPayment.PaymentAmount > currentMaxPayment
             ? currentMaxPayment
             : newPayment.PaymentAmount;

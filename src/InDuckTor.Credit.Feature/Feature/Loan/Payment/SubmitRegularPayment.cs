@@ -8,9 +8,9 @@ using Errors = InDuckTor.Credit.Domain.Exceptions.Errors;
 
 namespace InDuckTor.Credit.Feature.Feature.Loan.Payment;
 
-public interface ISubmitRegularPayment : ICommand<PaymentSubmissionRequest, PaymentInfoResponse>;
+public interface ISubmitRegularPayment : ICommand<PaymentSubmissionRequest, PaymentSubmissionResponse>;
 
-[Intercept(typeof(SaveChangesInterceptor<PaymentSubmissionRequest, PaymentInfoResponse>))]
+[Intercept(typeof(SaveChangesInterceptor<PaymentSubmissionRequest, PaymentSubmissionResponse>))]
 public class SubmitRegularPayment : ISubmitRegularPayment
 {
     private readonly LoanDbContext _context;
@@ -22,7 +22,7 @@ public class SubmitRegularPayment : ISubmitRegularPayment
         _paymentService = paymentService;
     }
 
-    public async Task<PaymentInfoResponse> Execute(PaymentSubmissionRequest input, CancellationToken ct)
+    public async Task<PaymentSubmissionResponse> Execute(PaymentSubmissionRequest input, CancellationToken ct)
     {
         var loan = await _context.Loans.FindAsync([input.LoanId], cancellationToken: ct)
                    ?? throw new Errors.Loan.NotFound(input.LoanId);
@@ -36,6 +36,6 @@ public class SubmitRegularPayment : ISubmitRegularPayment
 
         await _paymentService.DistributePayment(loan, payment);
 
-        return new PaymentInfoResponse(payment.LoanId, payment.ClientId, payment.PaymentAmount);
+        return new PaymentSubmissionResponse(payment.LoanId, payment.ClientId, payment.PaymentAmount);
     }
 }

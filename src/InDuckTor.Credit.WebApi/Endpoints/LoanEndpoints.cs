@@ -83,7 +83,7 @@ public static class LoanEndpoints
         [FromRoute] long loanId,
         [FromBody] RegularPayBody body,
         [FromServices]
-        IExecutor<ISubmitRegularPayment, PaymentSubmissionRequest, PaymentInfoResponse> submitRegularPayment,
+        IExecutor<ISubmitRegularPayment, PaymentSubmissionRequest, PaymentSubmissionResponse> submitRegularPayment,
         CancellationToken cancellationToken)
     {
         var submission = new PaymentSubmissionRequest(loanId, body.ClientId, body.Payment);
