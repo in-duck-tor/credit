@@ -5,13 +5,13 @@ using InDuckTor.Shared.Strategies;
 
 namespace InDuckTor.Credit.Feature.Feature.Loan.Payment;
 
-/// <param name="CurrentPeriodPayment">Сумма единовременного платежа за период</param>
+/// <param name="RequiredCurrentPeriodPayment">Сумма единовременного платежа за период</param>
 /// <param name="Debt">Задолженность по Кредиту</param>
-/// <param name="TotalPayment">Общая сумма платежа на данный момент. Превышение этой суммы приведёт к ошибке</param>
+/// <param name="TotalRemainingPayment">Общая сумма платежа на данный момент. Превышение этой суммы приведёт к ошибке</param>
 public record PaymentInfoResponse(
-    MoneyView CurrentPeriodPayment,
+    MoneyView RequiredCurrentPeriodPayment,
     MoneyView Debt,
-    MoneyView TotalPayment);
+    MoneyView TotalRemainingPayment);
 
 public interface IGetPaymentInfo : IQuery<long, PaymentInfoResponse>;
 
