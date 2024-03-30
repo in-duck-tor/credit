@@ -94,7 +94,7 @@ public class Loan
     /// <summary>
     /// <b>Планируемое число платежей</b>
     /// </summary>
-    public int PlannedPaymentsNumber { get; }
+    public int PlannedPaymentsNumber { get; init; }
 
     /// <summary>
     /// <b>Тип Платежа</b>
