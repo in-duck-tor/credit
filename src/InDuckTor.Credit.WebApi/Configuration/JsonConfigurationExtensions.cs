@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using InDuckTor.Credit.Domain.Financing.Application;
 using InDuckTor.Credit.Domain.LoanManagement;
 using InDuckTor.Credit.Domain.LoanManagement.Accounts;
+using InDuckTor.Credit.Domain.LoanManagement.State;
 using Microsoft.AspNetCore.Http.Json;
 
 namespace InDuckTor.Credit.WebApi.Configuration;

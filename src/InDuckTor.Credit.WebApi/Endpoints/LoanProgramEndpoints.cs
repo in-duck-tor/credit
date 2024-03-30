@@ -26,7 +26,7 @@ public static class LoanProgramEndpoints
     }
 
     // В будущем добавить эндпонит на получение доступных только клиенту программ кредитования
-    [ProducesResponseType<ErrorResponse>(500)]
+    [ProducesResponseType<ProblemDetails>(500)]
     [ProducesResponseType<List<LoanProgramResponse>>(200)]
     private static async Task<IResult> GetAllLoanPrograms(
         [FromServices] IExecutor<IGetAllLoanPrograms, Unit, List<LoanProgramResponse>> getAllLoanPrograms,
@@ -37,8 +37,8 @@ public static class LoanProgramEndpoints
     }
 
     // Здесь должна быть проверка прав вызывающего
-    [ProducesResponseType<ErrorResponse>(500)]
-    [ProducesResponseType<ErrorResponse>(401)]
+    [ProducesResponseType<ProblemDetails>(500)]
+    [ProducesResponseType<ProblemDetails>(401)]
     [ProducesResponseType<LoanProgramResponse>(200)]
     private static async Task<IResult> CreateLoanProgram(
         [FromBody] LoanProgramInfoRequest body,

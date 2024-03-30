@@ -1,4 +1,5 @@
 using InDuckTor.Credit.Domain.LoanManagement;
+using InDuckTor.Credit.Domain.LoanManagement.State;
 using InDuckTor.Credit.Feature.Feature.Interceptors;
 using InDuckTor.Credit.Infrastructure.Config.Database;
 using InDuckTor.Shared.Models;

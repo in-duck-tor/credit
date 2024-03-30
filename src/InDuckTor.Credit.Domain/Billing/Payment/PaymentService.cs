@@ -91,6 +91,11 @@ public class PaymentService : IPaymentService
         if (payments.Count == 0) return;
         if (unpaidPeriods.Count == 0) return;
 
+#if DEBUG
+        if (unpaidPeriods.Select(p => p.GetRemainingInterest() + p.GetRemainingLoanBodyPayoff()).Sum() > loan.Debt)
+            throw new Exception("Debt is less than remainings. Pizda.");
+#endif
+
         using var paymentEnumerator = payments.GetEnumerator();
         paymentEnumerator.MoveNext();
         var payment = paymentEnumerator.Current;

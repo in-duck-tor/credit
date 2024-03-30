@@ -1,6 +1,5 @@
 using InDuckTor.Credit.Domain.Financing.Application;
 using InDuckTor.Credit.Domain.Financing.Application.Model;
-using InDuckTor.Credit.Feature.Feature.Interceptors;
 using InDuckTor.Credit.Feature.Feature.Loan;
 using InDuckTor.Credit.Feature.Feature.Program.Model;
 using InDuckTor.Credit.Infrastructure.Config.Database;
@@ -15,7 +14,7 @@ namespace InDuckTor.Credit.Feature.Feature.Application;
 public record ApplicationInfoRequest(
     long ClientId,
     long LoanProgramId,
-    MoneyView BorrowedAmount,
+    decimal BorrowedAmount,
     long LoanTerm,
     string ClientAccountNumber);
 

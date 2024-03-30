@@ -1,3 +1,5 @@
+using InDuckTor.Credit.Domain.LoanManagement.State;
+
 namespace InDuckTor.Credit.Domain.Exceptions;
 
 public static class Errors
@@ -39,6 +41,11 @@ public static class Errors
 
         public class InvalidLoanState(string message) : BusinessLogicException(message)
         {
+            public InvalidLoanState(long loanId, string action, LoanState state) : this(
+                $"Cannot perform action '{action}': the loan with id '{loanId}' is {state.ToString()}")
+            {
+            }
+
             public static InvalidLoanState Closed(long loanId) =>
                 new($"Cannot perform action: the loan with id '{loanId}' is closed");
         }

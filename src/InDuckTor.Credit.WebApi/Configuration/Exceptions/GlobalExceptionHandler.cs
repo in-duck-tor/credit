@@ -1,8 +1,8 @@
 using System.Net;
 using InDuckTor.Credit.Domain.Exceptions;
-using InDuckTor.Credit.WebApi.Configuration.Models;
 using Microsoft.AspNetCore.Diagnostics;
 using Refit;
+using ProblemDetails = Microsoft.AspNetCore.Mvc.ProblemDetails;
 
 namespace InDuckTor.Credit.WebApi.Configuration.Exceptions;
 
@@ -22,41 +22,41 @@ public class GlobalExceptionHandler : IExceptionHandler
     {
         _logger.LogError("An error occurred while processing your request: {message}", exception.Message);
 
-        var er = new ErrorResponse { Message = exception.Message };
+        var er = new ProblemDetails { Detail = exception.Message };
 
         switch (exception)
         {
             case Errors.NotFoundException:
-                er.StatusCode = (int)HttpStatusCode.NotFound;
-                er.SetType(exception);
+                er.Status = (int)HttpStatusCode.NotFound;
+                er.Type = exception.GetType().Name;
                 er.Title = "Not Found Exception";
                 break;
             case Errors.BadRequestException:
             case BadHttpRequestException:
-                er.StatusCode = (int)HttpStatusCode.BadRequest;
-                er.SetType(exception);
+                er.Status = (int)HttpStatusCode.BadRequest;
+                er.Type = exception.GetType().Name;
                 er.Title = "Bad Request Exception";
                 break;
             case Errors.BusinessLogicException:
-                er.StatusCode = (int)HttpStatusCode.InternalServerError;
-                er.SetType(exception);
+                er.Status = (int)HttpStatusCode.InternalServerError;
+                er.Type = exception.GetType().Name;
                 er.Title = "Business Logic Error. Pizda.";
                 break;
             case ApiException apiException:
-                var apiErrorResponse = await apiException.GetContentAsAsync<ApiExceptionResponse>();
-                er.StatusCode = apiErrorResponse?.Status ?? (int)apiException.StatusCode;
-                er.SetType(apiException);
+                var apiErrorResponse = await apiException.GetContentAsAsync<ProblemDetails>();
+                er.Status = apiErrorResponse?.Status ?? (int)apiException.StatusCode;
+                er.Type = apiException.GetType().Name;
                 er.Title = apiErrorResponse?.Title ?? apiException.ReasonPhrase ?? er.Type;
-                er.Message = apiErrorResponse?.Detail ?? apiException.Content ?? er.Message;
+                er.Detail = apiErrorResponse?.Detail ?? apiException.Content ?? er.Detail;
                 break;
             default:
-                er.StatusCode = (int)HttpStatusCode.InternalServerError;
-                er.SetType(exception);
+                er.Status = (int)HttpStatusCode.InternalServerError;
+                er.Type = exception.GetType().Name;
                 er.Title = "Internal Server Error";
                 break;
         }
 
-        httpContext.Response.StatusCode = er.StatusCode;
+        httpContext.Response.StatusCode = er.Status.Value;
 
         await httpContext.Response.WriteAsJsonAsync(er, cancellationToken);
 

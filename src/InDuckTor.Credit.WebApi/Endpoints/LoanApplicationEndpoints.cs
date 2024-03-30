@@ -36,8 +36,8 @@ public static class LoanApplicationEndpoints
         return builder;
     }
 
-    [ProducesResponseType<ErrorResponse>(500)]
-    [ProducesResponseType<ErrorResponse>(404)]
+    [ProducesResponseType<ProblemDetails>(500)]
+    [ProducesResponseType<ProblemDetails>(404)]
     [ProducesResponseType<LoanApplicationResponse>(200)]
     private static async Task<IResult> CreateApplication(
         [FromBody] ApplicationInfoRequest body,

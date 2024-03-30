@@ -1,6 +1,7 @@
 using InDuckTor.Credit.Domain.Billing.Period;
 using InDuckTor.Credit.Domain.Exceptions;
 using InDuckTor.Credit.Domain.Expenses;
+using InDuckTor.Credit.Domain.Expenses.Extensions;
 
 namespace InDuckTor.Credit.Domain.Billing.Payment;
 

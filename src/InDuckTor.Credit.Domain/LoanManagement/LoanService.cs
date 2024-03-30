@@ -71,6 +71,12 @@ public class LoanService(PeriodService periodService, IAccountsRepository accoun
             return;
         }
 
+        if (loan.IsClientAhuel)
+        {
+            loan.SellToCollectors();
+            return;
+        }
+
         loan.StartNewPeriod();
     }
 }

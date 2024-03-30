@@ -4,7 +4,6 @@ using InDuckTor.Credit.Infrastructure.Config.Database;
 using InDuckTor.Credit.WebApi.Configuration;
 using InDuckTor.Credit.WebApi.Configuration.Exceptions;
 using InDuckTor.Credit.WebApi.Endpoints;
-using InDuckTor.Shared.Configuration.Swagger;
 using InDuckTor.Shared.Security.Http;
 using InDuckTor.Shared.Security.Jwt;
 using InDuckTor.Shared.Strategies;
@@ -34,7 +33,7 @@ services.ConfigureRefit(builder.Configuration);
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+if (!app.Environment.IsProduction())
 {
     app.UseSwagger();
     app.UseSwaggerUI();

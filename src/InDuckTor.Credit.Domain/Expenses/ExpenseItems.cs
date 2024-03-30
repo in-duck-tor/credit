@@ -20,7 +20,6 @@ public class ExpenseItems(decimal interest, decimal loanBodyPayoff, decimal char
 
     public void ChangeInterest(decimal amount)
     {
-        var I =  amount + Interest; 
         ArgumentOutOfRangeException.ThrowIfNegative(Interest + amount);
         Interest += amount;
     }

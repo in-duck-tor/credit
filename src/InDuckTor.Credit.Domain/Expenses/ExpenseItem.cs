@@ -6,15 +6,21 @@ public interface IExpenseItem
     void ChangeAmount(decimal amount);
 }
 
-public class ExpenseItem(decimal amount) : IExpenseItem
+public class ExpenseItem : IExpenseItem
 {
     private ExpenseItem() : this(0)
     {
     }
 
+    public ExpenseItem(decimal amount)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(amount);
+        Amount = amount;
+    }
+
     private const decimal RoundingValue = 0.0000001m;
 
-    public decimal Amount { get; private set; } = amount;
+    public decimal Amount { get; private set; }
 
     public static ExpenseItem Zero => new();
 

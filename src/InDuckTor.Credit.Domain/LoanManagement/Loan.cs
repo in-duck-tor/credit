@@ -4,6 +4,7 @@ using InDuckTor.Credit.Domain.Exceptions;
 using InDuckTor.Credit.Domain.Expenses;
 using InDuckTor.Credit.Domain.LoanManagement.Models;
 using InDuckTor.Credit.Domain.LoanManagement.PaymentCalculator;
+using InDuckTor.Credit.Domain.LoanManagement.State;
 
 namespace InDuckTor.Credit.Domain.LoanManagement;
 
@@ -24,7 +25,8 @@ public class Loan
 #pragma warning restore CS8618
     {
         // EF Core constructor
-        _paymentCalculator = InitPaymentCalculator();
+        PaymentCalculator = InitPaymentCalculator();
+        _state = InitState();
     }
 
     public Loan(NewLoan newLoan)
@@ -45,7 +47,8 @@ public class Loan
         Debt = ExpenseItem.Zero;
         Penalty = ExpenseItem.Zero;
 
-        _paymentCalculator = InitPaymentCalculator();
+        PaymentCalculator = InitPaymentCalculator();
+        _state = InitState();
     }
 
     public long Id { get; set; }
@@ -55,7 +58,7 @@ public class Loan
     /// <summary>
     /// <b>Ссудный счёт</b>
     /// </summary>
-    public string? LoanAccountNumber { get; private set; }
+    public string? LoanAccountNumber { get; protected internal set; }
 
     /// <summary>
     /// <b>Счёт Клиента</b>
@@ -91,7 +94,7 @@ public class Loan
     /// <summary>
     /// <b>Планируемое число платежей</b>
     /// </summary>
-    public int PlannedPaymentsNumber { get; private set; }
+    public int PlannedPaymentsNumber { get; }
 
     /// <summary>
     /// <b>Тип Платежа</b>
@@ -138,9 +141,11 @@ public class Loan
     /// </summary>
     public PeriodAccruals? PeriodAccruals { get; set; }
 
-    private readonly IPaymentCalculator _paymentCalculator;
+    protected internal readonly IPaymentCalculator PaymentCalculator;
+    private ILoanState _state;
 
     public bool IsRepaid => CurrentBody + Debt + Penalty == 0;
+    public bool IsClientAhuel => PeriodsBillings.Count - PlannedPaymentsNumber >= 3;
 
     public TimeSpan PeriodDuration
     {
@@ -157,77 +162,33 @@ public class Loan
     public decimal TickInterestRate => InterestRate / (decimal)(YearDuration / InterestAccrualFrequency);
     public ExpenseItem AccruedInterest => PeriodAccruals?.InterestAccrual ?? 0;
 
-    public void StartNewPeriod()
+    public void StartNewPeriod() => _state.StartNewPeriod();
+
+    public PeriodBilling ClosePeriod() => _state.ClosePeriod();
+
+    public decimal GetCurrentTotalPayment() => _state.GetCurrentTotalPayment();
+    public decimal GetExpectedOneTimePayment() => _state.GetExpectedOneTimePayment();
+
+    public void AccrueInterestOnCurrentPeriod() => _state.AccrueInterestOnCurrentPeriod();
+
+    public decimal CalculateTickInterest() => _state.CalculateTickInterest();
+
+    public void ChargePenalty() => _state.ChargePenalty();
+
+    public void AttachLoanAccount(string accountNumber) => _state.AttachLoanAccount(accountNumber);
+
+    public bool IsCurrentPeriodEnded() => _state.IsCurrentPeriodEnded();
+
+    public void ActivateLoan() => _state.ActivateLoan();
+
+    public void CloseLoan() => _state.CloseLoan();
+
+    public void SellToCollectors() => _state.SellToCollectors();
+
+    protected internal void SetState(LoanState state)
     {
-        if (State == LoanState.Closed) throw Errors.Loan.InvalidLoanState.Closed(Id);
-        if (PeriodAccruals != null && !IsCurrentPeriodEnded())
-            throw Errors.Loan.CannotStartNewPeriod.NotEndedYet();
-        _paymentCalculator.StartNewPeriod();
-    }
-
-    public PeriodBilling ClosePeriod()
-    {
-        ArgumentNullException.ThrowIfNull(PeriodAccruals);
-
-        _paymentCalculator.ClosePeriod();
-
-        var billingItems = new ExpenseItems(
-            PeriodAccruals.InterestAccrual,
-            PeriodAccruals.LoanBodyPayoff,
-            PeriodAccruals.ChargingForServices);
-
-        var periodBilling = new PeriodBilling
-        {
-            Loan = this,
-            PeriodStartDate = PeriodAccruals.PeriodStartDate,
-            PeriodEndDate = PeriodAccruals.PeriodEndDate,
-            OneTimePayment = PeriodAccruals.CurrentOneTimePayment,
-            ExpenseItems = billingItems,
-            RemainingPayoff = billingItems.DeepCopy(),
-        };
-
-        PeriodsBillings.Add(periodBilling);
-        BodyAfterPayoffs.ChangeAmount(-periodBilling.ExpenseItems.LoanBodyPayoff);
-
-        return periodBilling;
-    }
-
-    public decimal GetCurrentTotalPayment() => _paymentCalculator.GetCurrentTotalPayment();
-    public decimal GetExpectedOneTimePayment() => _paymentCalculator.GetExpectedOneTimePayment();
-
-    public void AccrueInterestOnCurrentPeriod() => _paymentCalculator.AccrueInterestOnCurrentPeriod();
-
-    public decimal CalculateTickInterest() => CurrentBody * TickInterestRate;
-
-    public void ChargePenalty()
-    {
-        Penalty.ChangeAmount(Debt * PenaltyRate);
-    }
-
-    public void AttachLoanAccount(string accountNumber)
-    {
-        LoanAccountNumber = accountNumber;
-    }
-
-    public bool IsCurrentPeriodEnded()
-    {
-        // if (PaymentScheduleType == PaymentScheduleType.Calendar) return DateTime.UtcNow.Day == PeriodDay;
-        ArgumentNullException.ThrowIfNull(PeriodAccruals);
-        return PeriodAccruals.PeriodEndDate <= DateTime.UtcNow;
-    }
-
-    public void ActivateLoan()
-    {
-        State = LoanState.Active;
-        StartNewPeriod();
-    }
-
-    public void CloseLoan()
-    {
-        if (!IsRepaid)
-            throw new Errors.Loan.InvalidLoanStateChange("Can't close the loan because it hasn't been repaid yet");
-
-        State = LoanState.Closed;
+        State = state;
+        _state = LoanStateFactory.CreateState(this);
     }
 
     private static int CalculatePaymentsNumber(NewLoan newLoan)
@@ -248,27 +209,11 @@ public class Loan
             _ => throw new ArgumentOutOfRangeException(nameof(PaymentType))
         };
     }
-}
 
-/// <summary>
-/// <b>Статус Кредита</b>
-/// </summary>
-public enum LoanState
-{
-    /// <summary>
-    /// Кредит одобрен, но деньги не переведены на счёт заёмщика
-    /// </summary>
-    [EnumMember(Value = "approved")] Approved,
-
-    /// <summary>
-    /// Кредит одобрен и деньги переведены на счёт заёмщика
-    /// </summary>
-    [EnumMember(Value = "active")] Active,
-
-    /// <summary>
-    /// Кредит погашен
-    /// </summary>
-    [EnumMember(Value = "closed")] Closed
+    private ILoanState InitState()
+    {
+        return LoanStateFactory.CreateState(this);
+    }
 }
 
 /// <summary>

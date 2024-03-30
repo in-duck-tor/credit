@@ -46,6 +46,8 @@ public class AnnuityPaymentCalculator : IPaymentCalculator
         var regularOneTimePayment = CalculateRegularOneTimePayment();
         var regularBody = regularOneTimePayment - interest;
 
+        ArgumentOutOfRangeException.ThrowIfNegative(regularBody);
+
         return Math.Min(_loan.BodyAfterPayoffs, regularBody);
     }
 
@@ -53,7 +55,10 @@ public class AnnuityPaymentCalculator : IPaymentCalculator
     {
         var periodAccruals = _loan.PeriodAccruals;
         var accruedInterest = periodAccruals?.InterestAccrual ?? 0;
-        var periodTimeLeft = (periodAccruals?.PeriodEndDate - DateTime.UtcNow)?.Duration() ?? _loan.PeriodDuration;
+
+        var periodTimeLeft = periodAccruals?.PeriodEndDate - DateTime.UtcNow ?? _loan.PeriodDuration;
+        if (periodTimeLeft < TimeSpan.Zero) periodTimeLeft = TimeSpan.Zero;
+
         var numberOfAccrualsLeft = (int)(periodTimeLeft / Loan.InterestAccrualFrequency);
         var interestAfterPayoffs = _loan.BodyAfterPayoffs * _loan.TickInterestRate * numberOfAccrualsLeft;
 
@@ -71,20 +76,6 @@ public class AnnuityPaymentCalculator : IPaymentCalculator
     // Если ввести округление, то платёж также нужно будет распределять на округление.
     // То есть после распределения по процентам и телу, нужно будет распределить платёж по сумме округления.
     // Скорее всего сумма округления должна быть отдельной категорией, то есть отдельным столбцом.
-    private decimal CalculateOneTimePayment()
-    {
-        var regularOneTimePayment = CalculateRegularOneTimePayment();
-
-        // добавить расчёт тела на текущий период
-        var periodInterest = _loan.CurrentBody * _loan.PeriodInterestRate;
-        var regularPaymentBody = regularOneTimePayment - periodInterest;
-
-        if (regularPaymentBody <= _loan.CurrentBody) return regularOneTimePayment;
-
-        // Последний платёж
-        return _loan.CurrentBody + periodInterest;
-    }
-
     private decimal CalculateRegularOneTimePayment()
     {
         var periodInterestRate = (double)_loan.PeriodInterestRate;

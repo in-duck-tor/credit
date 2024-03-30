@@ -1,7 +1,7 @@
 using System.Xml.Linq;
 using System.Xml.XPath;
-using InDuckTor.Credit.WebApi.Configuration.Exceptions;
 using InDuckTor.Shared.Configuration.Swagger;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -17,7 +17,7 @@ public static class SwaggerExtensions
             options.ConfigureEnumMemberValues();
             options.CustomSchemaIds(ComposeNameWithDeclaringType);
 
-            options.DocumentFilter<CustomModelDocumentFilter<ErrorResponse>>();
+            options.DocumentFilter<CustomModelDocumentFilter<ProblemDetails>>();
 
             var dir = new DirectoryInfo(AppContext.BaseDirectory);
             foreach (var fi in dir.EnumerateFiles("*.xml"))

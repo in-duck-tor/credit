@@ -48,7 +48,10 @@ public class DifferentiatedPaymentCalculator : IPaymentCalculator
     {
         var periodAccruals = _loan.PeriodAccruals;
         var accruedInterest = periodAccruals?.InterestAccrual ?? 0;
-        var periodTimeLeft = (periodAccruals?.PeriodEndDate - DateTime.UtcNow)?.Duration() ?? _loan.PeriodDuration;
+
+        var periodTimeLeft = periodAccruals?.PeriodEndDate - DateTime.UtcNow ?? _loan.PeriodDuration;
+        if (periodTimeLeft < TimeSpan.Zero) periodTimeLeft = TimeSpan.Zero;
+
         var numberOfAccrualsLeft = (int)(periodTimeLeft / Loan.InterestAccrualFrequency);
         var interestAfterPayoffs = _loan.BodyAfterPayoffs * _loan.TickInterestRate * numberOfAccrualsLeft;
 
