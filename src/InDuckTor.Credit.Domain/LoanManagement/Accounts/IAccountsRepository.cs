@@ -6,4 +6,5 @@ public interface IAccountsRepository
     Task<TransactionInfo> InitiateTransaction(NewTransaction newTransaction);
     Task CommitTransaction(long transactionId);
     Task CancelTransaction(long transactionId);
+    Task<bool> IsAccountOwner(long clientId, string accountNumber);
 }

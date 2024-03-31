@@ -1,5 +1,4 @@
 using InDuckTor.Credit.Domain.Financing.Application;
-using InDuckTor.Credit.Domain.Financing.Program;
 using InDuckTor.Credit.Domain.LoanManagement;
 using InDuckTor.Credit.Domain.LoanManagement.Models;
 using InDuckTor.Credit.Infrastructure.Config.Database;

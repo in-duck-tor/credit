@@ -43,11 +43,12 @@ public class GlobalExceptionHandler : IExceptionHandler
                 er.Title = "Business Logic Error. Pizda.";
                 break;
             case ApiException apiException:
-                var apiErrorResponse = await apiException.GetContentAsAsync<ProblemDetails>();
-                er.Status = apiErrorResponse?.Status ?? (int)apiException.StatusCode;
+                Console.WriteLine(apiException.Content);
+                // var apiErrorResponse = await apiException.GetContentAsAsync<ProblemDetails>();
+                er.Status = (int)apiException.StatusCode;
                 er.Type = apiException.GetType().Name;
-                er.Title = apiErrorResponse?.Title ?? apiException.ReasonPhrase ?? er.Type;
-                er.Detail = apiErrorResponse?.Detail ?? apiException.Content ?? er.Detail;
+                er.Title = apiException.ReasonPhrase ?? er.Type;
+                er.Detail = apiException.Content ?? er.Detail;
                 break;
             default:
                 er.Status = (int)HttpStatusCode.InternalServerError;

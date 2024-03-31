@@ -16,6 +16,9 @@ public class LoanService(PeriodService periodService, IAccountsRepository accoun
 {
     public async Task<Loan> CreateLoan(NewLoan newLoan)
     {
+        if (!await accountsRepository.IsAccountOwner(newLoan.ClientId, newLoan.ClientAccountNumber))
+            throw new Errors.Transaction.CannotInitiateTransaction.ClientIsNotAccountOwner();
+
         // Резервация запрошенных клиентом денег для дальнейшего перевода на расчётный счёт
         var newTransaction = new NewTransaction(
             newLoan.BorrowedAmount,
@@ -26,7 +29,7 @@ public class LoanService(PeriodService periodService, IAccountsRepository accoun
         var transactionInfo = await accountsRepository.InitiateTransaction(newTransaction);
 
         if (transactionInfo.Status == TransactionStatus.Canceled)
-            throw new Errors.Transaction.CannotInitiateTransaction();
+            throw new Errors.Transaction.CannotInitiateTransaction.Unknown();
 
         var loan = new Loan(newLoan);
 
@@ -66,12 +69,12 @@ public class LoanService(PeriodService periodService, IAccountsRepository accoun
     private async Task CloseBillingPeriod(Loan loan)
     {
         var periodBilling = await periodService.CloseBillingPeriod(loan);
-        
+
         if (periodBilling.IsDebt)
         {
             loan.Debt.ChangeAmount(periodBilling.GetRemainingInterest() + periodBilling.GetRemainingLoanBodyPayoff());
         }
-        
+
         if (loan.IsRepaid)
         {
             loan.CloseLoan();

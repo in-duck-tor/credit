@@ -8,6 +8,6 @@ public class LoanProgramConfiguration : IEntityTypeConfiguration<LoanProgram>
 {
     public void Configure(EntityTypeBuilder<LoanProgram> builder)
     {
-        builder.ToTable(nameof(LoanProgram)).HasKey(l => l.Id);
+        builder.ToTable(nameof(LoanProgram)).HasKey(lp => lp.Id);
     }
 }

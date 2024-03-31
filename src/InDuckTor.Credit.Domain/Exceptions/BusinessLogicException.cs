@@ -6,6 +6,8 @@ public static class Errors
 {
     public abstract class BusinessLogicException(string? message = null) : Exception(message);
 
+    public abstract class ForbiddenError(string? message = null) : Exception(message);
+
     public abstract class InternalError(string? message = null) : Exception(message);
 
     public class EntitiesIsNotRelatedException(string? message = null) : BusinessLogicException(message)
@@ -23,8 +25,14 @@ public static class Errors
 
     public static class Transaction
     {
-        public class CannotInitiateTransaction(string message = "Something went wrong. Cannot initiate transaction")
-            : InternalError(message);
+        public static class CannotInitiateTransaction
+        {
+            public class ClientIsNotAccountOwner(
+                string message = "Cannot initiate transaction: user is not account owner") : ForbiddenError(message);
+
+            public class Unknown(string message = "Cannot initiate transaction: something went wrong")
+                : InternalError(message);
+        }
     }
 
     public static class Loan
@@ -50,9 +58,6 @@ public static class Errors
                 $"Cannot perform action '{action}': the loan with id '{loanId}' is {state.ToString()}")
             {
             }
-
-            public static InvalidLoanState Closed(long loanId) =>
-                new($"Cannot perform action: the loan with id '{loanId}' is closed");
         }
     }
 

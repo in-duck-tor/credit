@@ -1,6 +1,7 @@
 using InDuckTor.Credit.Domain.Billing.Period;
 using InDuckTor.Credit.Domain.Exceptions;
 using InDuckTor.Credit.Domain.Expenses;
+using InDuckTor.Credit.Domain.LoanManagement.Event;
 
 namespace InDuckTor.Credit.Domain.LoanManagement.State;
 
@@ -77,7 +78,10 @@ public class ActiveLoanState : ILoanState
 
     public void ChargePenalty()
     {
-        Loan.Penalty.ChangeAmount(Loan.Debt * Loan.PenaltyRate);
+        var penalty = Loan.Debt * Loan.PenaltyRate;
+        if (penalty == 0) return;
+        Loan.Penalty.ChangeAmount(penalty);
+        Loan.StoreEvent(new PenaltyCharged(Loan.ClientId));
     }
 
     public void AttachLoanAccount(string accountNumber)

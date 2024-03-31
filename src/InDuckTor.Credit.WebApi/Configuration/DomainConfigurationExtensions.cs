@@ -4,6 +4,7 @@ using InDuckTor.Credit.Domain.Financing.Application;
 using InDuckTor.Credit.Domain.Financing.Program;
 using InDuckTor.Credit.Domain.LoanManagement;
 using InDuckTor.Credit.Domain.LoanManagement.Accounts;
+using InDuckTor.Credit.Domain.LoanManagement.CreditScore;
 using InDuckTor.Credit.Feature.Repository;
 using InDuckTor.Credit.WebApi.Configuration.Models;
 
@@ -39,7 +40,8 @@ public static class DomainConfigurationExtensions
             .AddScoped<IPaymentRepository, PaymentRepository>()
             .AddScoped<ILoanProgramRepository, LoanProgramRepository>()
             .AddScoped<IPeriodBillingRepository, PeriodBillingRepository>()
-            .AddScoped<IAccountsRepository, AccountsRepository>();
+            .AddScoped<IAccountsRepository, AccountsRepository>()
+            .AddScoped<ICreditScoreRepository, CreditScoreRepository>();
     }
 
     private static IServiceCollection AddAccountsRepositoryConfig(

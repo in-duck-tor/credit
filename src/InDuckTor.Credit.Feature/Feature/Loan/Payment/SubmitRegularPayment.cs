@@ -41,6 +41,7 @@ public class SubmitRegularPayment : ISubmitRegularPayment
 
         ArgumentNullException.ThrowIfNull(loan.LoanAccountNumber);
         var transactionInfo = await InitiateTransaction(
+            input.ClientId,
             payment.PaymentAmount,
             loan.LoanAccountNumber,
             loan.ClientAccountNumber);
@@ -52,11 +53,15 @@ public class SubmitRegularPayment : ISubmitRegularPayment
         return new PaymentSubmissionResponse(payment.LoanId, payment.ClientId, payment.PaymentAmount);
     }
 
-    // todo: добавить проверку на то, что счёт принадлежит пользователю
-    private async Task<TransactionInfo> InitiateTransaction(decimal paymentAmount,
+    private async Task<TransactionInfo> InitiateTransaction(
+        long clientId,
+        decimal paymentAmount,
         string loanAccountNumber,
         string clientAccountNumber)
     {
+        if (!await _accountsRepository.IsAccountOwner(clientId, clientAccountNumber))
+            throw new Errors.Transaction.CannotInitiateTransaction.ClientIsNotAccountOwner();
+
         var newTransaction = NewTransaction.ForInDuckTor(
             paymentAmount,
             loanAccountNumber,
@@ -66,7 +71,7 @@ public class SubmitRegularPayment : ISubmitRegularPayment
 
         var transactionInfo = await _accountsRepository.InitiateTransaction(newTransaction);
         if (transactionInfo.Status == TransactionStatus.Canceled)
-            throw new Errors.Transaction.CannotInitiateTransaction();
+            throw new Errors.Transaction.CannotInitiateTransaction.Unknown();
 
         return transactionInfo;
     }

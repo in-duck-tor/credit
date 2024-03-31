@@ -18,6 +18,13 @@ public class NewAccount
     public DateTime PlannedExpiration { get; set; }
 }
 
+public enum AccountState
+{
+    [EnumMember(Value = "active")] Active = 1,
+    [EnumMember(Value = "closed")] Closed = 2,
+    [EnumMember(Value = "frozen")] Frozen = 3
+}
+
 public enum AccountType
 {
     /// <summary>

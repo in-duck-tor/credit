@@ -71,9 +71,18 @@ public class PaymentService : IPaymentService
         if (!periodBilling.IsPaid) periodBilling.IsDebt = true;
     }
 
+    public static async Task DistributePayment2(PaymentService paymentService, Loan loan, Payment payment)
+    {
+        var unpaidPeriods = await paymentService._periodBillingRepository. GetAllUnpaidPeriodBillings(loan.Id);
+
+        if (unpaidPeriods.Count == 0) return;
+
+        DistributePayments(loan, [payment], unpaidPeriods);
+    }
+    
     public async Task DistributePayment(Loan loan, Payment payment)
     {
-        var unpaidPeriods = await _periodBillingRepository.GetAllUnpaidPeriodBillings(loan.Id);
+        var unpaidPeriods = await _periodBillingRepository. GetAllUnpaidPeriodBillings(loan.Id);
 
         if (unpaidPeriods.Count == 0) return;
 

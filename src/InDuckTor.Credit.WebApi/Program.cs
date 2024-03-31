@@ -13,7 +13,8 @@ var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
 
 services.AddStrategiesFrom(Assembly.GetAssembly(typeof(ISubmitApplication))!)
-    .ConfigureDomain(builder.Configuration);
+    .ConfigureDomain(builder.Configuration)
+    .ConfigureDomainEvents();
 
 services.AddProblemDetails().ConfigureJsonConverters();
 services.AddExceptionHandler<GlobalExceptionHandler>();

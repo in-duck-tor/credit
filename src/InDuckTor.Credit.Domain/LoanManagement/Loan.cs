@@ -1,5 +1,6 @@
 ﻿using System.Runtime.Serialization;
 using InDuckTor.Credit.Domain.Billing.Period;
+using InDuckTor.Credit.Domain.Events;
 using InDuckTor.Credit.Domain.Expenses;
 using InDuckTor.Credit.Domain.LoanManagement.Models;
 using InDuckTor.Credit.Domain.LoanManagement.PaymentCalculator;
@@ -7,7 +8,7 @@ using InDuckTor.Credit.Domain.LoanManagement.State;
 
 namespace InDuckTor.Credit.Domain.LoanManagement;
 
-public class Loan
+public class Loan : IEventStore
 {
     private const int MaxExtraPeriods = 3;
 
@@ -150,6 +151,8 @@ public class Loan
         set => _stateInteractor = value;
     }
 
+    private readonly List<IEvent> _events = [];
+
     public bool IsRepaid => CurrentBody + Debt + Penalty == 0;
     public bool IsClientAhuel => PeriodsBillings.Count - PlannedPaymentsNumber >= MaxExtraPeriods;
 
@@ -190,6 +193,12 @@ public class Loan
     public void CloseLoan() => StateInteractor.CloseLoan();
 
     public void SellToCollectors() => StateInteractor.SellToCollectors();
+
+    public IEnumerable<IEvent> GetEvents() => _events;
+
+    public void StoreEvent(IEvent @event) => _events.Add(@event);
+
+    public void ClearEvents() => _events.Clear();
 
     protected internal void SetState(LoanState state)
     {

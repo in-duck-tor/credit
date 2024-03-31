@@ -1,3 +1,4 @@
+using Hangfire.Dashboard;
 using InDuckTor.Credit.Domain.Exceptions;
 using InDuckTor.Credit.Domain.LoanManagement;
 using InDuckTor.Credit.Domain.LoanManagement.State;

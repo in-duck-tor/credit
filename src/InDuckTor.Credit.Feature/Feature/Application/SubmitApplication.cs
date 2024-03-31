@@ -53,6 +53,7 @@ public interface ISubmitApplication : ICommand<ApplicationInfoRequest, LoanAppli
 public class SubmitApplication(
     LoanDbContext context,
     IApplicationService applicationService,
+    
     IExecutor<ICreateLoan, LoanApplication, Domain.LoanManagement.Loan> createLoan) : ISubmitApplication
 {
     public async Task<LoanApplicationResponse> Execute(ApplicationInfoRequest infoRequest, CancellationToken ct)
