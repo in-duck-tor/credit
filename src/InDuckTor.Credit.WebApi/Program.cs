@@ -32,7 +32,15 @@ services.AddAuthorization();
 services.AddInDuckTorAuthentication(builder.Configuration.GetSection(nameof(JwtSettings)));
 services.AddInDuckTorSecurity();
 
+services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policyBuilder =>
+    {
+        policyBuilder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+    });
+});
 services.AddEndpointsApiExplorer();
+
 services.AddCreditSwaggerGen();
 
 services.ConfigureHangfire(builder.Configuration);
