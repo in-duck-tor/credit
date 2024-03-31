@@ -42,4 +42,10 @@ public static class LoanExtensions
 
         return items;
     }
+
+    public static void Main()
+    {
+        var d = 15000.28617216117216117216117;
+        Console.WriteLine(Math.Round(d, 2, MidpointRounding.ToPositiveInfinity));
+    }
 }

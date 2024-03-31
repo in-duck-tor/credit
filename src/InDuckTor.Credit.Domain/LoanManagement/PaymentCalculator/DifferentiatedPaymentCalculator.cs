@@ -35,6 +35,7 @@ public class DifferentiatedPaymentCalculator : IPaymentCalculator
 
     public decimal GetExpectedOneTimePayment() => GetExpectedBody() + GetExpectedInterest();
 
+    // todo: убедиться, что тело не отличается до последнего платежа (а оно чёта отличается сука)
     public decimal GetExpectedBody()
     {
         var regularFixedBody = _loan.BorrowedAmount / _loan.PlannedPaymentsNumber;

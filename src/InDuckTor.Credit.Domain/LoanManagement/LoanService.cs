@@ -10,7 +10,6 @@ public interface ILoanService
     public Task<Loan> CreateLoan(NewLoan newLoan);
 
     public Task Tick(Loan loan);
-    // public Task PayRegularly(long loanId, );
 }
 
 public class LoanService(PeriodService periodService, IAccountsRepository accountsRepository) : ILoanService
@@ -20,26 +19,28 @@ public class LoanService(PeriodService periodService, IAccountsRepository accoun
         // Резервация запрошенных клиентом денег для дальнейшего перевода на расчётный счёт
         var newTransaction = new NewTransaction(
             newLoan.BorrowedAmount,
-            new TransactionAccountInfo(newLoan.ClientAccountNumber, BankCodes.InDuckTorCode),
-            // todo: заменить на главную кассу кредитной организации (мастер-счёт)
-            null,
-            executeImmediate: true
+            TransactionAccountInfo.ForInDuckTor(newLoan.ClientAccountNumber),
+            TransactionAccountInfo.ForMasterAccount(),
+            executeImmediate: false
         );
         var transactionInfo = await accountsRepository.InitiateTransaction(newTransaction);
 
-        if (transactionInfo.Status == TransactionStatus.Canceled) throw new Errors.Loan.CannotProvideLoan();
+        if (transactionInfo.Status == TransactionStatus.Canceled)
+            throw new Errors.Transaction.CannotInitiateTransaction();
 
         var loan = new Loan(newLoan);
 
         // Создание ссудного счёта для Кредита
         var newAccount = CreateNewLoanAccount(loan);
-        var accountNumber = await accountsRepository.CreateLoanAccount(newAccount);
+        var accountNumber = await accountsRepository.CreateAccount(newAccount);
         loan.AttachLoanAccount(accountNumber);
 
         // Перевод долговой суммы на расчётный счёт
         // await accountsRepository.CommitTransaction(transactionInfo.TransactionId);
         loan.BorrowingDate = DateTime.UtcNow;
         loan.ActivateLoan();
+
+        await accountsRepository.CommitTransaction(transactionInfo.TransactionId);
 
         return loan;
     }
@@ -64,7 +65,13 @@ public class LoanService(PeriodService periodService, IAccountsRepository accoun
 
     private async Task CloseBillingPeriod(Loan loan)
     {
-        await periodService.CloseBillingPeriod(loan);
+        var periodBilling = await periodService.CloseBillingPeriod(loan);
+        
+        if (periodBilling.IsDebt)
+        {
+            loan.Debt.ChangeAmount(periodBilling.GetRemainingInterest() + periodBilling.GetRemainingLoanBodyPayoff());
+        }
+        
         if (loan.IsRepaid)
         {
             loan.CloseLoan();

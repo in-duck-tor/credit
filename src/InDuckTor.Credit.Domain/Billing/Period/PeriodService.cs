@@ -16,12 +16,6 @@ public class PeriodService(IPaymentService paymentService)
     {
         var periodBilling = loan.ClosePeriod();
         await paymentService.DistributePaymentsForNewPeriod(loan.Id, periodBilling);
-
-        if (periodBilling.IsDebt)
-        {
-            loan.Debt.ChangeAmount(periodBilling.GetRemainingInterest() + periodBilling.GetRemainingLoanBodyPayoff());
-        }
-
         return periodBilling;
     }
 }

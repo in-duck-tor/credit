@@ -6,6 +6,8 @@ public static class Errors
 {
     public abstract class BusinessLogicException(string? message = null) : Exception(message);
 
+    public abstract class InternalError(string? message = null) : Exception(message);
+
     public class EntitiesIsNotRelatedException(string? message = null) : BusinessLogicException(message)
     {
         public static EntitiesIsNotRelatedException WithNames(string entity1Name, string entity2Name)
@@ -18,6 +20,12 @@ public static class Errors
     public class NotFoundException(string message) : Exception(message);
 
     public class BadRequestException(string message) : Exception(message);
+
+    public static class Transaction
+    {
+        public class CannotInitiateTransaction(string message = "Something went wrong. Cannot initiate transaction")
+            : InternalError(message);
+    }
 
     public static class Loan
     {
@@ -33,9 +41,6 @@ public static class Errors
             public static CannotStartNewPeriod NotEndedYet() => new(
                 "Cannot start a new period because the current one has not ended yet");
         }
-
-        public class CannotProvideLoan(string message = "Cannot provide a loan to a client")
-            : BusinessLogicException(message);
 
         public class InvalidLoanStateChange(string message) : BusinessLogicException(message);
 

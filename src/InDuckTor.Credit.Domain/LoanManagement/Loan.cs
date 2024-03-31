@@ -9,6 +9,8 @@ namespace InDuckTor.Credit.Domain.LoanManagement;
 
 public class Loan
 {
+    private const int MaxExtraPeriods = 3;
+
     private const int DaysInRegularYear = 365;
     private const int DaysInLeapYear = 364;
 
@@ -44,6 +46,7 @@ public class Loan
         BodyAfterPayoffs = newLoan.BorrowedAmount;
         Debt = ExpenseItem.Zero;
         Penalty = ExpenseItem.Zero;
+        PeriodsBillings = [];
 
         PaymentCalculator = InitPaymentCalculator();
     }
@@ -129,7 +132,7 @@ public class Loan
     /// </summary>
     public const decimal PenaltyRate = 0.1m;
 
-    public List<PeriodBilling> PeriodsBillings { get; init; } = [];
+    public List<PeriodBilling> PeriodsBillings { get; init; }
 
     /// <summary>
     /// <para><b>Начисления за текущий Период</b></para>
@@ -148,7 +151,7 @@ public class Loan
     }
 
     public bool IsRepaid => CurrentBody + Debt + Penalty == 0;
-    public bool IsClientAhuel => PeriodsBillings.Count - PlannedPaymentsNumber >= 3;
+    public bool IsClientAhuel => PeriodsBillings.Count - PlannedPaymentsNumber >= MaxExtraPeriods;
 
     public TimeSpan PeriodDuration
     {
@@ -200,7 +203,7 @@ public class Loan
             return (int)Math.Round(newLoan.LoanTerm.Days / (double)30);
 
         ArgumentNullException.ThrowIfNull(newLoan.PeriodInterval);
-        
+
         var paymentsNumber = (int)Math.Round(newLoan.LoanTerm / newLoan.PeriodInterval.Value);
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(paymentsNumber, 0);
 

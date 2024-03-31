@@ -55,7 +55,7 @@ public class PaymentService : IPaymentService
         var totalPaymentToDistributeSum = undistributedPayments.Select(p => p.PaymentToDistribute).Sum();
         var currentMaxPayment = totalRemainingPayment - totalPaymentToDistributeSum;
 
-        if (currentMaxPayment == 0) Errors.Payment.InvalidRegularPaymentAmount.TooMuch();
+        if (currentMaxPayment == 0) throw Errors.Payment.InvalidRegularPaymentAmount.TooMuch();
 
         var realPaymentAmount = newPayment.PaymentAmount > currentMaxPayment
             ? currentMaxPayment
@@ -94,7 +94,11 @@ public class PaymentService : IPaymentService
         if (unpaidPeriods.Count == 0) return;
 
 #if DEBUG
-        if (unpaidPeriods.Select(p => p.GetRemainingInterest() + p.GetRemainingLoanBodyPayoff()).Sum() > loan.Debt)
+        var periodDebtSum = unpaidPeriods
+            .Where(p => p.IsDebt)
+            .Select(p => p.GetRemainingInterest() + p.GetRemainingLoanBodyPayoff())
+            .Sum();
+        if (periodDebtSum > loan.Debt)
             throw new Exception("Debt is less than remainings. Pizda.");
 #endif
 

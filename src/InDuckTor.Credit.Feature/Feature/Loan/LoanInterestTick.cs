@@ -16,6 +16,7 @@ public class LoanInterestTick(LoanDbContext context, ILoanService loanService) :
     public async Task<Unit> Execute(Unit input, CancellationToken ct)
     {
         var loans = await context.Loans
+            .Include(l => l.PeriodsBillings)
             .Where(loan => loan.State == LoanState.Active)
             .ToListAsync(cancellationToken: ct);
 

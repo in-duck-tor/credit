@@ -10,7 +10,7 @@ public record NewTransactionRequest(NewTransaction NewTransaction);
 public interface IAccountsRepositoryRefit
 {
     [Post("/api/v1/bank/account")]
-    Task<AccountInfoResponse> CreateLoanAccount([Body] NewAccount newAccount, [Authorize] string token);
+    Task<AccountInfoResponse> CreateAccount([Body] NewAccount newAccount, [Authorize] string token);
 
     [Post("/api/v1/bank/account/transaction")]
     Task<TransactionInfo> InitiateTransaction([Body] NewTransactionRequest newTransactionRequest, [Authorize] string token);
@@ -28,9 +28,9 @@ public class AccountsRepository(
     AccountsRepositoryConfig config,
     IAccountsRepositoryRefit accountsRepositoryRefit) : IAccountsRepository
 {
-    public async Task<string> CreateLoanAccount(NewAccount newAccount)
+    public async Task<string> CreateAccount(NewAccount newAccount)
     {
-        var accountInfoResponse = await accountsRepositoryRefit.CreateLoanAccount(newAccount, config.Token);
+        var accountInfoResponse = await accountsRepositoryRefit.CreateAccount(newAccount, config.Token);
         return accountInfoResponse.AccountNumber;
     }
 

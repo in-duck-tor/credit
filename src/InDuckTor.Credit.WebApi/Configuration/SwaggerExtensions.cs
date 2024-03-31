@@ -1,5 +1,6 @@
 using System.Xml.Linq;
 using System.Xml.XPath;
+using InDuckTor.Credit.Feature.Feature;
 using InDuckTor.Shared.Configuration.Swagger;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
@@ -16,6 +17,8 @@ public static class SwaggerExtensions
             options.ConfigureJwtAuth();
             options.ConfigureEnumMemberValues();
             options.CustomSchemaIds(ComposeNameWithDeclaringType);
+
+            options.SchemaFilter<MoneyViewSchemaFilter>();
 
             options.DocumentFilter<CustomModelDocumentFilter<ProblemDetails>>();
 
@@ -39,5 +42,15 @@ public class CustomModelDocumentFilter<T> : IDocumentFilter where T : class
     public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
     {
         context.SchemaGenerator.GenerateSchema(typeof(T), context.SchemaRepository);
+    }
+}
+
+public class MoneyViewSchemaFilter : ISchemaFilter
+{
+    public void Apply(OpenApiSchema schema, SchemaFilterContext context)
+    {
+        if (context.Type != typeof(MoneyView)) return;
+        schema.Type = "number";
+        schema.Description = "Отображение денег";
     }
 }
