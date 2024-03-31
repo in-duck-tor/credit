@@ -52,6 +52,7 @@ public class SubmitRegularPayment : ISubmitRegularPayment
         return new PaymentSubmissionResponse(payment.LoanId, payment.ClientId, payment.PaymentAmount);
     }
 
+    // todo: добавить проверку на то, что счёт принадлежит пользователю
     private async Task<TransactionInfo> InitiateTransaction(decimal paymentAmount,
         string loanAccountNumber,
         string clientAccountNumber)
