@@ -23,9 +23,9 @@ public static class RefitConfigurationExtensions
                     ServerCertificateCustomValidationCallback = (_, _, _, _) => true
                 };
             })
-            .ConfigureHttpClient(httpClient => httpClient.BaseAddress = new Uri(settings.BaseAddress))
             .AddHttpMessageHandler(serviceProvider =>
-                new HttpLoggingHandler(serviceProvider.GetRequiredService<ILogger<HttpLoggingHandler>>()));
+                new HttpLoggingHandler(serviceProvider.GetRequiredService<ILogger<HttpLoggingHandler>>()))
+            .ConfigureHttpClient(httpClient => httpClient.BaseAddress = new Uri(settings.BaseAddress));
 
         httpClientBuilder.Services.AddSingleton<HttpLoggingHandler>();
 

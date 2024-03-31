@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+using System.Runtime.Serialization;
 using InDuckTor.Credit.Domain.Financing.Program;
 using InDuckTor.Credit.Domain.Financing.Program.Model;
 using InDuckTor.Credit.Domain.LoanManagement;
@@ -13,10 +15,10 @@ namespace InDuckTor.Credit.Feature.Feature.Program;
 /// <param name="PaymentScheduleType">Тип кредитного графика (сейчас всегда выбирать interval)</param>
 /// <param name="PeriodInterval">Длительность Расчётного Периода (для интервального графика)</param>
 public record LoanProgramInfoRequest(
-    decimal InterestRate,
-    PaymentType PaymentType,
-    PaymentScheduleType PaymentScheduleType,
-    long PeriodInterval
+    [property: Required] decimal InterestRate,
+    [property: Required] PaymentType PaymentType,
+    [property: Required] PaymentScheduleType PaymentScheduleType,
+    [property: Required] long PeriodInterval
 );
 
 public interface ICreateLoanProgram : ICommand<LoanProgramInfoRequest, LoanProgramResponse>;

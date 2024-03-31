@@ -1,4 +1,3 @@
-using System.Runtime.Serialization;
 using InDuckTor.Credit.Domain.LoanManagement.Accounts;
 using Refit;
 

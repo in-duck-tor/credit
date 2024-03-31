@@ -23,7 +23,6 @@ public static class Endpoints
     }
     
     [Authorize(Policy = "EmployeeOnly")]
-    // Здесь должна быть проверка прав вызывающего
     [ProducesResponseType<ProblemDetails>(500)]
     [ProducesResponseType<ProblemDetails>(401)]
     [ProducesResponseType<LoanProgramResponse>(200)]

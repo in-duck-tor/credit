@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using InDuckTor.Credit.Domain.Financing.Application;
 using InDuckTor.Credit.Domain.Financing.Application.Model;
 using InDuckTor.Credit.Feature.Feature.Loan;
@@ -12,11 +13,11 @@ namespace InDuckTor.Credit.Feature.Feature.Application;
 /// <param name="BorrowedAmount">Сумма займа</param>
 /// <param name="LoanTerm">Время, на которое берётся Кредит в секундах</param>
 public record ApplicationInfoRequest(
-    long ClientId,
-    long LoanProgramId,
-    decimal BorrowedAmount,
-    long LoanTerm,
-    string ClientAccountNumber);
+    [property: Required] long ClientId,
+    [property: Required] long LoanProgramId,
+    [property: Required] decimal BorrowedAmount,
+    [property: Required] long LoanTerm,
+    [property: Required] string ClientAccountNumber);
 
 /// <param name="Id">Id Заявки</param>
 /// <param name="ClientId">Id Клиента</param>
@@ -53,7 +54,6 @@ public interface ISubmitApplication : ICommand<ApplicationInfoRequest, LoanAppli
 public class SubmitApplication(
     LoanDbContext context,
     IApplicationService applicationService,
-    
     IExecutor<ICreateLoan, LoanApplication, Domain.LoanManagement.Loan> createLoan) : ISubmitApplication
 {
     public async Task<LoanApplicationResponse> Execute(ApplicationInfoRequest infoRequest, CancellationToken ct)

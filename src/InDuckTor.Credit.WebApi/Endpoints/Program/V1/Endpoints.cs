@@ -34,7 +34,6 @@ public static class Endpoints
         return TypedResults.Ok(await getAllLoanPrograms.Execute(default, cancellationToken));
     }
 
-    // Здесь должна быть проверка прав вызывающего
     [ProducesResponseType<ProblemDetails>(500)]
     [ProducesResponseType<ProblemDetails>(401)]
     [ProducesResponseType<LoanProgramResponse>(200)]
