@@ -109,9 +109,9 @@ public class ActiveLoanState : ILoanState
         ChangeState(LoanState.Closed);
     }
 
-    public void SellToCollectors()
+    public void SellToCollectors(int numberOfPeriods)
     {
-        if (!Loan.IsClientAhuel)
+        if (!Loan.GetIsClientAhuel(numberOfPeriods))
             throw new Errors.Loan.InvalidLoanStateChange("Client is not ahuel enough to sell the loan to collectors");
 
         ChangeState(LoanState.Sold);

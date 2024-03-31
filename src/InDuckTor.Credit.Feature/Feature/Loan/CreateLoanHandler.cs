@@ -15,7 +15,7 @@ public class CreateLoanHandler(
 {
     public async Task<Domain.LoanManagement.Loan> Execute(LoanApplication loanApplication, CancellationToken ct)
     {
-        var loan = await loanService.CreateLoan(NewLoan.FromApplication(loanApplication));
+        var loan = await loanService.CreateLoan(NewLoan.FromApplication(loanApplication), ct);
         context.Loans.Add(loan);
 
         loanApplication.ApplicationState = ApplicationState.Processed;

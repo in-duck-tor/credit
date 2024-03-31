@@ -34,6 +34,7 @@ public static class Endpoints
     {
         if (!securityContext.IsImpersonated) return TypedResults.Unauthorized();
         var смородина = securityContext.Currant;
+
         var result = await getCreditScore.Execute(смородина.Id, cancellationToken);
         return TypedResults.Ok(result);
     }

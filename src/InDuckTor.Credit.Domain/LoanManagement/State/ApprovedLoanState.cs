@@ -88,7 +88,7 @@ public class ApprovedLoanState : ILoanState
         throw new Errors.Loan.InvalidLoanState.Forbidden(Loan.Id, nameof(CloseLoan), ThisState);
     }
 
-    public void SellToCollectors()
+    public void SellToCollectors(int numberOfPeriods)
     {
         throw new Errors.Loan.InvalidLoanState.Forbidden(Loan.Id, nameof(SellToCollectors), ThisState);
     }

@@ -2,6 +2,7 @@ using InDuckTor.Credit.Domain.Billing.Payment.Extensions;
 using InDuckTor.Credit.Domain.Billing.Payment.Models;
 using InDuckTor.Credit.Domain.Billing.Period;
 using InDuckTor.Credit.Domain.Exceptions;
+using InDuckTor.Credit.Domain.Expenses;
 using InDuckTor.Credit.Domain.LoanManagement;
 
 namespace InDuckTor.Credit.Domain.Billing.Payment;
@@ -71,22 +72,20 @@ public class PaymentService : IPaymentService
         if (!periodBilling.IsPaid) periodBilling.IsDebt = true;
     }
 
-    public static async Task DistributePayment2(PaymentService paymentService, Loan loan, Payment payment)
-    {
-        var unpaidPeriods = await paymentService._periodBillingRepository.GetAllUnpaidPeriodBillings(loan.Id);
-
-        if (unpaidPeriods.Count == 0) return;
-
-        DistributePayments(loan, [payment], unpaidPeriods);
-    }
-
     public async Task DistributePayment(Loan loan, Payment payment)
     {
         var unpaidPeriods = await _periodBillingRepository.GetAllUnpaidPeriodBillings(loan.Id);
 
-        if (unpaidPeriods.Count == 0) return;
+        if (unpaidPeriods.Count != 0)
+        {
+            DistributePayments(loan, [payment], unpaidPeriods);
+            return;
+        }
 
-        DistributePayments(loan, [payment], unpaidPeriods);
+        if (loan.Penalty == 0) return;
+
+        var penalty = new PrioritizedExpenseItem(PaymentPriority.Penalty, loan.Penalty);
+        payment.DistributeForPenalty(penalty);
     }
 
     /// <summary>
@@ -102,14 +101,14 @@ public class PaymentService : IPaymentService
         if (payments.Count == 0) return;
         if (unpaidPeriods.Count == 0) return;
 
-#if DEBUG
+// #if DEBUG
         var periodDebtSum = unpaidPeriods
             .Where(p => p.IsDebt)
             .Select(p => p.GetRemainingInterest() + p.GetRemainingLoanBodyPayoff())
             .Sum();
-        if (periodDebtSum > loan.Debt)
-            throw new Exception("Debt is less than remainings. Pizda.");
-#endif
+        // if (periodDebtSum > loan.Debt)
+//             throw new Exception("Debt is less than remainings. Pizda.");
+// #endif
 
         using var paymentEnumerator = payments.GetEnumerator();
         paymentEnumerator.MoveNext();
@@ -123,7 +122,13 @@ public class PaymentService : IPaymentService
 
         while (true)
         {
+            // todo: переделать распределение: сначала по долгам каждого из периодов по очереди, потом по штрафу
+            //  и далее - по остальным категориям каждого из периодов. 
+            //  Для этого можно сделать 2 метода: на получение долговых категорий и на получение обычных категорий.
+            //  Штраф обрабатывать отдельно.
             payment.DistributeOn(period, paymentItems);
+
+            if (period.IsPaid) period.RemainingPayoff = null;
 
             if (!payment.IsDistributed && !period.IsPaid)
                 throw new Errors.Payment.InvalidPaymentDistributionException(

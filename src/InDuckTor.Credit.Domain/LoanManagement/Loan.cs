@@ -130,7 +130,7 @@ public class Loan : IEventStore
     /// </summary>
     public const decimal PenaltyRate = 0.1m;
 
-    public List<PeriodBilling> PeriodsBillings { get; init; }
+    public List<PeriodBilling> PeriodsBillings { get; init; } = [];
 
     /// <summary>
     /// <para><b>Начисления за текущий Период</b></para>
@@ -153,7 +153,9 @@ public class Loan : IEventStore
     private readonly List<IEvent> _events = [];
 
     public bool IsRepaid => CurrentBody + Debt + Penalty == 0;
-    public bool IsClientAhuel => PeriodsBillings.Count - PlannedPaymentsNumber >= MaxExtraPeriods;
+
+    // todo: это пиздец. Так не должно быть. Провести миграцию и добавить поле NumberOfPeriods 
+    public bool GetIsClientAhuel(int numberOfPeriods) => numberOfPeriods - PlannedPaymentsNumber >= MaxExtraPeriods;
 
     public TimeSpan PeriodDuration
     {
@@ -193,7 +195,7 @@ public class Loan : IEventStore
 
     public void CloseLoan() => StateInteractor.CloseLoan();
 
-    public void SellToCollectors() => StateInteractor.SellToCollectors();
+    public void SellToCollectors(int numberOfPeriods) => StateInteractor.SellToCollectors(numberOfPeriods);
 
     public IEnumerable<IEvent> GetEvents() => _events;
 

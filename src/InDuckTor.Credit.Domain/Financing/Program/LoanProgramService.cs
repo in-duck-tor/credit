@@ -1,3 +1,5 @@
+using InDuckTor.Credit.Domain.Exceptions;
+using InDuckTor.Credit.Domain.Financing.Application.Extensions;
 using InDuckTor.Credit.Domain.Financing.Program.Model;
 using InDuckTor.Credit.Domain.LoanManagement;
 
@@ -12,8 +14,10 @@ public class LoanProgramService : ILoanProgramService
 {
     public LoanProgram CreateProgram(NewProgram newProgram)
     {
-        var interestFreq = Loan.InterestAccrualFrequency;
-        var realPeriodInterval = interestFreq * Math.Round(newProgram.PeriodInterval / interestFreq);
+        if (newProgram.PeriodInterval <= TimeSpan.Zero) throw Errors.LoanProgram.InvalidData.Interval();
+        if (newProgram.InterestRate <= 0) throw Errors.LoanProgram.InvalidData.Interest();
+
+        var realPeriodInterval = newProgram.PeriodInterval.MultipleOf(Loan.InterestAccrualFrequency);
 
         return new LoanProgram
         {

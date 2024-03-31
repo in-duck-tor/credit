@@ -16,5 +16,5 @@ public interface ILoanState
     bool IsCurrentPeriodEnded();
     void ActivateLoan();
     void CloseLoan();
-    void SellToCollectors();
+    void SellToCollectors(int numberOfPeriods);
 }

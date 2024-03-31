@@ -12,6 +12,13 @@ public class LoanRepository(LoanDbContext context) : ILoanRepository
         return await context.Loans.FindAsync([loanId], cancellationToken: cancellationToken);
     }
 
+    public async Task<int> GetNumberOfPeriods(long loanId, CancellationToken cancellationToken)
+    {
+        return await context.PeriodsBillings.CountAsync(
+            pb => pb.Loan.Id == loanId,
+            cancellationToken);
+    }
+
     public async Task<bool> IsExists(long loanId, long clientId, CancellationToken cancellationToken)
     {
         return await context.Loans.AnyAsync(

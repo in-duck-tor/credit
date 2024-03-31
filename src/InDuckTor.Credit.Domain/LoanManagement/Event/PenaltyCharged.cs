@@ -11,8 +11,8 @@ public class PenaltyChargedEventHandler(ICreditScoreRepository creditScoreReposi
 
     public async Task Handle(PenaltyCharged @event, CancellationToken cancellationToken)
     {
-        var creditScore = await creditScoreRepository.GetOrCreateByClientId(@event.ClientId, cancellationToken)
-                          ?? new CreditScore.CreditScore(@event.ClientId);
+        var creditScore = await creditScoreRepository.GetOrCreateByClientId(@event.ClientId, cancellationToken);
+
         var ratio = (double)(@event.Debt / @event.BorrowedAmount);
         var increase = F(ratio);
         creditScore.Score += ScoreChange + increase;

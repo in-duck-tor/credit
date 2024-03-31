@@ -73,8 +73,12 @@ public static class Errors
     {
         public class NotFound(long id) : NotFoundException($"LoanApplication with id '{id}' is not found");
 
-        public class LoanSumIsTooBig(decimal maxAmount) : BadRequestException(
-            $"The amount borrowed by client is too large. The max loan amount is {maxAmount}");
+        public class InvalidData(string message) : BadRequestException(message)
+        {
+            public static InvalidData LoanTerm() => new("Loan term must be positive");
+            public static InvalidData LoanSumIsTooBig(decimal maxAmount) =>
+                new($"The amount borrowed by client is too large. The max loan amount is {maxAmount}");
+        }
     }
 
     public static class LoanProgram
@@ -84,6 +88,12 @@ public static class Errors
             public NotFound(long id) : this($"LoanProgram with id '{id}' is not found")
             {
             }
+        }
+
+        public class InvalidData(string message) : BadRequestException(message)
+        {
+            public static InvalidData Interval() => new InvalidData("Interval must be positive");
+            public static InvalidData Interest() => new InvalidData("Interest must be positive");
         }
     }
 

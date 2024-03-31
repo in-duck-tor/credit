@@ -23,5 +23,6 @@ public class CreditScore
     }
 
     public long ClientId { get; init; }
+
     public int Score { get; set; }
 }

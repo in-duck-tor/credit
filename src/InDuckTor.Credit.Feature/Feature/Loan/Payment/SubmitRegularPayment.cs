@@ -46,9 +46,16 @@ public class SubmitRegularPayment : ISubmitRegularPayment
             loan.LoanAccountNumber,
             loan.ClientAccountNumber);
 
-        await _paymentService.DistributePayment(loan, payment);
-
-        await _accountsRepository.CommitTransaction(transactionInfo.TransactionId);
+        try
+        {
+            await _paymentService.DistributePayment(loan, payment);
+            await _accountsRepository.CommitTransaction(transactionInfo.TransactionId);
+        }
+        catch (Exception)
+        {
+            await _accountsRepository.CancelTransaction(transactionInfo.TransactionId);
+            throw;
+        }
 
         return new PaymentSubmissionResponse(payment.LoanId, payment.ClientId, payment.PaymentAmount);
     }
@@ -66,7 +73,8 @@ public class SubmitRegularPayment : ISubmitRegularPayment
             paymentAmount,
             loanAccountNumber,
             clientAccountNumber,
-            executeImmediate: false
+            executeImmediate: false,
+            requestedTransactionTtl: 100
         );
 
         var transactionInfo = await _accountsRepository.InitiateTransaction(newTransaction);

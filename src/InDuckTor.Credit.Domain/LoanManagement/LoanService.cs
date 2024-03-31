@@ -8,14 +8,17 @@ namespace InDuckTor.Credit.Domain.LoanManagement;
 
 public interface ILoanService
 {
-    public Task<Loan> CreateLoan(NewLoan newLoan);
+    public Task<Loan> CreateLoan(NewLoan newLoan, CancellationToken cancellationToken);
 
-    public Task Tick(Loan loan);
+    public Task Tick(Loan loan, CancellationToken cancellationToken);
 }
 
-public class LoanService(PeriodService periodService, IAccountsRepository accountsRepository) : ILoanService
+public class LoanService(
+    ILoanRepository loanRepository,
+    PeriodService periodService,
+    IAccountsRepository accountsRepository) : ILoanService
 {
-    public async Task<Loan> CreateLoan(NewLoan newLoan)
+    public async Task<Loan> CreateLoan(NewLoan newLoan, CancellationToken cancellationToken)
     {
         if (!await accountsRepository.IsAccountOwner(newLoan.ClientId, newLoan.ClientAccountNumber))
             throw new Errors.Transaction.CannotInitiateTransaction.ClientIsNotAccountOwner();
@@ -49,14 +52,15 @@ public class LoanService(PeriodService periodService, IAccountsRepository accoun
         return loan;
     }
 
-    public async Task Tick(Loan loan)
+    public async Task Tick(Loan loan, CancellationToken cancellationToken)
     {
         loan.AccrueInterestOnCurrentPeriod();
         loan.ChargePenalty();
-
+        var n = await loanRepository.GetNumberOfPeriods(loan.Id, cancellationToken);
+        Console.WriteLine(n);
         if (loan.IsCurrentPeriodEnded())
         {
-            await CloseBillingPeriod(loan);
+            await CloseBillingPeriod(loan, cancellationToken);
         }
     }
 
@@ -67,7 +71,7 @@ public class LoanService(PeriodService periodService, IAccountsRepository accoun
         return new NewAccount(loan.ClientId, AccountType.Loan, "RUB", plannedExpiration);
     }
 
-    private async Task CloseBillingPeriod(Loan loan)
+    private async Task CloseBillingPeriod(Loan loan, CancellationToken cancellationToken)
     {
         var periodBilling = await periodService.CloseBillingPeriod(loan);
 
@@ -95,9 +99,11 @@ public class LoanService(PeriodService periodService, IAccountsRepository accoun
             return;
         }
 
-        if (loan.IsClientAhuel)
+        var numberOfPeriods = await loanRepository.GetNumberOfPeriods(loan.Id, cancellationToken);
+
+        if (loan.GetIsClientAhuel(numberOfPeriods))
         {
-            loan.SellToCollectors();
+            loan.SellToCollectors(numberOfPeriods);
             return;
         }
 

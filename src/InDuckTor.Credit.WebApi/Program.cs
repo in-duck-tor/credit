@@ -8,6 +8,8 @@ using InDuckTor.Credit.WebApi.Endpoints.Application;
 using InDuckTor.Credit.WebApi.Endpoints.CreditScore;
 using InDuckTor.Credit.WebApi.Endpoints.Loan;
 using InDuckTor.Credit.WebApi.Endpoints.Program;
+using InDuckTor.Shared.Security;
+using InDuckTor.Shared.Security.Context;
 using InDuckTor.Shared.Security.Http;
 using InDuckTor.Shared.Security.Jwt;
 using InDuckTor.Shared.Strategies;
@@ -28,7 +30,10 @@ services.AddLoanDbContext(builder.Configuration);
 services.AddInDuckTorAuthentication(builder.Configuration.GetSection(nameof(JwtSettings)));
 services
     .AddAuthorizationBuilder()
-    .AddPolicy("EmployeeOnly", policy => policy.RequireClaim("roles", "employee"));
+    .AddPolicy("EmployeeOnly",
+        policy => policy
+            .RequireClaim("roles", "employee")
+            .RequireClaim(InDuckTorClaims.AccountType, AccountType.System.ToString()));
 services.AddInDuckTorSecurity();
 
 services.AddCors(options =>
@@ -54,13 +59,13 @@ if (!app.Environment.IsProduction())
     app.UseSwaggerUI();
 }
 
+app.UseExceptionHandler();
+
 app.AddLoanApplicationEndpoints()
     .AddLoanProgramEndpoints()
     .AddLoanEndpoints()
     .AddCreditScoreEndpoints()
     .AddTestEndpoints();
-
-app.UseExceptionHandler();
 
 app.UseCors();
 

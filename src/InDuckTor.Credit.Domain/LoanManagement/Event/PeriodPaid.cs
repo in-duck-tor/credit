@@ -11,8 +11,7 @@ public class PeriodPaidEventHandler(ICreditScoreRepository creditScoreRepository
 
     public async Task Handle(PeriodPaid @event, CancellationToken cancellationToken)
     {
-        var creditScore = await creditScoreRepository.GetOrCreateByClientId(@event.ClientId, cancellationToken)
-                          ?? new CreditScore.CreditScore(@event.ClientId);
+        var creditScore = await creditScoreRepository.GetOrCreateByClientId(@event.ClientId, cancellationToken);
 
         var ratio = Math.Max(1, @event.TimeUntilPeriodEnd / @event.PeriodDuration * 10);
         var increase = F(ratio);

@@ -13,7 +13,7 @@ public class CreditScoreRepository : ICreditScoreRepository
         _context = context;
     }
 
-    public async Task<CreditScore?> GetOrCreateByClientId(long id, CancellationToken cancellationToken)
+    public async Task<CreditScore> GetOrCreateByClientId(long id, CancellationToken cancellationToken)
     {
         var creditScore = await _context.CreditScores.FirstOrDefaultAsync(cs => cs.ClientId == id, cancellationToken);
 

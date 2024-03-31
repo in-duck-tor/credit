@@ -45,16 +45,7 @@ public class PeriodBilling
     /// </summary>
     public ExpenseItems? RemainingPayoff { get; set; }
 
-    public bool IsPaid
-    {
-        get
-        {
-            if (RemainingPayoff == null) return true;
-            if (RemainingPayoff.GetTotalSum() != 0) return false;
-            RemainingPayoff = null;
-            return true;
-        }
-    }
+    public bool IsPaid => RemainingPayoff == null || RemainingPayoff.GetTotalSum() == 0;
 
     public decimal TotalRemainingPayment =>
         GetRemainingInterest() + GetRemainingLoanBodyPayoff() + GetRemainingChargingForServices();

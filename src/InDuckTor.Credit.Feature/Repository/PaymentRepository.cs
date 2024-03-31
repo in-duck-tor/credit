@@ -18,6 +18,6 @@ public class PaymentRepository : IPaymentRepository
         return await _context.Payments
             .Include(p => p.BillingsPayoffs)
             .ThenInclude(bp => bp.PeriodBilling)
-            .Where(payment => !payment.IsDistributed).ToListAsync();
+            .Where(payment => !payment.IsDistributed && payment.LoanId == loanId).ToListAsync();
     }
 }

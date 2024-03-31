@@ -46,9 +46,28 @@ public class Payment
 
     public decimal PaymentToDistribute => PaymentAmount - CalculateDistributedPaymentSum();
 
+    public void DistributeForPenalty(IPrioritizedExpenseItem item)
+    {
+        if (item.Priority != PaymentPriority.Penalty) return;
+        if (IsDistributed) return;
+
+        var paymentToDistribute = PaymentToDistribute;
+        if (paymentToDistribute == 0) return;
+
+        var paymentExpenseItems = CreatePaymentBillingItems();
+
+        var min = decimal.Min(paymentToDistribute, item.Amount);
+        item.ChangeAmount(-min);
+        paymentToDistribute -= min;
+
+        IncreasePaymentExpenseItem(paymentExpenseItems, item.Priority, min);
+
+        if (paymentToDistribute == 0) IsDistributed = true;
+    }
+
     public void DistributeOn(PeriodBilling periodBilling, List<IPrioritizedExpenseItem> items)
     {
-        if (IsDistributed || periodBilling.IsPaid) return;
+        if (IsDistributed) return;
 
         var paymentToDistribute = PaymentToDistribute;
         if (paymentToDistribute == 0) return;
@@ -57,7 +76,7 @@ public class Payment
 
         foreach (var item in items)
         {
-            if (paymentToDistribute == 0 || periodBilling.IsPaid) break;
+            if (paymentToDistribute == 0) break;
 
             var min = decimal.Min(paymentToDistribute, item.Amount);
             item.ChangeAmount(-min);
@@ -84,11 +103,23 @@ public class Payment
         else paymentExpenseItems.ChangeBasedOnPriority(priority, amount);
     }
 
+    private ExpenseItems CreatePaymentBillingItems()
+    {
+        var paymentExpenseItems = new ExpenseItems(0, 0, 0);
+        BillingsPayoffs.Add(new BillingPayoff
+        {
+            PeriodBilling = null,
+            ExpenseItems = paymentExpenseItems
+        });
+
+        return paymentExpenseItems;
+    }
+
     private ExpenseItems GetOrCreatePaymentBillingItems(PeriodBilling periodBilling)
     {
         ExpenseItems paymentExpenseItems;
 
-        if (BillingsPayoffs.Count == 0 || BillingsPayoffs.Last().PeriodBilling.Id != periodBilling.Id)
+        if (BillingsPayoffs.Count == 0 || BillingsPayoffs.Last().PeriodBilling?.Id != periodBilling.Id)
         {
             paymentExpenseItems = new ExpenseItems(0, 0, 0);
             BillingsPayoffs.Add(new BillingPayoff
@@ -97,10 +128,7 @@ public class Payment
                 ExpenseItems = paymentExpenseItems
             });
         }
-        else
-        {
-            paymentExpenseItems = BillingsPayoffs.Last().ExpenseItems;
-        }
+        else paymentExpenseItems = BillingsPayoffs.Last().ExpenseItems;
 
         return paymentExpenseItems;
     }
@@ -116,7 +144,7 @@ public class BillingPayoff
     /// <summary>
     /// Расчётный Период, к которому относится текущее Погашение 
     /// </summary>
-    public required PeriodBilling PeriodBilling { get; init; }
+    public required PeriodBilling? PeriodBilling { get; init; }
 
     /// <summary>
     /// Статьи, по которым распределась часть текущего платежа

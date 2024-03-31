@@ -11,9 +11,8 @@ public class PeriodNotPaidEventHandler(ICreditScoreRepository creditScoreReposit
 
     public async Task Handle(PeriodNotPaid @event, CancellationToken cancellationToken)
     {
-        var creditScore = await creditScoreRepository.GetOrCreateByClientId(@event.ClientId, cancellationToken)
-                          ?? new CreditScore.CreditScore(@event.ClientId);
-
+        var creditScore = await creditScoreRepository.GetOrCreateByClientId(@event.ClientId, cancellationToken);
+        
         var ratio = (double)(@event.RemainingPayment / @event.ExpectedPayment);
         var increase = F(ratio);
         creditScore.Score += ScoreChange + increase;

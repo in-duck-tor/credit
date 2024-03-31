@@ -1,4 +1,5 @@
 using InDuckTor.Credit.Domain.Exceptions;
+using InDuckTor.Credit.Domain.Financing.Application.Extensions;
 using InDuckTor.Credit.Domain.Financing.Application.Model;
 using InDuckTor.Credit.Domain.Financing.Program;
 using InDuckTor.Credit.Domain.LoanManagement;
@@ -26,15 +27,17 @@ public class ApplicationService(
     public async Task<LoanApplication> CreateApplication(NewApplication newApplication)
     {
         if (newApplication.BorrowedAmount > LoanApplication.MaxLoanSum)
-            throw new Errors.LoanApplication.LoanSumIsTooBig(LoanApplication.MaxLoanSum);
+            throw Errors.LoanApplication.InvalidData.LoanSumIsTooBig(LoanApplication.MaxLoanSum);
+        if (newApplication.LoanTerm <= TimeSpan.Zero) throw Errors.LoanApplication.InvalidData.LoanTerm();
 
         // Сюда можно добавить валидацию заявки
         var loanProgram = await loanProgramRepository.GetLoanProgramById(newApplication.LoanProgramId)
                           ?? throw new Errors.LoanProgram.NotFound(newApplication.LoanProgramId);
 
         // Сделать продолжительность кредита кратной интервалам. Лучше выкидывать ошибку, но я забочусь о фронте
-        var realLoanTerm = MakeMultiple(newApplication.LoanTerm, Loan.InterestAccrualFrequency);
-        realLoanTerm = MakeMultiple(realLoanTerm, loanProgram.PeriodInterval!.Value);
+        var realLoanTerm = newApplication.LoanTerm
+            .MultipleOf(Loan.InterestAccrualFrequency)
+            .MultipleOf(loanProgram.PeriodInterval!.Value);
 
         return new LoanApplication
         {
@@ -47,13 +50,6 @@ public class ApplicationService(
             ApplicationState = ApplicationState.Approved,
             ApprovalDate = DateTime.UtcNow
         };
-    }
-
-    private TimeSpan MakeMultiple(TimeSpan changeable, TimeSpan multiple)
-    {
-        var round = Math.Round(changeable / multiple);
-        if (round == 0) return multiple;
-        return multiple * round;
     }
 
     // Лучше крутить джобу, которая будет искать одобренные заявки и создавать кредиты, но создать кредит сразу легче
