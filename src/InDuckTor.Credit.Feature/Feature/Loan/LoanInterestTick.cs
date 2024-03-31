@@ -10,7 +10,6 @@ namespace InDuckTor.Credit.Feature.Feature.Loan;
 
 public interface ILoanInterestTick : ICommand<Unit, Unit>;
 
-[Intercept(typeof(SaveChangesInterceptor<Unit, Unit>))]
 public class LoanInterestTick(LoanDbContext context, ILoanService loanService) : ILoanInterestTick
 {
     public async Task<Unit> Execute(Unit input, CancellationToken ct)
@@ -20,7 +19,11 @@ public class LoanInterestTick(LoanDbContext context, ILoanService loanService) :
             .Where(loan => loan.State == LoanState.Active)
             .ToListAsync(cancellationToken: ct);
 
-        foreach (var loan in loans) await loanService.Tick(loan);
+        foreach (var loan in loans)
+        {
+            await loanService.Tick(loan);
+            await context.SaveChangesAsync(ct);
+        }
 
         return default;
     }

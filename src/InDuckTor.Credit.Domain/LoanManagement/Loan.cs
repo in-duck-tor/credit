@@ -27,7 +27,6 @@ public class Loan : IEventStore
 #pragma warning restore CS8618
     {
         // EF Core constructor
-        PaymentCalculator = InitPaymentCalculator();
     }
 
     public Loan(NewLoan newLoan)
@@ -48,8 +47,6 @@ public class Loan : IEventStore
         Debt = ExpenseItem.Zero;
         Penalty = ExpenseItem.Zero;
         PeriodsBillings = [];
-
-        PaymentCalculator = InitPaymentCalculator();
     }
 
     public long Id { get; set; }
@@ -141,7 +138,9 @@ public class Loan : IEventStore
     /// </summary>
     public PeriodAccruals? PeriodAccruals { get; set; }
 
-    protected internal readonly IPaymentCalculator PaymentCalculator;
+    private IPaymentCalculator? _paymentCalculator;
+
+    protected internal IPaymentCalculator PaymentCalculator => _paymentCalculator ??= InitPaymentCalculator();
 
     private ILoanState? _stateInteractor;
 

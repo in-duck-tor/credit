@@ -10,10 +10,10 @@ public static class Endpoints
     public static IEndpointRouteBuilder AddCreditScoreEndpointsV1(this IEndpointRouteBuilder builder)
     {
         var groupBuilder = builder.MapGroup("/api/v1/score")
-            .WithTags(SwaggerTags.CreditScore)
+            .WithTags(SwaggerTags.CreditScoreV1)
             .WithOpenApi();
 
-        groupBuilder.MapGet("/", GetCreditScore)
+        groupBuilder.MapGet("", GetCreditScore)
             .RequireAuthorization()
             .WithSummary("Получение информации о кредитном рейтинге");
 
