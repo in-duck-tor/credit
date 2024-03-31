@@ -12,5 +12,5 @@ public static class SwaggerTags
     public const string ApplicationV2 = "Application V2";
 
     public const string CreditScore = "CreditScore";
-    public const string Test = "Test";
+    public const string Test = "Test"; 
 }
