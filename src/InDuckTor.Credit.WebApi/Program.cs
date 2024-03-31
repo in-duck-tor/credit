@@ -32,8 +32,7 @@ services
     .AddAuthorizationBuilder()
     .AddPolicy("EmployeeOnly",
         policy => policy
-            .RequireClaim("roles", "employee")
-            .RequireClaim(InDuckTorClaims.AccountType, AccountType.System.ToString()));
+            .RequireClaim("roles", "employee"));
 services.AddInDuckTorSecurity();
 
 services.AddCors(options =>

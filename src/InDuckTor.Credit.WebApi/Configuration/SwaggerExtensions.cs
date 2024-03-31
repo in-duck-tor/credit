@@ -3,6 +3,7 @@ using System.Xml.XPath;
 using InDuckTor.Credit.Feature.Feature;
 using InDuckTor.Shared.Configuration.Swagger;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -17,6 +18,12 @@ public static class SwaggerExtensions
             options.ConfigureJwtAuth();
             options.ConfigureEnumMemberValues();
             options.CustomSchemaIds(ComposeNameWithDeclaringType);
+
+            options.MapType<TimeSpan>(() => new OpenApiSchema
+            {
+                Type = "string",
+                Example = new OpenApiString("00:00:00")
+            });
 
             options.SchemaFilter<MoneyViewSchemaFilter>();
 
