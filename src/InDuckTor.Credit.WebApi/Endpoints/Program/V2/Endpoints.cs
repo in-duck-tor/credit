@@ -11,7 +11,7 @@ public static class Endpoints
 {
     internal static IEndpointRouteBuilder AddLoanProgramEndpointsV2(this IEndpointRouteBuilder builder)
     {
-        var groupBuilder = builder.MapGroup("/api/v1/program")
+        var groupBuilder = builder.MapGroup("/api/v2/program")
             .WithTags(SwaggerTags.ProgramV2)
             .WithOpenApi();
         
