@@ -1,26 +1,24 @@
 using InDuckTor.Credit.Feature.Feature.Program;
 using InDuckTor.Credit.Feature.Feature.Program.Model;
-using InDuckTor.Credit.WebApi.Configuration.Exceptions;
 using InDuckTor.Shared.Models;
 using InDuckTor.Shared.Strategies;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
-namespace InDuckTor.Credit.WebApi.Endpoints;
+namespace InDuckTor.Credit.WebApi.Endpoints.Program.V1;
 
-public static class LoanProgramEndpoints
+public static class Endpoints
 {
-    public static IEndpointRouteBuilder AddLoanProgramEndpoints(this IEndpointRouteBuilder builder)
+    internal static IEndpointRouteBuilder AddLoanProgramEndpointsV1(this IEndpointRouteBuilder builder)
     {
         var groupBuilder = builder.MapGroup("/api/v1/program")
-            .WithTags(SwaggerTags.Program)
+            .WithTags(SwaggerTags.ProgramV1)
             .WithOpenApi();
 
         groupBuilder.MapGet("", GetAllLoanPrograms)
-            .WithDescription("Получение всех программ кредитования");
+            .WithSummary("Получение всех программ кредитования");
 
         groupBuilder.MapPost("", CreateLoanProgram)
-            .WithDescription("Создание программы кредитования");
+            .WithSummary("Создание программы кредитования");
 
         return builder;
     }

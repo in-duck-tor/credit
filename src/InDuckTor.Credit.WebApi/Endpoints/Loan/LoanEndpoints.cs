@@ -7,7 +7,8 @@ public static class LoanEndpoints
 {
     public static IEndpointRouteBuilder AddLoanEndpoints(this IEndpointRouteBuilder builder)
     {
-        return builder.AddLoanEndpointsV1()
+        return builder
+            .AddLoanEndpointsV1()
             .AddLoanEndpointsV2();
     }
 }

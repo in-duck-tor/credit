@@ -4,8 +4,13 @@ using InDuckTor.Credit.Infrastructure.Config.Database;
 using InDuckTor.Credit.WebApi.Configuration;
 using InDuckTor.Credit.WebApi.Configuration.Exceptions;
 using InDuckTor.Credit.WebApi.Endpoints;
+using InDuckTor.Credit.WebApi.Endpoints.Application;
+using InDuckTor.Credit.WebApi.Endpoints.Application.V1;
+using InDuckTor.Credit.WebApi.Endpoints.CreditScore;
 using InDuckTor.Credit.WebApi.Endpoints.Loan;
 using InDuckTor.Credit.WebApi.Endpoints.Loan.V1;
+using InDuckTor.Credit.WebApi.Endpoints.Program;
+using InDuckTor.Credit.WebApi.Endpoints.Program.V1;
 using InDuckTor.Shared.Security.Http;
 using InDuckTor.Shared.Security.Jwt;
 using InDuckTor.Shared.Strategies;
@@ -49,6 +54,8 @@ app.AddLoanApplicationEndpoints()
     .AddTestEndpoints();
 
 app.UseExceptionHandler();
+
+app.UseCors();
 
 // Не менять порядок!!!
 app.UseAuthentication();

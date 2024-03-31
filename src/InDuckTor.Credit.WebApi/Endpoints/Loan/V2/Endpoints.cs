@@ -12,7 +12,7 @@ namespace InDuckTor.Credit.WebApi.Endpoints.Loan.V2;
 
 public static class Endpoints
 {
-    public static IEndpointRouteBuilder AddLoanEndpointsV2(this IEndpointRouteBuilder builder)
+    internal static IEndpointRouteBuilder AddLoanEndpointsV2(this IEndpointRouteBuilder builder)
     {
         var groupBuilder = builder.MapGroup("/api/v2/loan")
             .WithTags(SwaggerTags.LoanV2)

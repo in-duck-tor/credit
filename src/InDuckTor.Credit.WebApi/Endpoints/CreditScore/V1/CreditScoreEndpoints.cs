@@ -3,11 +3,11 @@ using InDuckTor.Shared.Security.Context;
 using InDuckTor.Shared.Strategies;
 using Microsoft.AspNetCore.Mvc;
 
-namespace InDuckTor.Credit.WebApi.Endpoints;
+namespace InDuckTor.Credit.WebApi.Endpoints.CreditScore.V1;
 
-public static class CreditScoreEndpoints
+public static class Endpoints
 {
-    public static IEndpointRouteBuilder AddCreditScoreEndpoints(this IEndpointRouteBuilder builder)
+    public static IEndpointRouteBuilder AddCreditScoreEndpointsV1(this IEndpointRouteBuilder builder)
     {
         var groupBuilder = builder.MapGroup("/api/v1/score")
             .WithTags(SwaggerTags.CreditScore)
