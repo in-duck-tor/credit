@@ -282,3 +282,5 @@ global.json
 
 #Verify
 *.received.*
+
+local.docker-compose.yaml
