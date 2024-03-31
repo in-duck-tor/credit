@@ -1,22 +1,18 @@
-using InDuckTor.Credit.Domain.Billing.Period;
 using InDuckTor.Credit.Feature.Feature.Loan;
 using InDuckTor.Credit.Feature.Feature.Loan.Payment;
 using InDuckTor.Credit.Feature.Feature.Loan.Payment.Models;
-using InDuckTor.Credit.WebApi.Configuration.Exceptions;
-using InDuckTor.Credit.WebApi.Contracts.Bodies;
-using InDuckTor.Shared.Models;
+using InDuckTor.Credit.WebApi.Endpoints.Loan.V1.Contracts.Body;
 using InDuckTor.Shared.Strategies;
 using Microsoft.AspNetCore.Mvc;
-using PaymentInfoResponse = InDuckTor.Credit.Feature.Feature.Loan.Payment.PaymentInfoResponse;
 
-namespace InDuckTor.Credit.WebApi.Endpoints;
+namespace InDuckTor.Credit.WebApi.Endpoints.Loan.V1;
 
-public static class LoanEndpoints
+public static class Endpoints
 {
-    public static IEndpointRouteBuilder AddLoanEndpoints(this IEndpointRouteBuilder builder)
+    internal static IEndpointRouteBuilder AddLoanEndpointsV1(this IEndpointRouteBuilder builder)
     {
         var groupBuilder = builder.MapGroup("/api/v1/loan")
-            .WithTags(SwaggerTags.Loan)
+            .WithTags(SwaggerTags.LoanV1)
             .WithOpenApi();
 
         groupBuilder.MapPost("/{loanId:long}/pay/regularly", PayRegularly)
@@ -55,7 +51,7 @@ public static class LoanEndpoints
     [ProducesResponseType<PaymentInfoResponse>(200)]
     private static async Task<IResult> GetPaymentInfo(
         [FromRoute] long loanId,
-        [FromServices] IExecutor<IGetPaymentInfo, long, PaymentInfoResponse> getPeriodPaymentInfo,
+        [FromServices] IExecutor<IGetPaymentInfoV1, long, PaymentInfoResponse> getPeriodPaymentInfo,
         CancellationToken cancellationToken)
     {
         return TypedResults.Ok(await getPeriodPaymentInfo.Execute(loanId, cancellationToken));
@@ -68,7 +64,7 @@ public static class LoanEndpoints
     [ProducesResponseType<List<PeriodInfoResponse>>(200)]
     private static async Task<IResult> GetOverduePeriods(
         [FromRoute] long loanId,
-        [FromServices] IExecutor<IGetOverduePeriods, long, List<PeriodInfoResponse>> getOverduePeriods,
+        [FromServices] IExecutor<IGetOverduePeriodsV1, long, List<PeriodInfoResponse>> getOverduePeriods,
         CancellationToken cancellationToken)
     {
         return TypedResults.Ok(await getOverduePeriods.Execute(loanId, cancellationToken));
@@ -81,7 +77,7 @@ public static class LoanEndpoints
     [ProducesResponseType(204)]
     private static async Task<IResult> PayRegularly(
         [FromRoute] long loanId,
-        [FromBody] RegularPayBody body,
+        [FromBody] RegularPayBodyV1 body,
         [FromServices]
         IExecutor<ISubmitRegularPayment, PaymentSubmissionRequest, PaymentSubmissionResponse> submitRegularPayment,
         CancellationToken cancellationToken)
@@ -110,7 +106,7 @@ public static class LoanEndpoints
     [ProducesResponseType<LoanInfoResponse>(200)]
     private static async Task<IResult> GetLoanInfoForClient(
         [FromRoute] long loanId,
-        [FromServices] IExecutor<IGetLoanInfo, long, LoanInfoResponse> getLoanInfo,
+        [FromServices] IExecutor<IGetLoanInfoV1, long, LoanInfoResponse> getLoanInfo,
         CancellationToken cancellationToken)
     {
         return TypedResults.Ok(await getLoanInfo.Execute(loanId, cancellationToken));

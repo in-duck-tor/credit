@@ -32,6 +32,11 @@ public class GlobalExceptionHandler : IExceptionHandler
                 er.Title = "Not Found Exception";
                 break;
             case Errors.BadRequestException:
+            case Errors.ForbiddenError:
+                er.Status = (int)HttpStatusCode.Forbidden;
+                er.Type = exception.GetType().Name;
+                er.Title = "Forbidden Exception";
+                break;
             case BadHttpRequestException:
                 er.Status = (int)HttpStatusCode.BadRequest;
                 er.Type = exception.GetType().Name;
@@ -48,7 +53,7 @@ public class GlobalExceptionHandler : IExceptionHandler
                 er.Status = (int)apiException.StatusCode;
                 er.Type = apiException.GetType().Name;
                 er.Title = apiException.ReasonPhrase ?? er.Type;
-                er.Detail = apiException.Content ?? er.Detail;
+                er.Detail = er.Detail;
                 break;
             default:
                 er.Status = (int)HttpStatusCode.InternalServerError;

@@ -1,6 +1,6 @@
 using System.Net.Http.Headers;
 using InDuckTor.Credit.Feature.Repository;
-using InDuckTor.Credit.WebApi.Configuration.Models;
+using InDuckTor.Credit.WebApi.Configuration.ConfigModels;
 using Refit;
 
 namespace InDuckTor.Credit.WebApi.Configuration;

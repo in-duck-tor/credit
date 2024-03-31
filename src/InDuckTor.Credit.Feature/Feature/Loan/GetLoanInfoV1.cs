@@ -1,4 +1,3 @@
-using Hangfire.Dashboard;
 using InDuckTor.Credit.Domain.Exceptions;
 using InDuckTor.Credit.Domain.LoanManagement;
 using InDuckTor.Credit.Domain.LoanManagement.State;
@@ -52,11 +51,10 @@ public record LoanInfoResponse(
 /// <summary>
 /// Возвращает информацию о Кредите
 /// </summary>
-public interface IGetLoanInfo : IQuery<long, LoanInfoResponse>;
+public interface IGetLoanInfoV1 : IQuery<long, LoanInfoResponse>;
 
-public class GetLoanInfo(LoanDbContext context) : IGetLoanInfo
+public class GetLoanInfoV1(LoanDbContext context) : IGetLoanInfoV1
 {
-    // todo: Добавить проверку id клиента из токена
     public async Task<LoanInfoResponse> Execute(long loanId, CancellationToken ct)
     {
         var loan = await context.Loans.FindAsync([loanId], cancellationToken: ct)

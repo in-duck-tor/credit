@@ -166,6 +166,8 @@ public class Loan : IEventStore
         }
     }
 
+    public TimeSpan TimeUntilPeriodEnd => PeriodAccruals?.PeriodEndDate - DateTime.UtcNow ?? PeriodDuration;
+
     // Возмонжо стоит определять не годовой процент, а процент для минимального срока взятия кредита
     public decimal PeriodInterestRate => InterestRate / (decimal)(YearDuration / PeriodDuration);
     public decimal TickInterestRate => InterestRate / (decimal)(YearDuration / InterestAccrualFrequency);
@@ -243,12 +245,12 @@ public enum PaymentType
     /// <summary>
     /// <b>Аннуитетный Платёж</b>
     /// </summary>
-    [EnumMember(Value = "annuity")] Annuity,
+    [EnumMember(Value = "annuity")] Annuity = 0,
 
     /// <summary>
     /// <b>Дифференцированный Платёж</b>
     /// </summary>
-    [EnumMember(Value = "differentiated")] Differentiated
+    [EnumMember(Value = "differentiated")] Differentiated = 1
 }
 
 // В расписании должно быть: длительность расчётного периода/день, в который начинается расчётный период
@@ -260,14 +262,14 @@ public enum PaymentScheduleType
     /// <summary>
     /// <b>Интервальный график</b>. Расчётный период не привязан к конкретной дате и длится всегда фиксированное время
     /// </summary>
-    [EnumMember(Value = "interval")] Interval,
+    [EnumMember(Value = "interval")] Interval = 0,
 
     /// <summary>
     /// <b>Календарный график</b>. Расчётный период привязан к конкретной дате
     /// <example>Если клиент взял кредит 10 числа какого-то месяца,
     /// то каждый новый Расчётный Период будет начинаться 10 числа следующего месяца</example>
     /// </summary>
-    [EnumMember(Value = "calendar")] Calendar,
+    [EnumMember(Value = "calendar")] Calendar = 1,
 }
 
 // todo: Досрочное погашение

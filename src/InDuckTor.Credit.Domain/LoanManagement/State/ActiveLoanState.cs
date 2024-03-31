@@ -81,12 +81,12 @@ public class ActiveLoanState : ILoanState
         var penalty = Loan.Debt * Loan.PenaltyRate;
         if (penalty == 0) return;
         Loan.Penalty.ChangeAmount(penalty);
-        Loan.StoreEvent(new PenaltyCharged(Loan.ClientId));
+        Loan.StoreEvent(new PenaltyCharged(Loan.ClientId, Loan.BorrowedAmount, Loan.Debt));
     }
 
     public void AttachLoanAccount(string accountNumber)
     {
-        throw new Errors.Loan.InvalidLoanState(Loan.Id, nameof(AttachLoanAccount), ThisState);
+        throw new Errors.Loan.InvalidLoanState.Forbidden(Loan.Id, nameof(AttachLoanAccount), ThisState);
     }
 
     public bool IsCurrentPeriodEnded()
@@ -98,7 +98,7 @@ public class ActiveLoanState : ILoanState
 
     public void ActivateLoan()
     {
-        throw new Errors.Loan.InvalidLoanState(Loan.Id, nameof(ActivateLoan), ThisState);
+        throw new Errors.Loan.InvalidLoanState.Forbidden(Loan.Id, nameof(ActivateLoan), ThisState);
     }
 
     public void CloseLoan()

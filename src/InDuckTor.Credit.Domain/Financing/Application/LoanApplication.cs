@@ -49,8 +49,8 @@ public class LoanApplication
 /// </summary>
 public enum ApplicationState
 {
-    [EnumMember(Value = "rejected")] Rejected,
-    [EnumMember(Value = "pending")] Pending,
-    [EnumMember(Value = "approved")] Approved,
-    [EnumMember(Value = "processed")] Processed
+    [EnumMember(Value = "rejected")] Rejected = 0,
+    [EnumMember(Value = "pending")] Pending = 1,
+    [EnumMember(Value = "approved")] Approved = 2,
+    [EnumMember(Value = "processed")] Processed = 3
 }

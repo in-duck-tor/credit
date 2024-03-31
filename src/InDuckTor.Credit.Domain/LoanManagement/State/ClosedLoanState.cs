@@ -31,61 +31,61 @@ public class ClosedLoanState : ILoanState
 
     public void StartNewPeriod()
     {
-        throw new Errors.Loan.InvalidLoanState(Loan.Id, nameof(StartNewPeriod), ThisState);
+        throw new Errors.Loan.InvalidLoanState.Forbidden(Loan.Id, nameof(StartNewPeriod), ThisState);
     }
 
     public PeriodBilling ClosePeriod()
     {
-        throw new Errors.Loan.InvalidLoanState(Loan.Id, nameof(ClosePeriod), ThisState);
+        throw new Errors.Loan.InvalidLoanState.Forbidden(Loan.Id, nameof(ClosePeriod), ThisState);
     }
 
     public decimal GetCurrentTotalPayment()
     {
-        throw new Errors.Loan.InvalidLoanState(Loan.Id, nameof(GetCurrentTotalPayment), ThisState);
+        throw new Errors.Loan.InvalidLoanState.Forbidden(Loan.Id, nameof(GetCurrentTotalPayment), ThisState);
     }
 
     public decimal GetExpectedOneTimePayment()
     {
-        throw new Errors.Loan.InvalidLoanState(Loan.Id, nameof(GetExpectedOneTimePayment), ThisState);
+        throw new Errors.Loan.InvalidLoanState.Forbidden(Loan.Id, nameof(GetExpectedOneTimePayment), ThisState);
     }
 
     public void AccrueInterestOnCurrentPeriod()
     {
-        throw new Errors.Loan.InvalidLoanState(Loan.Id, nameof(AccrueInterestOnCurrentPeriod), ThisState);
+        throw new Errors.Loan.InvalidLoanState.Forbidden(Loan.Id, nameof(AccrueInterestOnCurrentPeriod), ThisState);
     }
 
     public decimal CalculateTickInterest()
     {
-        throw new Errors.Loan.InvalidLoanState(Loan.Id, nameof(CalculateTickInterest), ThisState);
+        throw new Errors.Loan.InvalidLoanState.Forbidden(Loan.Id, nameof(CalculateTickInterest), ThisState);
     }
 
     public void ChargePenalty()
     {
-        throw new Errors.Loan.InvalidLoanState(Loan.Id, nameof(ChargePenalty), ThisState);
+        throw new Errors.Loan.InvalidLoanState.Forbidden(Loan.Id, nameof(ChargePenalty), ThisState);
     }
 
     public void AttachLoanAccount(string accountNumber)
     {
-        throw new Errors.Loan.InvalidLoanState(Loan.Id, nameof(AttachLoanAccount), ThisState);
+        throw new Errors.Loan.InvalidLoanState.Forbidden(Loan.Id, nameof(AttachLoanAccount), ThisState);
     }
 
     public bool IsCurrentPeriodEnded()
     {
-        throw new Errors.Loan.InvalidLoanState(Loan.Id, nameof(IsCurrentPeriodEnded), ThisState);
+        throw new Errors.Loan.InvalidLoanState.Forbidden(Loan.Id, nameof(IsCurrentPeriodEnded), ThisState);
     }
 
     public void ActivateLoan()
     {
-        throw new Errors.Loan.InvalidLoanState(Loan.Id, nameof(ActivateLoan), ThisState);
+        throw new Errors.Loan.InvalidLoanState.Forbidden(Loan.Id, nameof(ActivateLoan), ThisState);
     }
 
     public void CloseLoan()
     {
-        throw new Errors.Loan.InvalidLoanState(Loan.Id, nameof(CloseLoan), ThisState);
+        throw new Errors.Loan.InvalidLoanState.Forbidden(Loan.Id, nameof(CloseLoan), ThisState);
     }
 
     public void SellToCollectors()
     {
-        throw new Errors.Loan.InvalidLoanState(Loan.Id, nameof(SellToCollectors), ThisState);
+        throw new Errors.Loan.InvalidLoanState.Forbidden(Loan.Id, nameof(SellToCollectors), ThisState);
     }
 }

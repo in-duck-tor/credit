@@ -1,4 +1,4 @@
-namespace InDuckTor.Credit.WebApi.Configuration.Models;
+namespace InDuckTor.Credit.WebApi.Configuration.ConfigModels;
 
 public class AccountsSettings
 {

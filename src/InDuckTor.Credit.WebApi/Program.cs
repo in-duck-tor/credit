@@ -4,6 +4,8 @@ using InDuckTor.Credit.Infrastructure.Config.Database;
 using InDuckTor.Credit.WebApi.Configuration;
 using InDuckTor.Credit.WebApi.Configuration.Exceptions;
 using InDuckTor.Credit.WebApi.Endpoints;
+using InDuckTor.Credit.WebApi.Endpoints.Loan;
+using InDuckTor.Credit.WebApi.Endpoints.Loan.V1;
 using InDuckTor.Shared.Security.Http;
 using InDuckTor.Shared.Security.Jwt;
 using InDuckTor.Shared.Strategies;
@@ -21,8 +23,8 @@ services.AddExceptionHandler<GlobalExceptionHandler>();
 
 services.AddLoanDbContext(builder.Configuration);
 
-services.AddInDuckTorAuthentication(builder.Configuration.GetSection(nameof(JwtSettings)));
 services.AddAuthorization();
+services.AddInDuckTorAuthentication(builder.Configuration.GetSection(nameof(JwtSettings)));
 services.AddInDuckTorSecurity();
 
 services.AddEndpointsApiExplorer();
@@ -43,13 +45,15 @@ if (!app.Environment.IsProduction())
 app.AddLoanApplicationEndpoints()
     .AddLoanProgramEndpoints()
     .AddLoanEndpoints()
+    .AddCreditScoreEndpoints()
     .AddTestEndpoints();
 
 app.UseExceptionHandler();
 
+// Не менять порядок!!!
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseInDuckTorSecurity();
-// app.UseAuthentication();
-// app.UseAuthorization();
 
 // app.UseHttpsRedirection();
 

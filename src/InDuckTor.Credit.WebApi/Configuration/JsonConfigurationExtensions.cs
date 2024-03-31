@@ -20,6 +20,7 @@ public static class JsonConfigurationExtensions
             typeof(PaymentType),
             typeof(PaymentScheduleType),
             typeof(AccountType),
+            typeof(AccountState),
             typeof(TransactionType),
             typeof(TransactionStatus));
 

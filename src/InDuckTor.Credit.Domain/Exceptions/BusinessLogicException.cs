@@ -42,6 +42,11 @@ public static class Errors
             public NotFound(long id) : this($"Loan with id '{id}' is not found")
             {
             }
+
+            public NotFound(long clientId, long loanId) : this(
+                $"Loan with id {loanId} for client with id {clientId} is not found")
+            {
+            }
         }
 
         public class CannotStartNewPeriod(string message) : BusinessLogicException(message)
@@ -52,11 +57,14 @@ public static class Errors
 
         public class InvalidLoanStateChange(string message) : BusinessLogicException(message);
 
-        public class InvalidLoanState(string message) : BusinessLogicException(message)
+        public static class InvalidLoanState
         {
-            public InvalidLoanState(long loanId, string action, LoanState state) : this(
-                $"Cannot perform action '{action}': the loan with id '{loanId}' is {state.ToString()}")
+            public class Forbidden(string message) : ForbiddenError(message)
             {
+                public Forbidden(long loanId, string action, LoanState state) : this(
+                    $"Cannot perform action '{action}': the loan with id '{loanId}' is {state.ToString()}")
+                {
+                }
             }
         }
     }
@@ -93,5 +101,15 @@ public static class Errors
         }
 
         public class InvalidPaymentDistributionException(string message) : BusinessLogicException(message);
+    }
+
+    public static class CreditScore
+    {
+        public class NotFound(string message) : NotFoundException(message)
+        {
+            public NotFound(long id) : this($"CreditScore for client with id '{id}' is not found")
+            {
+            }
+        }
     }
 }

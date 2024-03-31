@@ -15,7 +15,7 @@ public interface IAccountsRepositoryRefit
         int Take,
         int Skip,
         AccountState? AccountState = null,
-        AccountType? AccountType = null);
+        string? AccountType = null);
 
     record AccountNumberResponse(string AccountNumber);
 
@@ -27,9 +27,9 @@ public interface IAccountsRepositoryRefit
         string BankCode,
         long OwnerId,
         long CreatedBy,
-        long Amount,
+        decimal Amount,
         AccountState State,
-        AccountType Type,
+        string Type,
         string CustomComment,
         List<GrantedUser> GrantedUsers);
 
@@ -48,6 +48,7 @@ public interface IAccountsRepositoryRefit
     [Post("/api/v1/bank/account/transaction/{transactionId}/cancel")]
     Task CancelTransaction([AliasAs("transactionId")] long transactionId, [Authorize] string token);
 
+    [Put("/api/v1/bank/account/search")]
     Task<AccountSearchResponse> SearchAccounts([Body] AccountSearchRequest accountSearchRequest,
         [Authorize] string token);
 }

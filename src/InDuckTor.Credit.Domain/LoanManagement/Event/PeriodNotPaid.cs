@@ -3,17 +3,18 @@ using InDuckTor.Credit.Domain.LoanManagement.CreditScore;
 
 namespace InDuckTor.Credit.Domain.LoanManagement.Event;
 
-public record PenaltyCharged(long ClientId, decimal BorrowedAmount, decimal Debt) : IEvent;
+public record PeriodNotPaid(long ClientId, decimal ExpectedPayment, decimal RemainingPayment) : IEvent;
 
-public class PenaltyChargedEventHandler(ICreditScoreRepository creditScoreRepository) : IEventHandler<PenaltyCharged>
+public class PeriodNotPaidEventHandler(ICreditScoreRepository creditScoreRepository) : IEventHandler<PeriodNotPaid>
 {
-    private const int ScoreChange = -10;
+    private const int ScoreChange = -7;
 
-    public async Task Handle(PenaltyCharged @event, CancellationToken cancellationToken)
+    public async Task Handle(PeriodNotPaid @event, CancellationToken cancellationToken)
     {
         var creditScore = await creditScoreRepository.GetOrCreateByClientId(@event.ClientId, cancellationToken)
                           ?? new CreditScore.CreditScore(@event.ClientId);
-        var ratio = (double)(@event.Debt / @event.BorrowedAmount);
+
+        var ratio = (double)(@event.RemainingPayment / @event.ExpectedPayment);
         var increase = F(ratio);
         creditScore.Score += ScoreChange + increase;
     }

@@ -33,7 +33,7 @@ public class SubmitRegularPayment : ISubmitRegularPayment
                    ?? throw new Errors.Loan.NotFound(input.LoanId);
 
         if (loan.Id != input.LoanId || loan.ClientId != input.ClientId)
-            throw new Errors.Loan.NotFound("Loan with specified client id and loan id is not found");
+            throw new Errors.Loan.NotFound(input.ClientId, input.LoanId);
 
         var newPayment = new NewPayment(input.LoanId, input.ClientId, input.Payment);
         var payment = await _paymentService.CreatePayment(loan, newPayment, ct);

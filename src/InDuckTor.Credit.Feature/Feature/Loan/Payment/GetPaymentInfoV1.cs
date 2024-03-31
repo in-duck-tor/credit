@@ -11,11 +11,12 @@ namespace InDuckTor.Credit.Feature.Feature.Loan.Payment;
 public record PaymentInfoResponse(
     MoneyView PeriodPayment,
     MoneyView Debt,
-    MoneyView RemainingRegularPayment);
+    MoneyView RemainingRegularPayment,
+    TimeSpan TimeUntilPeriodEnd);
 
-public interface IGetPaymentInfo : IQuery<long, PaymentInfoResponse>;
+public interface IGetPaymentInfoV1 : IQuery<long, PaymentInfoResponse>;
 
-public class GetPaymentInfo(LoanDbContext context, IPaymentRepository paymentRepository) : IGetPaymentInfo
+public class GetPaymentInfoV1(LoanDbContext context, IPaymentRepository paymentRepository) : IGetPaymentInfoV1
 {
     public async Task<PaymentInfoResponse> Execute(long loanId, CancellationToken ct)
     {
@@ -30,6 +31,7 @@ public class GetPaymentInfo(LoanDbContext context, IPaymentRepository paymentRep
         return new PaymentInfoResponse(
             loan.GetExpectedOneTimePayment(),
             loan.Debt,
-            totalRemainingPayment - totalPaymentToDistributeSum);
+            totalRemainingPayment - totalPaymentToDistributeSum,
+            loan.TimeUntilPeriodEnd);
     }
 }

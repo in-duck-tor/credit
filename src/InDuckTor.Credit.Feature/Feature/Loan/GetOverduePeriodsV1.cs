@@ -14,11 +14,10 @@ public record PeriodInfoResponse(
     MoneyView OneTimePayment,
     MoneyView RemainingPayment);
 
-public interface IGetOverduePeriods : IQuery<long, List<PeriodInfoResponse>>;
+public interface IGetOverduePeriodsV1 : IQuery<long, List<PeriodInfoResponse>>;
 
-public class GetOverduePeriods(LoanDbContext context) : IGetOverduePeriods
+public class GetOverduePeriodsV1(LoanDbContext context) : IGetOverduePeriodsV1
 {
-    // todo: Добавить проверку id клиента из токена
     public async Task<List<PeriodInfoResponse>> Execute(long loanId, CancellationToken ct)
     {
         return await context.PeriodsBillings

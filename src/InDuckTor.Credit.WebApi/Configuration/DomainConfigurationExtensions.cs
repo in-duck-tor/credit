@@ -6,7 +6,7 @@ using InDuckTor.Credit.Domain.LoanManagement;
 using InDuckTor.Credit.Domain.LoanManagement.Accounts;
 using InDuckTor.Credit.Domain.LoanManagement.CreditScore;
 using InDuckTor.Credit.Feature.Repository;
-using InDuckTor.Credit.WebApi.Configuration.Models;
+using InDuckTor.Credit.WebApi.Configuration.ConfigModels;
 
 namespace InDuckTor.Credit.WebApi.Configuration;
 

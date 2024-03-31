@@ -17,7 +17,7 @@ public static class TestEndpoints
         groupBuilder.MapPost("/tick", TriggerTick)
             .WithSummary("Вызвать начисление процентов по кредитам, а также закрытие расчётных периодов/кредитов");
 
-        return groupBuilder;
+        return builder;
     }
 
     private static NoContent TriggerTick()
@@ -26,4 +26,4 @@ public static class TestEndpoints
             loanInterestTick.Execute(default, default));
         return TypedResults.NoContent();
     }
-}
+ }

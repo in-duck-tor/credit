@@ -47,7 +47,7 @@ public class PaymentService : IPaymentService
         Errors.Payment.InvalidRegularPaymentAmount.ThrowIfNotPositive(newPayment.PaymentAmount);
 
         if (loan.Id != newPayment.LoanId || loan.ClientId != newPayment.ClientId)
-            throw new Errors.Loan.NotFound("Loan with specified client id and loan id is not found");
+            throw new Errors.Loan.NotFound(newPayment.ClientId, newPayment.LoanId);
 
         var undistributedPayments = await _paymentRepository.GetAllNonDistributedPayments(loan.Id);
 
@@ -73,16 +73,16 @@ public class PaymentService : IPaymentService
 
     public static async Task DistributePayment2(PaymentService paymentService, Loan loan, Payment payment)
     {
-        var unpaidPeriods = await paymentService._periodBillingRepository. GetAllUnpaidPeriodBillings(loan.Id);
+        var unpaidPeriods = await paymentService._periodBillingRepository.GetAllUnpaidPeriodBillings(loan.Id);
 
         if (unpaidPeriods.Count == 0) return;
 
         DistributePayments(loan, [payment], unpaidPeriods);
     }
-    
+
     public async Task DistributePayment(Loan loan, Payment payment)
     {
-        var unpaidPeriods = await _periodBillingRepository. GetAllUnpaidPeriodBillings(loan.Id);
+        var unpaidPeriods = await _periodBillingRepository.GetAllUnpaidPeriodBillings(loan.Id);
 
         if (unpaidPeriods.Count == 0) return;
 

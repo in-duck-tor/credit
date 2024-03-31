@@ -8,9 +8,11 @@ public static class DomainEventConfiguration
     public static IServiceCollection ConfigureDomainEvents(this IServiceCollection serviceCollection)
     {
         return serviceCollection.AddScoped<IEventHandler<PenaltyCharged>, PenaltyChargedEventHandler>()
+            .AddScoped<IEventHandler<PeriodNotPaid>, PeriodNotPaidEventHandler>()
+            .AddScoped<IEventHandler<PeriodPaid>, PeriodPaidEventHandler>()
             .AddScoped<IEventDispatcher, EventDispatcher>();
     }
-    
+
 //     var concreteTypes = assemblies.SelectMany(assembly => assembly.ExportedTypes).Where(type => type is { IsClass: true, IsAbstract: false });
 //
 //         foreach (var type in concreteTypes)

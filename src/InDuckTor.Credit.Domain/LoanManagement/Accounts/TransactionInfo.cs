@@ -23,29 +23,29 @@ public enum TransactionType
     /// <summary>
     /// Снятие
     /// </summary>
-    [EnumMember(Value = "withdraw")] Withdraw,
+    [EnumMember(Value = "withdraw")] Withdraw = 0,
 
     /// <summary>
     /// Внесение
     /// </summary>
-    [EnumMember(Value = "deposit")] Deposit,
+    [EnumMember(Value = "deposit")] Deposit = 1,
 
     /// <summary>
     /// Перевод
     /// </summary>
-    [EnumMember(Value = "transfer")] Transfer,
+    [EnumMember(Value = "transfer")] Transfer = 2,
 
     /// <summary>
     /// Перевод на внешний счёт
     /// </summary>
     [EnumMember(Value = "transfer_to_external")]
-    TransferToExternal,
+    TransferToExternal = 3,
 
     /// <summary>
     /// Перевод со внешнего счёт
     /// </summary>
     [EnumMember(Value = "transfer_from_external")]
-    TransferFromExternal
+    TransferFromExternal = 4
 }
 
 public enum TransactionStatus
@@ -53,20 +53,20 @@ public enum TransactionStatus
     /// <summary>
     /// Трансакция в процессе создания 
     /// </summary>
-    [EnumMember(Value = "creating")] Creating,
+    [EnumMember(Value = "creating")] Creating = 0,
 
     /// <summary>
     /// Трансакция обрабатывается
     /// </summary>
-    [EnumMember(Value = "pending")] Pending,
+    [EnumMember(Value = "pending")] Pending = 1,
 
     /// <summary>
     /// Трансакция исполнена
     /// </summary>
-    [EnumMember(Value = "committed")] Committed,
+    [EnumMember(Value = "committed")] Committed = 2,
 
     /// <summary>
     /// Трансакция отменена
     /// </summary>
-    [EnumMember(Value = "canceled")] Canceled,
+    [EnumMember(Value = "canceled")] Canceled = 3,
 }

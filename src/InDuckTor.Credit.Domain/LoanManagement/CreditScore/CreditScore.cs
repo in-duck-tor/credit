@@ -3,7 +3,7 @@ namespace InDuckTor.Credit.Domain.LoanManagement.CreditScore;
 // Должен сложно создаватаься, исходя из кучи данных и вообще не должен находиться в этом сервисе, но так проще...
 public class CreditScore
 {
-    private const long DefaultScore = 900;
+    private const int DefaultScore = 900;
 
     private CreditScore()
     {
@@ -16,12 +16,12 @@ public class CreditScore
         Score = DefaultScore;
     }
 
-    public CreditScore(long clientId, long score)
+    public CreditScore(long clientId, int score)
     {
         ClientId = clientId;
         Score = score;
     }
 
     public long ClientId { get; init; }
-    public long Score { get; set; }
+    public int Score { get; set; }
 }
