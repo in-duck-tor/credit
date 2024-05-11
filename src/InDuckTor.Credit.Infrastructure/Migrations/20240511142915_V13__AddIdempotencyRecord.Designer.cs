@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using InDuckTor.Credit.Infrastructure.Config.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace InDuckTor.Credit.Infrastructure.Migrations
 {
     [DbContext(typeof(LoanDbContext))]
-    partial class LoanDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240511142915_V13__AddIdempotencyRecord")]
+    partial class V13__AddIdempotencyRecord
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

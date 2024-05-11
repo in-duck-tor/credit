@@ -1,4 +1,6 @@
 using InDuckTor.Credit.Feature.Feature.CreditScore;
+using InDuckTor.Credit.WebApi.Endpoints.Idempotency;
+using InDuckTor.Shared.Idempotency.Http;
 using InDuckTor.Shared.Security.Context;
 using InDuckTor.Shared.Strategies;
 using Microsoft.AspNetCore.Authorization;
@@ -12,7 +14,8 @@ public static class Endpoints
     {
         var groupBuilder = builder.MapGroup("/api/v1/score")
             .WithTags(SwaggerTags.CreditScoreV1)
-            .WithOpenApi();
+            .WithOpenApi()
+            .WithIdempotencyKey(ttlSeconds: IdempotencyUtils.TimeToLive);
 
         groupBuilder.MapGet("", GetCreditScore)
             .RequireAuthorization()

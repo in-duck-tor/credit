@@ -1,5 +1,7 @@
 using InDuckTor.Credit.Feature.Feature.Application;
 using InDuckTor.Credit.WebApi.Endpoints.Application.V2.Contracts.Body;
+using InDuckTor.Credit.WebApi.Endpoints.Idempotency;
+using InDuckTor.Shared.Idempotency.Http;
 using InDuckTor.Shared.Security.Context;
 using InDuckTor.Shared.Strategies;
 using Microsoft.AspNetCore.Mvc;
@@ -12,7 +14,8 @@ public static class Endpoints
     {
         var groupBuilder = builder.MapGroup("/api/v2/application")
             .WithTags(SwaggerTags.ApplicationV2)
-            .WithOpenApi();
+            .WithOpenApi()
+            .WithIdempotencyKey(ttlSeconds: IdempotencyUtils.TimeToLive);
 
         groupBuilder.MapPost("", CreateApplication)
             .WithSummary("Создаёт заявку на получение кредита. С авторизацией пользователя через токен")

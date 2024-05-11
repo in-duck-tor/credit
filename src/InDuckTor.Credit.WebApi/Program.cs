@@ -6,10 +6,10 @@ using InDuckTor.Credit.WebApi.Configuration.Exceptions;
 using InDuckTor.Credit.WebApi.Endpoints;
 using InDuckTor.Credit.WebApi.Endpoints.Application;
 using InDuckTor.Credit.WebApi.Endpoints.CreditScore;
+using InDuckTor.Credit.WebApi.Endpoints.Idempotency;
 using InDuckTor.Credit.WebApi.Endpoints.Loan;
 using InDuckTor.Credit.WebApi.Endpoints.Program;
-using InDuckTor.Shared.Security;
-using InDuckTor.Shared.Security.Context;
+using InDuckTor.Shared.Idempotency.Http;
 using InDuckTor.Shared.Security.Http;
 using InDuckTor.Shared.Security.Jwt;
 using InDuckTor.Shared.Strategies;
@@ -17,6 +17,8 @@ using InDuckTor.Shared.Strategies;
 var builder = WebApplication.CreateBuilder(args);
 
 var services = builder.Services;
+
+services.AddIdempotencyHttpServices<IdempotencyRecordRepository>(ServiceLifetime.Scoped);
 
 services.AddStrategiesFrom(Assembly.GetAssembly(typeof(ISubmitApplication))!)
     .ConfigureDomain(builder.Configuration)
@@ -60,6 +62,7 @@ if (!app.Environment.IsProduction())
 
 app.UseExceptionHandler();
 
+app.UseIdempotencyMiddleware();
 app.AddLoanApplicationEndpoints()
     .AddLoanProgramEndpoints()
     .AddLoanEndpoints()

@@ -1,7 +1,9 @@
 using InDuckTor.Credit.Feature.Feature.Loan;
 using InDuckTor.Credit.Feature.Feature.Loan.Payment;
 using InDuckTor.Credit.Feature.Feature.Loan.Payment.Models;
+using InDuckTor.Credit.WebApi.Endpoints.Idempotency;
 using InDuckTor.Credit.WebApi.Endpoints.Loan.V2.Contracts.Body;
+using InDuckTor.Shared.Idempotency.Http;
 using InDuckTor.Shared.Security.Context;
 using InDuckTor.Shared.Strategies;
 using Microsoft.AspNetCore.Mvc;
@@ -17,7 +19,8 @@ public static class Endpoints
         var groupBuilder = builder.MapGroup("/api/v2/loan")
             .WithTags(SwaggerTags.LoanV2)
             .WithOpenApi()
-            .RequireAuthorization();
+            .RequireAuthorization()
+            .WithIdempotencyKey(ttlSeconds: IdempotencyUtils.TimeToLive);
 
         groupBuilder.MapPost("/{loanId:long}/pay/regularly", PayRegularly)
             .WithSummary("Внесение средств для оплаты кредита в регулярном порядке. С авторизацей по токену")

@@ -56,8 +56,6 @@ public class LoanService(
     {
         loan.AccrueInterestOnCurrentPeriod();
         loan.ChargePenalty();
-        var n = await loanRepository.GetNumberOfPeriods(loan.Id, cancellationToken);
-        Console.WriteLine(n);
         if (loan.IsCurrentPeriodEnded())
         {
             await CloseBillingPeriod(loan, cancellationToken);

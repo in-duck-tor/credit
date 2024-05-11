@@ -1,5 +1,7 @@
 using InDuckTor.Credit.Feature.Feature.Program;
 using InDuckTor.Credit.Feature.Feature.Program.Model;
+using InDuckTor.Credit.WebApi.Endpoints.Idempotency;
+using InDuckTor.Shared.Idempotency.Http;
 using InDuckTor.Shared.Models;
 using InDuckTor.Shared.Strategies;
 using Microsoft.AspNetCore.Authorization;
@@ -13,7 +15,8 @@ public static class Endpoints
     {
         var groupBuilder = builder.MapGroup("/api/v2/program")
             .WithTags(SwaggerTags.ProgramV2)
-            .WithOpenApi();
+            .WithOpenApi()
+            .WithIdempotencyKey(ttlSeconds: IdempotencyUtils.TimeToLive);
         
         groupBuilder.MapPost("", CreateLoanProgram)
             .WithSummary("Создание программы кредитования")
